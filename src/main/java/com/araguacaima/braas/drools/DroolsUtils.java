@@ -61,15 +61,15 @@ public class DroolsUtils {
         return droolsConfig;
     }
 
+    public void setDroolsConfig(DroolsConfig droolsConfig) {
+        this.droolsConfig = droolsConfig;
+    }
+
     @PostConstruct
     public void init()
             throws IOException {
         this.url = UrlResourceStrategyFactory.getUrlResourceStrategy(droolsConfig).buildUrl();
         droolsConfig.setUrl(this.url);
-    }
-
-    public void setDroolsConfig(DroolsConfig droolsConfig) {
-        this.droolsConfig = droolsConfig;
     }
 
     public <T> Collection<T> executeRules(boolean expandLists, Object... assets)

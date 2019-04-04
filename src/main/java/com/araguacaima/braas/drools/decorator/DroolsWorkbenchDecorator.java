@@ -13,8 +13,8 @@ public class DroolsWorkbenchDecorator {
                                   String artifactid,
                                   String version) {
         return protocol + "://" + server + ":" + port + MavenArtifactDecorator.decorateFullPath(appName,
-                                                                                                groupid,
-                                                                                                artifactid,
-                                                                                                version);
+                groupid,
+                artifactid,
+                version);
     }
 }
