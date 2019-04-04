@@ -35,11 +35,11 @@ public class RulesTest {
         String localeLanguage = locale.getLanguage();
         return localeLanguage.equals(language);
     };
-    private static final String PERSON_FIRST_NAME_CANNOT_BE_NULL = "Person firstName cannot be null";
-    private static final String PERSON_FIRST_NAME_CANNOT_BE_EMPTY = "Person firstName cannot be empty";
-    private static final String PERSON_EMAIL_CANNOT_BE_NULL = "Person email cannot be null";
-    private static final String PERSON_EMAIL_CANNOT_BE_NULL_OR_EMPTY = "Person email cannot be null or empty";
-    private static final String PERSON_EMAIL_SHOULD_BE_VALID = "Person email should be valid";
+    private static final String PERSON_FIRST_NAME_CANNOT_BE_NULL = "Person's first name cannot be null";
+    private static final String PERSON_FIRST_NAME_CANNOT_BE_EMPTY = "Person's first name cannot be empty<";
+    private static final String PERSON_EMAIL_CANNOT_BE_NULL = "Person's email cannot be null";
+    private static final String PERSON_EMAIL_CANNOT_BE_NULL_OR_EMPTY = "Person's email cannot be null or empty";
+    private static final String PERSON_EMAIL_SHOULD_BE_VALID = "Person's email should be valid";
     private static final String OK_PREFIX_BEFORE = "@|bold,green [OK]|@ Testing @|bold ";
     private static final String OK_PREFIX_AFTER = "|@: @|italic,underline ";
     private static final String OK_CHECK_PREFIX = "@|bold,green ";

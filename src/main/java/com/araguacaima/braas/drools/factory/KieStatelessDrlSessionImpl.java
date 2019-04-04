@@ -1,5 +1,6 @@
 package com.araguacaima.braas.drools.factory;
 
+import com.araguacaima.commons.utils.ReflectionUtils;
 import org.drools.core.ClassObjectFilter;
 import org.drools.core.impl.StatelessKnowledgeSessionImpl;
 import org.kie.api.event.rule.DebugAgendaEventListener;
@@ -17,6 +18,7 @@ import java.util.Map;
  */
 public class KieStatelessDrlSessionImpl implements KieSessionImpl {
     private final StatelessKnowledgeSessionImpl statelessSession;
+    private static final ReflectionUtils reflectionUtils = new ReflectionUtils(null);
 
     public KieStatelessDrlSessionImpl(StatelessKieSession statelessKieSession,
                                       boolean verbose,
@@ -78,7 +80,7 @@ public class KieStatelessDrlSessionImpl implements KieSessionImpl {
 
     @Override
     public Collection<Object> execute(Object asset, boolean expandLists) {
-        Collection<Object> assets = new ArrayList<>();
+        Collection<Object> assets;
 
 /*        StatefulKnowledgeSession statefulKnowledgeSession = ((StatefulKnowledgeSession) statelessSession);
         try {
@@ -91,9 +93,15 @@ public class KieStatelessDrlSessionImpl implements KieSessionImpl {
             statefulKnowledgeSession.dispose();
         }*/
         ObjectFilter filter = new ClassObjectFilter(Object.class);
-        statelessSession.executeWithResults(new ArrayList<Object>() {{
-            add(asset);
-        }}, filter);
+        Collection<Object> objects;
+        if (reflectionUtils.isCollectionImplementation(asset.getClass().getName())) {
+            objects = (Collection) asset;
+        } else {
+            objects = new ArrayList<Object>() {{
+                add(asset);
+            }};
+        }
+        assets = statelessSession.executeWithResults(objects, filter);
         return assets;
     }
 
