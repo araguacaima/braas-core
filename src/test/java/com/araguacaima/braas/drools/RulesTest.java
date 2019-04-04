@@ -7,9 +7,7 @@ import com.araguacaima.commons.utils.JsonUtils;
 import io.codearte.jfairy.Fairy;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Predicate;
-import org.apache.commons.collections4.Transformer;
 import org.apache.commons.lang3.StringUtils;
-
 import org.drools.core.impl.InternalKnowledgeBase;
 import org.junit.Assert;
 import org.junit.Before;
@@ -80,10 +78,8 @@ public class RulesTest {
     }
 
     @Test
-    public void testPersonFirstNameNullity()
-            throws Exception {
-
-        Person person = (Person) fairy.person();
+    public void testPersonFirstNameNullity() throws Exception {
+        Person person = Person.PersonWrapper.fromParent(fairy.person());
         facts.add(person);
         final String condition = "is null";
         final String attribute = "person.firstName";
@@ -94,7 +90,7 @@ public class RulesTest {
             comments = getMessages(result);
         }
         try {
-            Assert.assertTrue("It should fail due fistName is null",
+            Assert.assertTrue("It should fail due firstName is null",
                     comments.contains(PERSON_FIRST_NAME_CANNOT_BE_NULL));
             log.info(getOK(attribute, condition, comments));
         } catch (AssertionError ae) {
@@ -104,10 +100,8 @@ public class RulesTest {
     }
 
     @Test
-    public void testPersonFirstNameEmpty()
-            throws Exception {
-
-        Person person = (Person) fairy.person();
+    public void testPersonFirstNameEmpty() throws Exception {
+        Person person = Person.PersonWrapper.fromParent(fairy.person());
         facts.add(person);
         final String condition = "is empty";
         final String attribute = "person.firstName";
@@ -118,7 +112,7 @@ public class RulesTest {
             comments = getMessages(result);
         }
         try {
-            Assert.assertTrue("It should fail due fistName is empty",
+            Assert.assertTrue("It should fail due firstName is empty",
                     comments.contains(PERSON_FIRST_NAME_CANNOT_BE_EMPTY));
             log.info(getOK(attribute, condition, comments));
         } catch (AssertionError ae) {
@@ -127,10 +121,73 @@ public class RulesTest {
         }
     }
 
+    @Test
+    public void testPersonEmailNullity() throws Exception {
+        Person person = Person.PersonWrapper.fromParent(fairy.person());
+        facts.add(person);
+        final String condition = "is null";
+        final String attribute = "person.email";
+        person.setEmail(null);
+        Collection<Object> result = ksession.execute(facts, true);
+        Collection comments = new ArrayList();
+        if (result.size() > 1) {
+            comments = getMessages(result);
+        }
+        try {
+            Assert.assertTrue("It should fail due email is null",
+                    comments.contains(PERSON_FIRST_NAME_CANNOT_BE_NULL));
+            log.info(getOK(attribute, condition, comments));
+        } catch (AssertionError ae) {
+            log.error(getFail(attribute, condition, comments));
+            throw ae;
+        }
+    }
 
     @Test
-    public void testNullPerson()
-            throws Exception {
+    public void testPersonEmailEmpty() throws Exception {
+        Person person = Person.PersonWrapper.fromParent(fairy.person());
+        facts.add(person);
+        final String condition = "is empty";
+        final String attribute = "person.email";
+        person.setEmail("");
+        Collection<Object> result = ksession.execute(facts, true);
+        Collection comments = new ArrayList();
+        if (result.size() > 1) {
+            comments = getMessages(result);
+        }
+        try {
+            Assert.assertTrue("It should fail due email is empty",
+                    comments.contains(PERSON_FIRST_NAME_CANNOT_BE_EMPTY));
+            log.info(getOK(attribute, condition, comments));
+        } catch (AssertionError ae) {
+            log.error(getFail(attribute, condition, comments));
+            throw ae;
+        }
+    }
+
+    @Test
+    public void testPersonEmailValid() throws Exception {
+        Person person = Person.PersonWrapper.fromParent(fairy.person());
+        facts.add(person);
+        final String condition = "is valid";
+        final String attribute = "person.email";
+        Collection<Object> result = ksession.execute(facts, true);
+        Collection comments = new ArrayList();
+        if (result.size() > 1) {
+            comments = getMessages(result);
+        }
+        try {
+            Assert.assertTrue("It should fail due email is invalid",
+                    comments.contains(PERSON_FIRST_NAME_CANNOT_BE_EMPTY));
+            log.info(getOK(attribute, condition, comments));
+        } catch (AssertionError ae) {
+            log.error(getFail(attribute, condition, comments));
+            throw ae;
+        }
+    }
+    
+    @Test
+    public void testNullPerson() throws Exception {
 
         facts.clear();
         final String attribute = "person";

@@ -79,4 +79,25 @@ public class Person extends io.codearte.jfairy.producer.person.Person {
         beanUtilsBean.setProperty(this, "passportNumber", passportNumber);
     }
 
+    public static class PersonWrapper {
+        public static Person fromParent(io.codearte.jfairy.producer.person.Person person) {
+            return new Person(person.getFirstName(),
+                    person.getMiddleName(),
+                    person.getLastName(),
+                    person.getAddress(),
+                    person.getEmail(),
+                    person.getUsername(),
+                    person.getPassword(),
+                    person.getSex(),
+                    person.getTelephoneNumber(),
+                    person.getDateOfBirth(),
+                    person.getAge(),
+                    person.getNationalIdentityCardNumber(),
+                    person.getNationalIdentificationNumber(),
+                    person.getPassportNumber(),
+                    person.getCompany(),
+                    person.getCompanyEmail());
+        }
+    }
+
 }
