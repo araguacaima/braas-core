@@ -1,8 +1,10 @@
 package com.araguacaima.braas.drools.factory;
 
+import org.drools.core.ClassObjectFilter;
 import org.drools.core.impl.StatelessKnowledgeSessionImpl;
 import org.kie.api.event.rule.DebugAgendaEventListener;
 import org.kie.api.event.rule.DebugRuleRuntimeEventListener;
+import org.kie.api.runtime.ObjectFilter;
 import org.kie.api.runtime.StatelessKieSession;
 import org.kie.internal.runtime.StatefulKnowledgeSession;
 
@@ -78,7 +80,7 @@ public class KieStatelessDrlSessionImpl implements KieSessionImpl {
     public Collection<Object> execute(Object asset, boolean expandLists) {
         Collection<Object> assets = new ArrayList<>();
 
-        StatefulKnowledgeSession statefulKnowledgeSession = ((StatefulKnowledgeSession) statelessSession);
+/*        StatefulKnowledgeSession statefulKnowledgeSession = ((StatefulKnowledgeSession) statelessSession);
         try {
             if (asset != null) {
                 insertAssets(statefulKnowledgeSession, asset, expandLists);
@@ -87,7 +89,11 @@ public class KieStatelessDrlSessionImpl implements KieSessionImpl {
             }
         } finally {
             statefulKnowledgeSession.dispose();
-        }
+        }*/
+        ObjectFilter filter = new ClassObjectFilter(Object.class);
+        statelessSession.executeWithResults(new ArrayList<Object>() {{
+            add(asset);
+        }}, filter);
         return assets;
     }
 

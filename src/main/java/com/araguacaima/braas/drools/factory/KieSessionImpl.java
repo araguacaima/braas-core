@@ -9,5 +9,5 @@ public interface KieSessionImpl {
 
     void setGlobal(String globalName, Object object);
 
-    <T> Collection<T> execute(Object asset, boolean expandLists);
+    Collection<Object> execute(Object asset, boolean expandLists);
 }

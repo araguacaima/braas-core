@@ -211,8 +211,8 @@ public class RulesTest {
     public void testValidateTestObject()
             throws Exception {
         Person person = (Person) fairy.person();
-        final Collection<IMessage> inputCollection = droolsUtils.executeRules(true, person);
-        Collection<IMessage> messages = CollectionUtils.select(inputCollection,
+        final Collection<Object> inputCollection = droolsUtils.executeRules(true, person);
+        Collection<Object> messages = CollectionUtils.select(inputCollection,
                 object -> IMessage.class.isAssignableFrom(object.getClass()));
         int expectedObjectcount = 0;
         Assert.assertNotNull(messages);

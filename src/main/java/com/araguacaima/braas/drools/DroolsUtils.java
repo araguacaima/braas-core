@@ -72,12 +72,12 @@ public class DroolsUtils {
         droolsConfig.setUrl(this.url);
     }
 
-    public <T> Collection<T> executeRules(boolean expandLists, Object... assets)
+    public Collection<Object> executeRules(boolean expandLists, Object... assets)
             throws Exception {
         return executeRules(assets, globals, expandLists);
     }
 
-    public <T> Collection<T> executeRules(Object asset, Map<String, Object> globals, boolean expandLists)
+    public Collection<Object> executeRules(Object asset, Map<String, Object> globals, boolean expandLists)
             throws Exception {
         KieSessionImpl kieSessionImpl = KieSessionFactory.getSession(this);
         if (globals != null && !globals.isEmpty()) {
