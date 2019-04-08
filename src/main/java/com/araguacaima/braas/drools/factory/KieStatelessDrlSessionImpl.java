@@ -83,15 +83,18 @@ public class KieStatelessDrlSessionImpl implements KieSessionImpl {
         Collection<Object> assets;
         ObjectFilter filter = new ClassObjectFilter(Object.class);
         Collection<Object> objects;
-        if (reflectionUtils.isCollectionImplementation(asset.getClass().getName())) {
-            objects = (Collection) asset;
-        } else {
-            objects = new ArrayList<Object>() {{
-                add(asset);
-            }};
+        if (asset != null) {
+            if (reflectionUtils.isCollectionImplementation(asset.getClass().getName())) {
+                objects = (Collection<Object>) asset;
+            } else {
+                objects = new ArrayList<Object>() {{
+                    add(asset);
+                }};
+            }
+            assets = statelessSession.executeWithResults(objects, filter);
+            return assets;
         }
-        assets = statelessSession.executeWithResults(objects, filter);
-        return assets;
+        return null;
     }
 
     public StatelessKnowledgeSessionImpl getStatelessSession() {

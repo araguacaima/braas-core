@@ -38,8 +38,8 @@ public class RulesTest {
     private static final String PERSON_FIRST_NAME_CANNOT_BE_NULL = "Person's first name cannot be null";
     private static final String PERSON_FIRST_NAME_CANNOT_BE_EMPTY = "Person's first name cannot be empty";
     private static final String PERSON_EMAIL_CANNOT_BE_NULL = "Person's email cannot be null";
-    private static final String PERSON_EMAIL_CANNOT_BE_EMPTY = "Person's email cannot be null or empty";
-    private static final String PERSON_EMAIL_SHOULD_BE_VALID = "Person's email should be valid";
+    private static final String PERSON_EMAIL_CANNOT_BE_EMPTY = "Person's email cannot be empty";
+    private static final String PERSON_EMAIL_IS_INVALID = "Person's email is not valid";
     private DroolsUtils droolsUtils = null;
     private Fairy fairy;
 
@@ -68,10 +68,8 @@ public class RulesTest {
         facts.add(person);
         person.setFirstName(null);
         Collection<Object> result = ksession.execute(facts, true);
-        Collection comments = new ArrayList();
-        if (result.size() > 1) {
-            comments = getMessages(result);
-        } else {
+        Collection comments = getMessages(result);
+        if (comments.size() == 0) {
             Assert.fail("It should be returned an error message due firstName is null, but no error was retrieved");
         }
         log.debug("It should be returned an error message due firstName is null");
@@ -89,10 +87,8 @@ public class RulesTest {
         facts.add(person);
         person.setFirstName("");
         Collection<Object> result = ksession.execute(facts, true);
-        Collection comments = new ArrayList();
-        if (result.size() > 1) {
-            comments = getMessages(result);
-        } else {
+        Collection comments = getMessages(result);
+        if (comments.size() == 0) {
             Assert.fail("It should be returned an error message due firstName is empty, but no error was retrieved");
         }
         log.debug("It should be returned an error message due firstName is empty");
@@ -110,10 +106,8 @@ public class RulesTest {
         facts.add(person);
         person.setEmail(null);
         Collection<Object> result = ksession.execute(facts, true);
-        Collection comments = new ArrayList();
-        if (result.size() > 1) {
-            comments = getMessages(result);
-        } else {
+        Collection comments = getMessages(result);
+        if (comments.size() == 0) {
             Assert.fail("It should be returned an error message due email is null, but no error was retrieved");
         }
         log.debug("It should be returned an error message due email is null");
@@ -131,10 +125,8 @@ public class RulesTest {
         facts.add(person);
         person.setEmail("");
         Collection<Object> result = ksession.execute(facts, true);
-        Collection comments = new ArrayList();
-        if (result.size() > 1) {
-            comments = getMessages(result);
-        } else {
+        Collection comments = getMessages(result);
+        if (comments.size() == 0) {
             Assert.fail("It should be returned an error message due email is empty, but no error was retrieved");
         }
         log.debug("It should be returned an error message due email is empty");
@@ -146,20 +138,18 @@ public class RulesTest {
     }
 
     @Test
-    public void testPersonEmailValid() throws Exception {
+    public void testPersonEmailInvalid() throws Exception {
         Person person = Person.PersonWrapper.fromParent(fairy.person());
         facts.clear();
         facts.add(person);
         person.setEmail("@.com");
         Collection<Object> result = ksession.execute(facts, true);
-        Collection comments = new ArrayList();
-        if (result.size() > 1) {
-            comments = getMessages(result);
-        } else {
+        Collection comments = getMessages(result);
+        if (comments.size() == 0) {
             Assert.fail("It should be returned an error message due email is not valid, but no error was retrieved");
         }
         log.debug("It should be returned an error message due email is not valid");
-        CollectionUtils.filter(comments, comment -> PERSON_EMAIL_SHOULD_BE_VALID.equals(((RuleMessage) comment).getComment()));
+        CollectionUtils.filter(comments, comment -> PERSON_EMAIL_IS_INVALID.equals(((RuleMessage) comment).getComment()));
         Assert.assertEquals(1, comments.size());
         RuleMessage message = (RuleMessage) comments.iterator().next();
         log.info("Message returned: " + message.getComment());
@@ -172,9 +162,12 @@ public class RulesTest {
         facts.clear();
         Collection<Object> result = ksession.execute(null, true);
         Collection comments = new ArrayList();
-        if (result.size() > 0) {
-            Assert.fail("It should not be returned any error message due there is no facts provided, but some errors was retrieved");
-            log.info(jsonUtils.toJSON(comments));
+
+        if (result != null) {
+            if (result.size() > 0) {
+                Assert.fail("It should not be returned any error message due there is no facts provided, but some errors was retrieved");
+                log.info(jsonUtils.toJSON(comments));
+            }
         }
         log.debug("It should not be returned any error message due there is no facts provided");
         Assert.assertEquals(0, comments.size());
@@ -189,7 +182,7 @@ public class RulesTest {
         facts.add(person);
         Collection<Object> result = ksession.execute(facts, true);
         Collection comments = new ArrayList();
-        if (result.size() != 1) {
+        if (result.size() == 1) {
             comments = getMessages(result);
         } else {
             Assert.fail("It should not be returned an error message due person provided is valid, but some error was retrieved");
