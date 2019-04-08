@@ -11,6 +11,7 @@ import org.kie.internal.runtime.StatefulKnowledgeSession;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -84,7 +85,11 @@ public class KieStatelessDrlSessionImpl implements KieSessionImpl {
         ObjectFilter filter = new ClassObjectFilter(Object.class);
         Collection<Object> objects;
         if (asset != null) {
-            if (reflectionUtils.isCollectionImplementation(asset.getClass().getName())) {
+            if (asset instanceof Object[]) {
+                objects = new ArrayList<>();
+                Object[] assets_ = (Object[]) asset;
+                Collections.addAll(objects, assets_);
+            } else if (reflectionUtils.isCollectionImplementation(asset.getClass().getName())) {
                 objects = (Collection<Object>) asset;
             } else {
                 objects = new ArrayList<Object>() {{

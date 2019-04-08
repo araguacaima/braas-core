@@ -1,5 +1,10 @@
 package com.araguacaima.braas.drools;
 
+import com.araguacaima.commons.utils.FileUtils;
+import com.araguacaima.commons.utils.PropertiesHandlerUtils;
+
+import java.util.Properties;
+
 /**
  * Created by Alejandro on 04/12/2014.
  */
@@ -24,9 +29,30 @@ public class DroolsConfig {
     private String urlResourceStrategy;
     private boolean verbose;
     private String version;
-    private String sourceType;
 
-    public void buildDroolsConfig(String key, String value) {
+    public DroolsConfig(String configFile) {
+        PropertiesHandlerUtils propertiesHandlerUtils = new PropertiesHandlerUtils(null, new FileUtils(), null);
+        Properties bundle = propertiesHandlerUtils.getHandler(configFile).getProperties();
+        this.build("absoluteLocalPath", bundle.getProperty("absoluteLocalPath"))
+                .build("drools.workbench.app.name", bundle.getProperty("drools.workbench.app.name"))
+                .build("artifactName", bundle.getProperty("artifactName"))
+                .build("drools.maven.artifactid", bundle.getProperty("drools.maven.artifactid"))
+                .build("decision.table.path", bundle.getProperty("decision.table.path"))
+                .build("drools.maven.groupid", bundle.getProperty("drools.maven.groupid"))
+                .build("drools.kie.session", bundle.getProperty("drools.kie.session"))
+                .build("drools.kie.session.type", bundle.getProperty("drools.kie.session.type"))
+                .build("mavenLocalRepositoryPath", bundle.getProperty("mavenLocalRepositoryPath"))
+                .build("drools.workbench.server.port", bundle.getProperty("drools.workbench.server.port"))
+                .build("drools.workbench.server.protocol", bundle.getProperty("drools.workbench.server.protocol"))
+                .build("rules.repository.strategy", bundle.getProperty("rules.repository.strategy"))
+                .build("scannerPeriod", bundle.getProperty("scannerPeriod"))
+                .build("drools.workbench.server.name", bundle.getProperty("drools.workbench.server.name"))
+                .build("urlResourceStrategy", bundle.getProperty("urlResourceStrategy"))
+                .build("drools.engine.verbose", bundle.getProperty("drools.engine.verbose"))
+                .build("drools.maven.version", bundle.getProperty("drools.maven.version"));
+    }
+
+    public DroolsConfig build(String key, String value) {
 
         if ("urlResourceStrategy".equals(key)) {
             this.setUrlResourceStrategy(value);
@@ -63,6 +89,7 @@ public class DroolsConfig {
         } else if ("decision.table.path".equals(key)) {
             this.setDecisionTablePath(value);
         }
+        return this;
     }
 
     public String getAbsoluteLocalPath() {

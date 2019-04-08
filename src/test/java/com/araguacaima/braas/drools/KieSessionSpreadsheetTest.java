@@ -19,9 +19,9 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 @SuppressWarnings("unchecked")
-public class RulesTest {
+public class KieSessionSpreadsheetTest {
 
-    private static Logger log = LoggerFactory.getLogger(RulesTest.class);
+    private static Logger log = LoggerFactory.getLogger(KieSessionSpreadsheetTest.class);
     private static final boolean VERBOSE = false;
     private KieStatelessDrlSessionImpl ksession;
 
@@ -40,15 +40,11 @@ public class RulesTest {
     private static final String PERSON_EMAIL_CANNOT_BE_NULL = "Person's email cannot be null";
     private static final String PERSON_EMAIL_CANNOT_BE_EMPTY = "Person's email cannot be empty";
     private static final String PERSON_EMAIL_IS_INVALID = "Person's email is not valid";
-    private DroolsUtils droolsUtils = null;
+
     private Fairy fairy;
 
     @Before
     public void init() throws Exception {
-
-        DroolsConfig droolsConfig = new DroolsConfig();
-        droolsUtils = new DroolsUtils(droolsConfig);
-
         jsonUtils = new JsonUtils();
         String path = "rules.xlsx";
         InternalKnowledgeBase knowledgeBase = KieSessionFactory.createKnowledgeBaseFromSpreadsheet(path);
@@ -57,7 +53,6 @@ public class RulesTest {
         globals.put("locale", locale);
         globals.put("logger", log);
         this.ksession = new KieStatelessDrlSessionImpl(session, VERBOSE, globals);
-
         fairy = Fairy.create();
     }
 

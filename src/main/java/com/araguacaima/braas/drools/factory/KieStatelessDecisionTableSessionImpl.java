@@ -1,13 +1,17 @@
 package com.araguacaima.braas.drools.factory;
 
+import com.araguacaima.commons.utils.ReflectionUtils;
+import org.drools.core.ClassObjectFilter;
 import org.drools.core.impl.StatelessKnowledgeSessionImpl;
 import org.kie.api.event.rule.DebugAgendaEventListener;
 import org.kie.api.event.rule.DebugRuleRuntimeEventListener;
+import org.kie.api.runtime.ObjectFilter;
 import org.kie.api.runtime.StatelessKieSession;
 import org.kie.internal.runtime.StatefulKnowledgeSession;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -15,6 +19,7 @@ import java.util.Map;
  */
 public class KieStatelessDecisionTableSessionImpl implements KieSessionImpl {
     private final StatelessKnowledgeSessionImpl statelessSession;
+    private static final ReflectionUtils reflectionUtils = new ReflectionUtils(null);
 
     public KieStatelessDecisionTableSessionImpl(StatelessKieSession statelessKieSession,
                                                 boolean verbose,
@@ -73,18 +78,24 @@ public class KieStatelessDecisionTableSessionImpl implements KieSessionImpl {
 
     @Override
     public Collection<Object> execute(Object asset, boolean expandLists) {
-        Collection<Object> assets = new ArrayList<>();
-        StatefulKnowledgeSession statefulKnowledgeSession = ((StatefulKnowledgeSession) statelessSession);
-
-        try {
-            if (asset != null) {
-                insertAssets(statefulKnowledgeSession, asset, expandLists);
-                statefulKnowledgeSession.fireAllRules();
-                assets.addAll(statefulKnowledgeSession.getObjects());
+        Collection<Object> assets;
+        ObjectFilter filter = new ClassObjectFilter(Object.class);
+        Collection<Object> objects;
+        if (asset != null) {
+            if (asset instanceof Object[]) {
+                objects = new ArrayList<>();
+                Object[] assets_ = (Object[]) asset;
+                Collections.addAll(objects, assets_);
+            } else if (reflectionUtils.isCollectionImplementation(asset.getClass().getName())) {
+                objects = (Collection<Object>) asset;
+            } else {
+                objects = new ArrayList<Object>() {{
+                    add(asset);
+                }};
             }
-        } finally {
-            statefulKnowledgeSession.dispose();
+            assets = statelessSession.executeWithResults(objects, filter);
+            return assets;
         }
-        return assets;
+        return null;
     }
 }

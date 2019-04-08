@@ -11,7 +11,7 @@ import org.kie.api.io.KieResources;
 import org.kie.api.io.Resource;
 import org.kie.api.runtime.KieContainer;
 
-import javax.annotation.PostConstruct;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
@@ -39,6 +39,7 @@ public class DroolsUtils {
 
     public DroolsUtils(DroolsConfig droolsConfig) {
         this.droolsConfig = droolsConfig;
+        init();
     }
 
     public void addGlobal(String globalName, Object value) {
@@ -52,7 +53,7 @@ public class DroolsUtils {
     public void buildDroolsUtils(String key, String value)
             throws IOException {
         DroolsConfig droolsConfig = this.getDroolsConfig();
-        droolsConfig.buildDroolsConfig(key, value);
+        droolsConfig.build(key, value);
         this.setDroolsConfig(droolsConfig);
         this.init();
     }
@@ -65,11 +66,19 @@ public class DroolsUtils {
         this.droolsConfig = droolsConfig;
     }
 
-    @PostConstruct
-    public void init()
-            throws IOException {
-        this.url = UrlResourceStrategyFactory.getUrlResourceStrategy(droolsConfig).buildUrl();
-        droolsConfig.setUrl(this.url);
+    @SuppressWarnings("ConstantConditions")
+    private void init() {
+        try {
+            this.url = UrlResourceStrategyFactory.getUrlResourceStrategy(droolsConfig).buildUrl();
+            droolsConfig.setUrl(this.url);
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+    }
+
+    public Collection<Object> executeRules(Object... assets)
+            throws Exception {
+        return executeRules(assets, globals, true);
     }
 
     public Collection<Object> executeRules(boolean expandLists, Object... assets)
