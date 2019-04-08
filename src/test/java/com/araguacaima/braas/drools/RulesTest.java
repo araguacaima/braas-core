@@ -1,13 +1,13 @@
 package com.araguacaima.braas.drools;
 
 import com.araguacaima.braas.IMessage;
+import com.araguacaima.braas.RuleMessage;
 import com.araguacaima.braas.drools.Model.Person;
 import com.araguacaima.braas.drools.factory.KieStatelessDrlSessionImpl;
 import com.araguacaima.commons.utils.JsonUtils;
 import io.codearte.jfairy.Fairy;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Predicate;
-import org.apache.commons.lang3.StringUtils;
 import org.drools.core.impl.InternalKnowledgeBase;
 import org.junit.Assert;
 import org.junit.Before;
@@ -16,9 +16,9 @@ import org.kie.api.runtime.StatelessKieSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.*;
 
+@SuppressWarnings("unchecked")
 public class RulesTest {
 
     private static Logger log = LoggerFactory.getLogger(RulesTest.class);
@@ -28,41 +28,25 @@ public class RulesTest {
     private Collection<Object> facts = new ArrayList<>();
     private JsonUtils jsonUtils;
     private Locale locale = Locale.ENGLISH;
-    private Predicate predicateNonPerson = object -> !Person.class.isAssignableFrom(object.getClass());
-    private Predicate transformerComments = input -> {
+    private Predicate predicateMessage = object -> RuleMessage.class.isAssignableFrom(object.getClass());
+    private Predicate transformerLocalizedComments = input -> {
         IMessage message = (IMessage) input;
         String language = message.getLanguage();
         String localeLanguage = locale.getLanguage();
         return localeLanguage.equals(language);
     };
     private static final String PERSON_FIRST_NAME_CANNOT_BE_NULL = "Person's first name cannot be null";
-    private static final String PERSON_FIRST_NAME_CANNOT_BE_EMPTY = "Person's first name cannot be empty<";
+    private static final String PERSON_FIRST_NAME_CANNOT_BE_EMPTY = "Person's first name cannot be empty";
     private static final String PERSON_EMAIL_CANNOT_BE_NULL = "Person's email cannot be null";
-    private static final String PERSON_EMAIL_CANNOT_BE_NULL_OR_EMPTY = "Person's email cannot be null or empty";
+    private static final String PERSON_EMAIL_CANNOT_BE_EMPTY = "Person's email cannot be null or empty";
     private static final String PERSON_EMAIL_SHOULD_BE_VALID = "Person's email should be valid";
-    private static final String OK_PREFIX_BEFORE = "@|bold,green [OK]|@ Testing @|bold ";
-    private static final String OK_PREFIX_AFTER = "|@: @|italic,underline ";
-    private static final String OK_CHECK_PREFIX = "@|bold,green ";
-    private static final String FAIL_PREFIX_BEFORE = "@|bold,red [KO]|@ Testing @|bold ";
-    private static final String FAIL_PREFIX_AFTER = "|@: @|italic,underline ";
-    private static final String FAIL_CHECK_PREFIX = "@|bold,red ";
-    private static final String END = "|@";
-    private static final String MIDDLE_SCORE = " - ";
-    private static final String BLANK_SPACE = " ";
-    private static final String PIPE = " | ";
-    private Collection<String> ALL_NULL_COMMENTS = new ArrayList<String>() {{
-        add(PERSON_FIRST_NAME_CANNOT_BE_NULL);
-        add(PERSON_EMAIL_CANNOT_BE_NULL_OR_EMPTY);
-    }};
-    private DroolsConfig droolsConfig = null;
     private DroolsUtils droolsUtils = null;
     private Fairy fairy;
 
     @Before
-    public void init()
-            throws Exception {
+    public void init() throws Exception {
 
-        droolsConfig = new DroolsConfig();
+        DroolsConfig droolsConfig = new DroolsConfig();
         droolsUtils = new DroolsUtils(droolsConfig);
 
         jsonUtils = new JsonUtils();
@@ -80,162 +64,146 @@ public class RulesTest {
     @Test
     public void testPersonFirstNameNullity() throws Exception {
         Person person = Person.PersonWrapper.fromParent(fairy.person());
+        facts.clear();
         facts.add(person);
-        final String condition = "is null";
-        final String attribute = "person.firstName";
         person.setFirstName(null);
         Collection<Object> result = ksession.execute(facts, true);
         Collection comments = new ArrayList();
         if (result.size() > 1) {
             comments = getMessages(result);
+        } else {
+            Assert.fail("It should be returned an error message due firstName is null, but no error was retrieved");
         }
-        try {
-            Assert.assertTrue("It should fail due firstName is null",
-                    comments.contains(PERSON_FIRST_NAME_CANNOT_BE_NULL));
-            log.info(getOK(attribute, condition, comments));
-        } catch (AssertionError ae) {
-            log.error(getFail(attribute, condition, comments));
-            throw ae;
-        }
+        log.debug("It should be returned an error message due firstName is null");
+        CollectionUtils.filter(comments, comment -> PERSON_FIRST_NAME_CANNOT_BE_NULL.equals(((RuleMessage) comment).getComment()));
+        Assert.assertEquals(1, comments.size());
+        RuleMessage message = (RuleMessage) comments.iterator().next();
+        log.info("Message returned: " + message.getComment());
+        log.info(jsonUtils.toJSON(message));
     }
 
     @Test
     public void testPersonFirstNameEmpty() throws Exception {
         Person person = Person.PersonWrapper.fromParent(fairy.person());
+        facts.clear();
         facts.add(person);
-        final String condition = "is empty";
-        final String attribute = "person.firstName";
         person.setFirstName("");
         Collection<Object> result = ksession.execute(facts, true);
         Collection comments = new ArrayList();
         if (result.size() > 1) {
             comments = getMessages(result);
+        } else {
+            Assert.fail("It should be returned an error message due firstName is empty, but no error was retrieved");
         }
-        try {
-            Assert.assertTrue("It should fail due firstName is empty",
-                    comments.contains(PERSON_FIRST_NAME_CANNOT_BE_EMPTY));
-            log.info(getOK(attribute, condition, comments));
-        } catch (AssertionError ae) {
-            log.error(getFail(attribute, condition, comments));
-            throw ae;
-        }
+        log.debug("It should be returned an error message due firstName is empty");
+        CollectionUtils.filter(comments, comment -> PERSON_FIRST_NAME_CANNOT_BE_EMPTY.equals(((RuleMessage) comment).getComment()));
+        Assert.assertEquals(1, comments.size());
+        RuleMessage message = (RuleMessage) comments.iterator().next();
+        log.info("Message returned: " + message.getComment());
+        log.info(jsonUtils.toJSON(message));
     }
 
     @Test
     public void testPersonEmailNullity() throws Exception {
         Person person = Person.PersonWrapper.fromParent(fairy.person());
+        facts.clear();
         facts.add(person);
-        final String condition = "is null";
-        final String attribute = "person.email";
         person.setEmail(null);
         Collection<Object> result = ksession.execute(facts, true);
         Collection comments = new ArrayList();
         if (result.size() > 1) {
             comments = getMessages(result);
+        } else {
+            Assert.fail("It should be returned an error message due email is null, but no error was retrieved");
         }
-        try {
-            Assert.assertTrue("It should fail due email is null",
-                    comments.contains(PERSON_FIRST_NAME_CANNOT_BE_NULL));
-            log.info(getOK(attribute, condition, comments));
-        } catch (AssertionError ae) {
-            log.error(getFail(attribute, condition, comments));
-            throw ae;
-        }
+        log.debug("It should be returned an error message due email is null");
+        CollectionUtils.filter(comments, comment -> PERSON_EMAIL_CANNOT_BE_NULL.equals(((RuleMessage) comment).getComment()));
+        Assert.assertEquals(1, comments.size());
+        RuleMessage message = (RuleMessage) comments.iterator().next();
+        log.info("Message returned: " + message.getComment());
+        log.info(jsonUtils.toJSON(message));
     }
 
     @Test
     public void testPersonEmailEmpty() throws Exception {
         Person person = Person.PersonWrapper.fromParent(fairy.person());
+        facts.clear();
         facts.add(person);
-        final String condition = "is empty";
-        final String attribute = "person.email";
         person.setEmail("");
         Collection<Object> result = ksession.execute(facts, true);
         Collection comments = new ArrayList();
         if (result.size() > 1) {
             comments = getMessages(result);
+        } else {
+            Assert.fail("It should be returned an error message due email is empty, but no error was retrieved");
         }
-        try {
-            Assert.assertTrue("It should fail due email is empty",
-                    comments.contains(PERSON_FIRST_NAME_CANNOT_BE_EMPTY));
-            log.info(getOK(attribute, condition, comments));
-        } catch (AssertionError ae) {
-            log.error(getFail(attribute, condition, comments));
-            throw ae;
-        }
+        log.debug("It should be returned an error message due email is empty");
+        CollectionUtils.filter(comments, comment -> PERSON_EMAIL_CANNOT_BE_EMPTY.equals(((RuleMessage) comment).getComment()));
+        Assert.assertEquals(1, comments.size());
+        RuleMessage message = (RuleMessage) comments.iterator().next();
+        log.info("Message returned: " + message.getComment());
+        log.info(jsonUtils.toJSON(message));
     }
 
     @Test
     public void testPersonEmailValid() throws Exception {
         Person person = Person.PersonWrapper.fromParent(fairy.person());
+        facts.clear();
         facts.add(person);
-        final String condition = "is valid";
-        final String attribute = "person.email";
+        person.setEmail("@.com");
         Collection<Object> result = ksession.execute(facts, true);
         Collection comments = new ArrayList();
         if (result.size() > 1) {
             comments = getMessages(result);
+        } else {
+            Assert.fail("It should be returned an error message due email is not valid, but no error was retrieved");
         }
-        try {
-            Assert.assertTrue("It should fail due email is invalid",
-                    comments.contains(PERSON_FIRST_NAME_CANNOT_BE_EMPTY));
-            log.info(getOK(attribute, condition, comments));
-        } catch (AssertionError ae) {
-            log.error(getFail(attribute, condition, comments));
-            throw ae;
-        }
+        log.debug("It should be returned an error message due email is not valid");
+        CollectionUtils.filter(comments, comment -> PERSON_EMAIL_SHOULD_BE_VALID.equals(((RuleMessage) comment).getComment()));
+        Assert.assertEquals(1, comments.size());
+        RuleMessage message = (RuleMessage) comments.iterator().next();
+        log.info("Message returned: " + message.getComment());
+        log.info(jsonUtils.toJSON(message));
     }
-    
+
     @Test
     public void testNullPerson() throws Exception {
 
         facts.clear();
-        final String attribute = "person";
-        final String condition = "is empty";
         Collection<Object> result = ksession.execute(null, true);
         Collection comments = new ArrayList();
-        if (result.size() > 1) {
-            comments = getMessages(result);
+        if (result.size() > 0) {
+            Assert.fail("It should not be returned any error message due there is no facts provided, but some errors was retrieved");
+            log.info(jsonUtils.toJSON(comments));
         }
-        try {
-            Assert.assertTrue("It should not fail due " + attribute + " " + condition,
-                    CollectionUtils.isEqualCollection(comments, ALL_NULL_COMMENTS));
-            log.info(getOK(attribute, condition, comments));
-        } catch (AssertionError ae) {
-            log.error(getFail(attribute, condition, comments));
-            throw ae;
-        }
+        log.debug("It should not be returned any error message due there is no facts provided");
+        Assert.assertEquals(0, comments.size());
+        log.info("Amount of message returned: " + comments.size());
     }
 
     @Test
-    public void testValidateTestObject()
+    public void testValidatePerson()
             throws Exception {
-        Person person = (Person) fairy.person();
-        final Collection<Object> inputCollection = droolsUtils.executeRules(true, person);
-        Collection<Object> messages = CollectionUtils.select(inputCollection,
-                object -> IMessage.class.isAssignableFrom(object.getClass()));
-        int expectedObjectcount = 0;
-        Assert.assertNotNull(messages);
-        Assert.assertEquals(messages.size(), expectedObjectcount);
-    }
+        Person person = Person.PersonWrapper.fromParent(fairy.person());
+        facts.clear();
+        facts.add(person);
+        Collection<Object> result = ksession.execute(facts, true);
+        Collection comments = new ArrayList();
+        if (result.size() != 1) {
+            comments = getMessages(result);
+        } else {
+            Assert.fail("It should not be returned an error message due person provided is valid, but some error was retrieved");
+            log.info(jsonUtils.toJSON(comments));
+        }
+        log.debug("It should not be returned an error message due person provided is valid");
+        Assert.assertEquals(0, comments.size());
+        log.info("Amount of message returned: " + comments.size());
 
-    private String getFail(String attribute, String message, Collection comments)
-            throws IOException {
-        return FAIL_PREFIX_BEFORE + attribute + FAIL_PREFIX_AFTER + message + END + PIPE + FAIL_CHECK_PREFIX
-                + "X" + END + (CollectionUtils.isNotEmpty(
-                comments) ? (PIPE + "@|bold Messages:|@" + jsonUtils.toJSON(comments)) : StringUtils.EMPTY);
-    }
-
-    private String getOK(String attribute, String message, Collection comments)
-            throws IOException {
-        return OK_PREFIX_BEFORE + attribute + OK_PREFIX_AFTER + message + END + PIPE + OK_CHECK_PREFIX + "✓"
-                + END + (CollectionUtils.isNotEmpty(
-                comments) ? (PIPE + "@|bold Messages:|@" + jsonUtils.toJSON(comments)) : StringUtils.EMPTY);
     }
 
     private Collection getMessages(Collection result) {
-        Collection collection = CollectionUtils.select(result, predicateNonPerson);
-        CollectionUtils.filter(collection, transformerComments);
+        Collection collection = CollectionUtils.select(result, predicateMessage);
+        CollectionUtils.filter(collection, transformerLocalizedComments);
         return collection;
     }
 }

@@ -81,17 +81,6 @@ public class KieStatelessDrlSessionImpl implements KieSessionImpl {
     @Override
     public Collection<Object> execute(Object asset, boolean expandLists) {
         Collection<Object> assets;
-
-/*        StatefulKnowledgeSession statefulKnowledgeSession = ((StatefulKnowledgeSession) statelessSession);
-        try {
-            if (asset != null) {
-                insertAssets(statefulKnowledgeSession, asset, expandLists);
-                statefulKnowledgeSession.fireAllRules();
-                assets.addAll(statefulKnowledgeSession.getObjects());
-            }
-        } finally {
-            statefulKnowledgeSession.dispose();
-        }*/
         ObjectFilter filter = new ClassObjectFilter(Object.class);
         Collection<Object> objects;
         if (reflectionUtils.isCollectionImplementation(asset.getClass().getName())) {
