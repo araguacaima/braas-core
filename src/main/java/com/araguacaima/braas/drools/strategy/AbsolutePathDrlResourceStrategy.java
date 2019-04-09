@@ -10,18 +10,18 @@ import java.io.OutputStream;
  */
 public class AbsolutePathDrlResourceStrategy implements ResourceStrategy {
 
-    String absoluteLocalPath;
+    String rulesPath;
     String artifactName;
 
-    public AbsolutePathDrlResourceStrategy(String absoluteLocalPath, String artifactName) {
+    public AbsolutePathDrlResourceStrategy(String rulesPath, String artifactName) {
 
-        this.absoluteLocalPath = absoluteLocalPath;
+        this.rulesPath = rulesPath;
         this.artifactName = artifactName;
     }
 
     @Override
     public String buildUrl() {
-        return MavenArtifactDecorator.decorateAbsolutePath(absoluteLocalPath, artifactName);
+        return MavenArtifactDecorator.decorateAbsolutePath(rulesPath, artifactName);
     }
 
     @Override

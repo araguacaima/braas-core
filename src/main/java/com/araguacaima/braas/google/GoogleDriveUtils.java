@@ -31,19 +31,18 @@ public class GoogleDriveUtils {
      * If modifying these scopes, delete your previously saved tokens/ folder.
      */
     private static final List<String> SCOPES = Collections.singletonList(DriveScopes.DRIVE);
-    private static final String CREDENTIALS_FILE_PATH = "/client_secret_827513863287-pgc2u5juaet4ss8ojk6d6pt5i3jo7lik.apps.googleusercontent.com.json";
 
     /**
      * Creates an authorized Credential object.
      *
      * @param HTTP_TRANSPORT The network HTTP Transport.
+     * @param credentials    Stream that contains a json object with user credentials info
      * @return An authorized Credential object.
-     * @throws IOException If the credentials.json file cannot be found.
+     * @throws IOException If the credentials stream is invalid.
      */
-    private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
+    private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT, InputStream credentials) throws IOException {
         // Load client secrets.
-        InputStream in = GoogleDriveUtils.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
-        GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
+        GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(credentials));
 
         // Build flow and trigger user authorization request.
         GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
@@ -55,15 +54,28 @@ public class GoogleDriveUtils {
         return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
     }
 
-    public static ByteArrayOutputStream getSpreadsheet(String fileId) throws GeneralSecurityException, IOException {
-        return getFile(fileId, GoogleDocumentsMime.Types.SPREADSHEET.value());
+    /**
+     * @param fileId      Identifier of the file to retrieve
+     * @param credentials Stream that contains a json object with user credentials info
+     * @return A stream with the requested file
+     * @throws GeneralSecurityException If there is any security issue trying tio use the provided credentials
+     * @throws IOException              If the credentials stream is invalid.
+     */
+    public static ByteArrayOutputStream getSpreadsheet(String fileId, InputStream credentials) throws GeneralSecurityException, IOException {
+        return getFile(fileId, credentials);
     }
 
-
-    public static ByteArrayOutputStream getFile(String fileId, String mime) throws GeneralSecurityException, IOException {
+    /**
+     * @param fileId      Identifier of the file to retrieve
+     * @param credentials Stream that contains a json object with user credentials info
+     * @return A stream with the requested file
+     * @throws GeneralSecurityException If there is any security issue trying tio use the provided credentials
+     * @throws IOException              If the credentials stream is invalid.
+     */
+    public static ByteArrayOutputStream getFile(String fileId, InputStream credentials) throws GeneralSecurityException, IOException {
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+        Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT, credentials))
                 .setApplicationName(APPLICATION_NAME)
                 .build();
         service.files().get(fileId).executeMediaAndDownloadTo(outputStream);

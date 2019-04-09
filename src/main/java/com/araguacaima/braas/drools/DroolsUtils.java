@@ -1,7 +1,7 @@
 package com.araguacaima.braas.drools;
 
 import com.araguacaima.braas.drools.factory.KieSessionImpl;
-import com.araguacaima.braas.drools.factory.UrlResourceStrategyFactory;
+import com.araguacaima.braas.drools.factory.ResourceStrategyFactory;
 import com.araguacaima.braas.drools.strategy.ResourceStrategy;
 import org.drools.core.io.impl.UrlResource;
 import org.kie.api.KieServices;
@@ -66,7 +66,7 @@ public class DroolsUtils {
     @SuppressWarnings("ConstantConditions")
     private void init() {
         try {
-            ResourceStrategy urlResourceStrategy = UrlResourceStrategyFactory.getUrlResourceStrategy(droolsConfig);
+            ResourceStrategy urlResourceStrategy = ResourceStrategyFactory.getUrlResourceStrategy(droolsConfig);
             String url = urlResourceStrategy.buildUrl();
             if (url != null) {
                 droolsConfig.setUrl(url);

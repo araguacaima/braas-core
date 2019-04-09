@@ -7,13 +7,12 @@ import com.araguacaima.braas.google.GoogleDriveUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.OutputStream;
 import java.net.URL;
 
 /**
  * Created by Alejandro on 12/01/2015.
  */
-public class UrlResourceStrategyFactory {
+public class ResourceStrategyFactory {
 
     public static ResourceStrategy getUrlResourceStrategy(DroolsConfig droolsConfig) {
         String protocol;
@@ -24,7 +23,7 @@ public class UrlResourceStrategyFactory {
         String artifactid;
         String version;
         String mavenLocalRepositoryPath;
-        String absoluteLocalPath;
+        String rulesPath;
         String decisionTablePath;
         String artifactName;
 
@@ -56,9 +55,9 @@ public class UrlResourceStrategyFactory {
                         artifactid,
                         version);
             case ABSOLUTE_DRL_PATH:
-                absoluteLocalPath = droolsConfig.getAbsoluteLocalPath();
+                rulesPath = droolsConfig.getRulesPath();
                 artifactName = droolsConfig.getArtifactName();
-                return new AbsolutePathDrlResourceStrategy(absoluteLocalPath, artifactName);
+                return new AbsolutePathDrlResourceStrategy(rulesPath, artifactName);
             case ABSOLUTE_DECISION_TABLE_PATH:
                 decisionTablePath = droolsConfig.getDecisionTablePath();
                 String file1;
@@ -66,7 +65,7 @@ public class UrlResourceStrategyFactory {
                     if (new File(decisionTablePath).exists()) {
                         file1 = decisionTablePath;
                     } else {
-                        URL url = UrlResourceStrategyFactory.class.getResource(decisionTablePath);
+                        URL url = ResourceStrategyFactory.class.getResource(decisionTablePath);
                         file1 = url.getFile();
                     }
                     return new AbsolutePathDecisionTableResourceStrategy(new File(file1));
@@ -75,9 +74,9 @@ public class UrlResourceStrategyFactory {
                 }
                 return null;
             case GOOGLE_DRIVE_DECISION_TABLE_PATH:
-                absoluteLocalPath = droolsConfig.getAbsoluteLocalPath();
+                rulesPath = droolsConfig.getRulesPath();
                 try {
-                    ByteArrayOutputStream excelStream = GoogleDriveUtils.getSpreadsheet(absoluteLocalPath);
+                    ByteArrayOutputStream excelStream = GoogleDriveUtils.getSpreadsheet(rulesPath, droolsConfig.getCredentialsStream());
                     return new StreamDecisionTableResourceStrategy(excelStream);
                 } catch (Throwable t) {
                     t.printStackTrace();

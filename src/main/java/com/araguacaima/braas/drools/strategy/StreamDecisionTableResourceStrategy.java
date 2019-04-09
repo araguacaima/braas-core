@@ -8,7 +8,7 @@ import java.io.OutputStream;
  */
 public class StreamDecisionTableResourceStrategy implements ResourceStrategy {
 
-    ByteArrayOutputStream excelStream;
+    private ByteArrayOutputStream excelStream;
 
     public StreamDecisionTableResourceStrategy(ByteArrayOutputStream excelStream) {
         this.excelStream = excelStream;

@@ -40,3 +40,6 @@ bin
 build/
 lib-src/
 target/
+
+
+src/main/resources/credentials.json

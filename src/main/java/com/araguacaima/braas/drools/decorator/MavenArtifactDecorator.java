@@ -43,8 +43,8 @@ public class MavenArtifactDecorator {
         return "/" + artifactId + "-" + version + ".jar";
     }
 
-    public static String decorateAbsolutePath(String absoluteLocalPath, String artifactName) {
-        final String s = absoluteLocalPath.replaceAll("\\\\", "/");
+    public static String decorateAbsolutePath(String rulesPath, String artifactName) {
+        final String s = rulesPath.replaceAll("\\\\", "/");
         return "file://" + (s.startsWith("/") ? "" : "/") + s + "/" + artifactName;
     }
 

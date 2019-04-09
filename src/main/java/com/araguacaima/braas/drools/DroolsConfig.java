@@ -4,7 +4,9 @@ import com.araguacaima.commons.utils.FileUtils;
 import com.araguacaima.commons.utils.PropertiesHandlerUtils;
 
 import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.Properties;
 
 /**
@@ -13,7 +15,8 @@ import java.util.Properties;
 
 public class DroolsConfig {
 
-    private String absoluteLocalPath;
+    private String rulesPath;
+    private String credentialsPath;
     private String appName;
     private String artifactName;
     private String artifactid;
@@ -29,6 +32,7 @@ public class DroolsConfig {
     private String server;
     private String url;
     private ByteArrayOutputStream excelStream;
+    private InputStream credentialsStream;
     private String urlResourceStrategy;
     private boolean verbose;
     private String version;
@@ -36,7 +40,8 @@ public class DroolsConfig {
     public DroolsConfig(String configFile) {
         PropertiesHandlerUtils propertiesHandlerUtils = new PropertiesHandlerUtils(null, new FileUtils(), null);
         Properties bundle = propertiesHandlerUtils.getHandler(configFile).getProperties();
-        this.build("absoluteLocalPath", bundle.getProperty("absoluteLocalPath"))
+        this.build("rulesPath", bundle.getProperty("rulesPath"))
+                .build("credentialsPath", bundle.getProperty("credentialsPath"))
                 .build("drools.workbench.app.name", bundle.getProperty("drools.workbench.app.name"))
                 .build("artifactName", bundle.getProperty("artifactName"))
                 .build("drools.maven.artifactid", bundle.getProperty("drools.maven.artifactid"))
@@ -81,8 +86,10 @@ public class DroolsConfig {
             this.setVersion(value);
         } else if ("drools.engine.verbose".equals(key)) {
             this.setVerbose(Boolean.valueOf(value));
-        } else if ("absoluteLocalPath".equals(key)) {
-            this.setAbsoluteLocalPath(value);
+        } else if ("rulesPath".equals(key)) {
+            this.setRulesPath(value);
+        } else if ("credentialsPath".equals(key)) {
+            this.setCredentialsPath(value);
         } else if ("artifactName".equals(key)) {
             this.setArtifactName(value);
         } else if ("scannerPeriod".equals(key)) {
@@ -95,12 +102,25 @@ public class DroolsConfig {
         return this;
     }
 
-    public String getAbsoluteLocalPath() {
-        return absoluteLocalPath;
+    public String getRulesPath() {
+        return rulesPath;
     }
 
-    public void setAbsoluteLocalPath(String absoluteLocalPath) {
-        this.absoluteLocalPath = absoluteLocalPath;
+    public void setRulesPath(String rulesPath) {
+        this.rulesPath = rulesPath;
+    }
+
+    public String getCredentialsPath() {
+        return credentialsPath;
+    }
+
+    public void setCredentialsPath(String credentialsPath) {
+        this.credentialsPath = credentialsPath;
+        try {
+            credentialsStream = new FileInputStream(new File(this.credentialsPath));
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
     }
 
     public String getAppName() {
@@ -221,6 +241,14 @@ public class DroolsConfig {
 
     public void setExcelStream(ByteArrayOutputStream excelStream) {
         this.excelStream = excelStream;
+    }
+
+    public InputStream getCredentialsStream() {
+        return credentialsStream;
+    }
+
+    public void setCredentialsStream(InputStream credentialsStream) {
+        this.credentialsStream = credentialsStream;
     }
 
     public String getUrlResourceStrategy() {
