@@ -15,6 +15,7 @@ import org.kie.api.runtime.KieContainer;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,7 +51,7 @@ public class DroolsUtils {
     }
 
     public void buildDroolsUtils(String key, String value)
-            throws IOException {
+            throws IOException, URISyntaxException {
         DroolsConfig droolsConfig = this.getDroolsConfig();
         droolsConfig.build(key, value);
         this.setDroolsConfig(droolsConfig);
