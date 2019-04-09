@@ -18,8 +18,8 @@ import java.util.Map;
  * Created by Alejandro on 01/12/2014.
  */
 public class KieStatelessDrlSessionImpl implements KieSessionImpl {
-    private final StatelessKnowledgeSessionImpl statelessSession;
     private static final ReflectionUtils reflectionUtils = new ReflectionUtils(null);
+    private final StatelessKnowledgeSessionImpl statelessSession;
 
     public KieStatelessDrlSessionImpl(StatelessKieSession statelessKieSession,
                                       boolean verbose,

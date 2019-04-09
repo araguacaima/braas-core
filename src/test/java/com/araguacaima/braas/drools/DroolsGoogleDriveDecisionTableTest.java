@@ -9,10 +9,13 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Predicate;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileNotFoundException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -20,8 +23,14 @@ import java.util.Collection;
 import java.util.Locale;
 
 @SuppressWarnings("unchecked")
+@Ignore
 public class DroolsGoogleDriveDecisionTableTest {
 
+    private static final String PERSON_FIRST_NAME_CANNOT_BE_NULL = "Person's first name cannot be null";
+    private static final String PERSON_FIRST_NAME_CANNOT_BE_EMPTY = "Person's first name cannot be empty";
+    private static final String PERSON_EMAIL_CANNOT_BE_NULL = "Person's email cannot be null";
+    private static final String PERSON_EMAIL_CANNOT_BE_EMPTY = "Person's email cannot be empty";
+    private static final String PERSON_EMAIL_IS_INVALID = "Person's email is not valid";
     private static Logger log = LoggerFactory.getLogger(DroolsGoogleDriveDecisionTableTest.class);
     private JsonUtils jsonUtils;
     private Locale locale = Locale.ENGLISH;
@@ -32,31 +41,21 @@ public class DroolsGoogleDriveDecisionTableTest {
         String localeLanguage = locale.getLanguage();
         return localeLanguage.equals(language);
     };
-    private static final String PERSON_FIRST_NAME_CANNOT_BE_NULL = "Person's first name cannot be null";
-    private static final String PERSON_FIRST_NAME_CANNOT_BE_EMPTY = "Person's first name cannot be empty";
-    private static final String PERSON_EMAIL_CANNOT_BE_NULL = "Person's email cannot be null";
-    private static final String PERSON_EMAIL_CANNOT_BE_EMPTY = "Person's email cannot be empty";
-    private static final String PERSON_EMAIL_IS_INVALID = "Person's email is not valid";
     private DroolsUtils droolsUtils = null;
     private Fairy fairy;
 
     @SuppressWarnings("ConstantConditions")
     @Before
-    public void init() {
-        try {
-            URL resource = DroolsGoogleDriveDecisionTableTest.class.getClassLoader().getResource("./drools-google-drive-decision-table.properties");
-            String fullconfigFile = resource.toURI().getPath();
-            if (OSValidator.isWindows() && fullconfigFile.startsWith("/")) {
-                fullconfigFile = fullconfigFile.substring(1);
-            }
-            DroolsConfig droolsConfig = new DroolsConfig(fullconfigFile);
-            droolsUtils = new DroolsUtils(droolsConfig);
-            jsonUtils = new JsonUtils();
-            fairy = Fairy.create();
-        } catch (NullPointerException | URISyntaxException e) {
-            e.printStackTrace();
+    public void init() throws FileNotFoundException, MalformedURLException, URISyntaxException {
+        URL resource = DroolsGoogleDriveDecisionTableTest.class.getClassLoader().getResource("./drools-google-drive-decision-table.properties");
+        String fullconfigFile = resource.toURI().getPath();
+        if (OSValidator.isWindows() && fullconfigFile.startsWith("/")) {
+            fullconfigFile = fullconfigFile.substring(1);
         }
-
+        DroolsConfig droolsConfig = new DroolsConfig(fullconfigFile);
+        droolsUtils = new DroolsUtils(droolsConfig);
+        jsonUtils = new JsonUtils();
+        fairy = Fairy.create();
     }
 
     @Test

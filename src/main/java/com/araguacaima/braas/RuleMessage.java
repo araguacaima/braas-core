@@ -1,7 +1,5 @@
 package com.araguacaima.braas;
 
-import java.util.*;
-
 /**
  * Created by Alejandro on 08/12/2014.
  */
@@ -75,6 +73,11 @@ public abstract class RuleMessage implements IMessage {
     }
 
     @Override
+    public void setRuleName(String ruleName) {
+        this.ruleName = ruleName;
+    }
+
+    @Override
     public String getComment() {
         return comment;
     }
@@ -82,11 +85,6 @@ public abstract class RuleMessage implements IMessage {
     @Override
     public void setComment(String comment) {
         this.comment = comment;
-    }
-
-    @Override
-    public void setRuleName(String ruleName) {
-        this.ruleName = ruleName;
     }
 
     @Override

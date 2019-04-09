@@ -21,10 +21,14 @@ import java.util.*;
 @SuppressWarnings("unchecked")
 public class KieSessionSpreadsheetTest {
 
-    private static Logger log = LoggerFactory.getLogger(KieSessionSpreadsheetTest.class);
     private static final boolean VERBOSE = false;
+    private static final String PERSON_FIRST_NAME_CANNOT_BE_NULL = "Person's first name cannot be null";
+    private static final String PERSON_FIRST_NAME_CANNOT_BE_EMPTY = "Person's first name cannot be empty";
+    private static final String PERSON_EMAIL_CANNOT_BE_NULL = "Person's email cannot be null";
+    private static final String PERSON_EMAIL_CANNOT_BE_EMPTY = "Person's email cannot be empty";
+    private static final String PERSON_EMAIL_IS_INVALID = "Person's email is not valid";
+    private static Logger log = LoggerFactory.getLogger(KieSessionSpreadsheetTest.class);
     private KieStatelessDrlSessionImpl ksession;
-
     private Collection<Object> facts = new ArrayList<>();
     private JsonUtils jsonUtils;
     private Locale locale = Locale.ENGLISH;
@@ -35,16 +39,10 @@ public class KieSessionSpreadsheetTest {
         String localeLanguage = locale.getLanguage();
         return localeLanguage.equals(language);
     };
-    private static final String PERSON_FIRST_NAME_CANNOT_BE_NULL = "Person's first name cannot be null";
-    private static final String PERSON_FIRST_NAME_CANNOT_BE_EMPTY = "Person's first name cannot be empty";
-    private static final String PERSON_EMAIL_CANNOT_BE_NULL = "Person's email cannot be null";
-    private static final String PERSON_EMAIL_CANNOT_BE_EMPTY = "Person's email cannot be empty";
-    private static final String PERSON_EMAIL_IS_INVALID = "Person's email is not valid";
-
     private Fairy fairy;
 
     @Before
-    public void init() throws Exception {
+    public void init()  {
         jsonUtils = new JsonUtils();
         String path = "rules.xlsx";
         InternalKnowledgeBase knowledgeBase = KieSessionFactory.createKnowledgeBaseFromSpreadsheet(path);

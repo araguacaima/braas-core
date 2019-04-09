@@ -2,11 +2,13 @@ package com.araguacaima.braas.drools;
 
 import com.araguacaima.commons.utils.FileUtils;
 import com.araguacaima.commons.utils.PropertiesHandlerUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Properties;
 
 /**
@@ -14,6 +16,8 @@ import java.util.Properties;
  */
 
 public class DroolsConfig {
+
+    private static final Logger log = LoggerFactory.getLogger(DroolsConfig.class);
 
     private String rulesPath;
     private String credentialsPath;
@@ -37,7 +41,7 @@ public class DroolsConfig {
     private boolean verbose;
     private String version;
 
-    public DroolsConfig(String configFile) {
+    public DroolsConfig(String configFile) throws FileNotFoundException, URISyntaxException, MalformedURLException {
         PropertiesHandlerUtils propertiesHandlerUtils = new PropertiesHandlerUtils(null, new FileUtils(), null);
         Properties bundle = propertiesHandlerUtils.getHandler(configFile).getProperties();
         this.build("rulesPath", bundle.getProperty("rulesPath"))
@@ -60,7 +64,7 @@ public class DroolsConfig {
                 .build("drools.maven.version", bundle.getProperty("drools.maven.version"));
     }
 
-    public DroolsConfig build(String key, String value) {
+    public DroolsConfig build(String key, String value) throws FileNotFoundException, MalformedURLException, URISyntaxException {
 
         if ("urlResourceStrategy".equals(key)) {
             this.setUrlResourceStrategy(value);
@@ -114,12 +118,38 @@ public class DroolsConfig {
         return credentialsPath;
     }
 
-    public void setCredentialsPath(String credentialsPath) {
+    public void setCredentialsPath(String credentialsPath) throws FileNotFoundException, URISyntaxException, MalformedURLException {
         this.credentialsPath = credentialsPath;
-        try {
-            credentialsStream = new FileInputStream(new File(this.credentialsPath));
-        } catch (Throwable t) {
-            t.printStackTrace();
+        if (this.credentialsPath != null) {
+            try {
+                // First try as an absolute file path
+                credentialsStream = new FileInputStream(new File(this.credentialsPath));
+            } catch (Throwable t1) {
+                // If absolute file path is not valid try as relative (to the classloader)
+                log.info("credentialsPath of '" + this.credentialsPath + "' is not a valid absolute path. Attempting as a relative one");
+                try {
+                    URL resource = DroolsConfig.class.getClassLoader().getResource(this.credentialsPath);
+                    String credentialsPath_ = resource.toURI().getPath();
+                    if (OSValidator.isWindows() && credentialsPath_.startsWith("/")) {
+                        credentialsPath_ = credentialsPath_.substring(1);
+                        credentialsStream = new FileInputStream(new File(credentialsPath_));
+                    }
+                } catch (Throwable t2) {
+                    // If relative file path fails try as URL
+                    log.info("credentialsPath of '" + this.credentialsPath + "' is not a valid relative path (to the classloader). Attempting as an URL");
+                    try {
+                        URL resource = new URL(this.credentialsPath);
+                        String credentialsPath_ = resource.toURI().getPath();
+                        if (OSValidator.isWindows() && credentialsPath_.startsWith("/")) {
+                            credentialsPath_ = credentialsPath_.substring(1);
+                            credentialsStream = new FileInputStream(new File(credentialsPath_));
+                        }
+                    } catch (Throwable t3) {
+                        log.error("There is no a valid credential path. No credential available in order to use Google Drive Rules Strategy");
+                        throw t3;
+                    }
+                }
+            }
         }
     }
 

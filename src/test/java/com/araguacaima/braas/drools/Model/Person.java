@@ -3,8 +3,6 @@ package com.araguacaima.braas.drools.Model;
 import com.araguacaima.braas.drools.Commons;
 import io.codearte.jfairy.producer.company.Company;
 import io.codearte.jfairy.producer.person.Address;
-import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.beanutils.BeanUtilsBean;
 import org.joda.time.DateTime;
 
 import java.lang.reflect.InvocationTargetException;

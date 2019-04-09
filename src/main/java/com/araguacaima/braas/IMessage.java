@@ -1,11 +1,5 @@
 package com.araguacaima.braas;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import java.beans.Transient;
-import java.util.Map;
-import java.util.Set;
-
 public interface IMessage {
 
     MessageType getType();
@@ -28,11 +22,11 @@ public interface IMessage {
 
     String getRuleName();
 
+    void setRuleName(String ruleName);
+
     String getComment();
 
     void setComment(String comment);
-
-    void setRuleName(String ruleName);
 
     String getExpectedValue();
 

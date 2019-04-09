@@ -3,7 +3,6 @@ package com.araguacaima.braas.drools.strategy;
 import com.araguacaima.braas.drools.decorator.DroolsWorkbenchDecorator;
 
 import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
 
 /**
  * Created by Alejandro on 12/01/2015.
