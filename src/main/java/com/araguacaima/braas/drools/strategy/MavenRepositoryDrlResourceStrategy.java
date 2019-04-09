@@ -2,19 +2,21 @@ package com.araguacaima.braas.drools.strategy;
 
 import com.araguacaima.braas.drools.decorator.MavenArtifactDecorator;
 
+import java.io.ByteArrayOutputStream;
+
 /**
  * Created by Alejandro on 12/01/2015.
  */
-public class MavenRepositoryDrlUrlResourceStrategy implements UrlResourceStrategy {
+public class MavenRepositoryDrlResourceStrategy implements ResourceStrategy {
     private String mavenLocalRepositoryPath;
     private String groupid;
     private String artifactid;
     private String version;
 
-    public MavenRepositoryDrlUrlResourceStrategy(String mavenLocalRepositoryPath,
-                                                 String groupid,
-                                                 String artifactid,
-                                                 String version) {
+    public MavenRepositoryDrlResourceStrategy(String mavenLocalRepositoryPath,
+                                              String groupid,
+                                              String artifactid,
+                                              String version) {
 
         this.mavenLocalRepositoryPath = mavenLocalRepositoryPath;
         this.groupid = groupid;
@@ -28,5 +30,10 @@ public class MavenRepositoryDrlUrlResourceStrategy implements UrlResourceStrateg
                 groupid,
                 artifactid,
                 version);
+    }
+
+    @Override
+    public ByteArrayOutputStream getStream() {
+        return null;
     }
 }

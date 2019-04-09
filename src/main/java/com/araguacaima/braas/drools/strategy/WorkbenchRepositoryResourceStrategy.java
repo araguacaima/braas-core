@@ -2,10 +2,13 @@ package com.araguacaima.braas.drools.strategy;
 
 import com.araguacaima.braas.drools.decorator.DroolsWorkbenchDecorator;
 
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
+
 /**
  * Created by Alejandro on 12/01/2015.
  */
-public class WorkbenchRepositoryUrlResourceStrategy implements UrlResourceStrategy {
+public class WorkbenchRepositoryResourceStrategy implements ResourceStrategy {
     private String protocol;
     private String server;
     private String port;
@@ -14,13 +17,13 @@ public class WorkbenchRepositoryUrlResourceStrategy implements UrlResourceStrate
     private String artifactid;
     private String version;
 
-    public WorkbenchRepositoryUrlResourceStrategy(String protocol,
-                                                  String server,
-                                                  String port,
-                                                  String appName,
-                                                  String groupid,
-                                                  String artifactid,
-                                                  String version) {
+    public WorkbenchRepositoryResourceStrategy(String protocol,
+                                               String server,
+                                               String port,
+                                               String appName,
+                                               String groupid,
+                                               String artifactid,
+                                               String version) {
         this.protocol = protocol;
         this.server = server;
         this.port = port;
@@ -33,5 +36,10 @@ public class WorkbenchRepositoryUrlResourceStrategy implements UrlResourceStrate
     @Override
     public String buildUrl() {
         return DroolsWorkbenchDecorator.decorate(protocol, server, port, appName, groupid, artifactid, version);
+    }
+
+    @Override
+    public ByteArrayOutputStream getStream() {
+        return null;
     }
 }

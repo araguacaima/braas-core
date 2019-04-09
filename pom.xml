@@ -53,7 +53,6 @@
         <maven.compiler.version>3.0</maven.compiler.version>
         <maven.assembly.version>2.4</maven.assembly.version>
         <maven.surefire.version>2.13</maven.surefire.version>
-        <maven.skipTests>true</maven.skipTests>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <minimum-maven-version>3.1</minimum-maven-version>
@@ -67,7 +66,6 @@
 
         <org.codehaus.mojo-aspectj-maven-plugin>1.8</org.codehaus.mojo-aspectj-maven-plugin>
         <org.apache.maven.plugins-maven-jar-plugin>3.0.2</org.apache.maven.plugins-maven-jar-plugin>
-        <maven.skip.tests>true</maven.skip.tests>
 
         <!-- maven-compiler-plugins -->
         <org.apache.maven.plugins-maven-compiler-plugin>3.8.0</org.apache.maven.plugins-maven-compiler-plugin>
@@ -90,6 +88,10 @@
         <io.codearte.jfairy-jfairy>0.5.9</io.codearte.jfairy-jfairy>
         <slf4j.version>1.7.26</slf4j.version>
         <logback.version>1.2.3</logback.version>
+        <com.google.api-client-google-api-client>1.28.0</com.google.api-client-google-api-client>
+        <com.google.oauth-client-google-oauth-client-jetty>1.28.0</com.google.oauth-client-google-oauth-client-jetty>
+        <com.google.apis-google-api-services-sheets>v4-rev571-1.25.0</com.google.apis-google-api-services-sheets>
+        <com.google.apis-google-api-services-drive>v3-rev157-1.25.0</com.google.apis-google-api-services-drive>
 
     </properties>
 
@@ -135,6 +137,28 @@
             <artifactId>commons-collections4</artifactId>
             <version>${org.apache.commons-commons-collections4}</version>
             <scope>compile</scope>
+        </dependency>
+
+        <!-- Google -->
+        <dependency>
+            <groupId>com.google.api-client</groupId>
+            <artifactId>google-api-client</artifactId>
+            <version>${com.google.api-client-google-api-client}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.oauth-client</groupId>
+            <artifactId>google-oauth-client-jetty</artifactId>
+            <version>${com.google.oauth-client-google-oauth-client-jetty}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-drive</artifactId>
+            <version>${com.google.apis-google-api-services-drive}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-sheets</artifactId>
+            <version>${com.google.apis-google-api-services-sheets}</version>
         </dependency>
 
         <!-- Testing -->

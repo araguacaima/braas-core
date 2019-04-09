@@ -7,7 +7,6 @@ import com.araguacaima.commons.utils.JsonUtils;
 import io.codearte.jfairy.Fairy;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Predicate;
-import org.apache.commons.lang3.SystemUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,9 +20,9 @@ import java.util.Collection;
 import java.util.Locale;
 
 @SuppressWarnings("unchecked")
-public class DroolsUtilsTest {
+public class DroolsGoogleDriveDecisionTableTest {
 
-    private static Logger log = LoggerFactory.getLogger(DroolsUtilsTest.class);
+    private static Logger log = LoggerFactory.getLogger(DroolsGoogleDriveDecisionTableTest.class);
     private JsonUtils jsonUtils;
     private Locale locale = Locale.ENGLISH;
     private Predicate predicateMessage = object -> RuleMessage.class.isAssignableFrom(object.getClass());
@@ -45,7 +44,7 @@ public class DroolsUtilsTest {
     @Before
     public void init() {
         try {
-            URL resource = DroolsUtilsTest.class.getClassLoader().getResource("./drools.properties");
+            URL resource = DroolsGoogleDriveDecisionTableTest.class.getClassLoader().getResource("./drools-google-drive-decision-table.properties");
             String fullconfigFile = resource.toURI().getPath();
             if (OSValidator.isWindows() && fullconfigFile.startsWith("/")) {
                 fullconfigFile = fullconfigFile.substring(1);

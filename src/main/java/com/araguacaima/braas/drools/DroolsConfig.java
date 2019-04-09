@@ -3,6 +3,8 @@ package com.araguacaima.braas.drools;
 import com.araguacaima.commons.utils.FileUtils;
 import com.araguacaima.commons.utils.PropertiesHandlerUtils;
 
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 import java.util.Properties;
 
 /**
@@ -26,6 +28,7 @@ public class DroolsConfig {
     private String scannerPeriod;
     private String server;
     private String url;
+    private ByteArrayOutputStream excelStream;
     private String urlResourceStrategy;
     private boolean verbose;
     private String version;
@@ -210,6 +213,14 @@ public class DroolsConfig {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public ByteArrayOutputStream getExcelStream() {
+        return excelStream;
+    }
+
+    public void setExcelStream(ByteArrayOutputStream excelStream) {
+        this.excelStream = excelStream;
     }
 
     public String getUrlResourceStrategy() {

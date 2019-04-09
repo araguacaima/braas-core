@@ -3,9 +3,11 @@ package com.araguacaima.braas.drools.factory;
 import com.araguacaima.braas.Constants;
 import com.araguacaima.braas.drools.DroolsConfig;
 import com.araguacaima.braas.drools.strategy.*;
+import com.araguacaima.braas.google.GoogleDriveUtils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URL;
 
 /**
@@ -13,7 +15,7 @@ import java.net.URL;
  */
 public class UrlResourceStrategyFactory {
 
-    public static UrlResourceStrategy getUrlResourceStrategy(DroolsConfig droolsConfig) {
+    public static ResourceStrategy getUrlResourceStrategy(DroolsConfig droolsConfig) {
         String protocol;
         String server;
         String port;
@@ -37,7 +39,7 @@ public class UrlResourceStrategyFactory {
                 groupid = droolsConfig.getGroupid();
                 artifactid = droolsConfig.getArtifactid();
                 version = droolsConfig.getVersion();
-                return new WorkbenchRepositoryUrlResourceStrategy(protocol,
+                return new WorkbenchRepositoryResourceStrategy(protocol,
                         server,
                         port,
                         appName,
@@ -49,14 +51,14 @@ public class UrlResourceStrategyFactory {
                 artifactid = droolsConfig.getArtifactid();
                 version = droolsConfig.getVersion();
                 mavenLocalRepositoryPath = droolsConfig.getMavenLocalRepositoryPath();
-                return new MavenRepositoryDrlUrlResourceStrategy(mavenLocalRepositoryPath,
+                return new MavenRepositoryDrlResourceStrategy(mavenLocalRepositoryPath,
                         groupid,
                         artifactid,
                         version);
             case ABSOLUTE_DRL_PATH:
                 absoluteLocalPath = droolsConfig.getAbsoluteLocalPath();
                 artifactName = droolsConfig.getArtifactName();
-                return new AbsolutePathDrlUrlResourceStrategy(absoluteLocalPath, artifactName);
+                return new AbsolutePathDrlResourceStrategy(absoluteLocalPath, artifactName);
             case ABSOLUTE_DECISION_TABLE_PATH:
                 decisionTablePath = droolsConfig.getDecisionTablePath();
                 String file1;
@@ -67,29 +69,20 @@ public class UrlResourceStrategyFactory {
                         URL url = UrlResourceStrategyFactory.class.getResource(decisionTablePath);
                         file1 = url.getFile();
                     }
-                    return new AbsolutePathDecisionTableUrlResourceStrategy(new File(file1));
+                    return new AbsolutePathDecisionTableResourceStrategy(new File(file1));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
                 return null;
             case GOOGLE_DRIVE_DECISION_TABLE_PATH:
-                decisionTablePath = droolsConfig.getDecisionTablePath();
-                String file2;
+                absoluteLocalPath = droolsConfig.getAbsoluteLocalPath();
                 try {
-                    URL url = UrlResourceStrategyFactory.class.getResource(decisionTablePath);
-                    file2 = url.getFile();
-                    return new AbsolutePathDecisionTableUrlResourceStrategy(new File(file2));
-                } catch (Exception ignored) {
-                    File file = new File(decisionTablePath);
-                    if (file.exists()) {
-                        try {
-                            return new AbsolutePathDecisionTableUrlResourceStrategy(file);
-                        } catch (IOException e1) {
-                            e1.printStackTrace();
-                        }
-                    }
+                    ByteArrayOutputStream excelStream = GoogleDriveUtils.getSpreadsheet(absoluteLocalPath);
+                    return new StreamDecisionTableResourceStrategy(excelStream);
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                    return null;
                 }
-                return null;
             default:
                 throw new IllegalArgumentException();
         }

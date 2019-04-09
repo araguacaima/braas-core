@@ -2,6 +2,7 @@ package com.araguacaima.braas.drools;
 
 import com.araguacaima.braas.drools.factory.KieSessionImpl;
 import com.araguacaima.braas.drools.factory.UrlResourceStrategyFactory;
+import com.araguacaima.braas.drools.strategy.ResourceStrategy;
 import org.drools.core.io.impl.UrlResource;
 import org.kie.api.KieServices;
 import org.kie.api.builder.KieModule;
@@ -11,9 +12,7 @@ import org.kie.api.io.KieResources;
 import org.kie.api.io.Resource;
 import org.kie.api.runtime.KieContainer;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,9 +32,7 @@ import java.util.Map;
 public class DroolsUtils {
 
     private DroolsConfig droolsConfig;
-    private Map<String, Object> globals = new HashMap<String, Object>();
-    private String url;
-
+    private Map<String, Object> globals = new HashMap<>();
 
     public DroolsUtils(DroolsConfig droolsConfig) {
         this.droolsConfig = droolsConfig;
@@ -69,8 +66,13 @@ public class DroolsUtils {
     @SuppressWarnings("ConstantConditions")
     private void init() {
         try {
-            this.url = UrlResourceStrategyFactory.getUrlResourceStrategy(droolsConfig).buildUrl();
-            droolsConfig.setUrl(this.url);
+            ResourceStrategy urlResourceStrategy = UrlResourceStrategyFactory.getUrlResourceStrategy(droolsConfig);
+            String url = urlResourceStrategy.buildUrl();
+            if (url != null) {
+                droolsConfig.setUrl(url);
+            } else {
+                droolsConfig.setExcelStream(urlResourceStrategy.getStream());
+            }
         } catch (Throwable t) {
             t.printStackTrace();
         }
@@ -111,9 +113,14 @@ public class DroolsUtils {
         KieServices ks = KieServices.Factory.get();
         KieRepository kr = ks.getRepository();
         KieResources resources = ks.getResources();
-        UrlResource urlResource = (UrlResource) resources.newUrlResource(url);
-
-        InputStream is = urlResource.getInputStream();
+        InputStream is;
+        String url = droolsConfig.getUrl();
+        if (url != null) {
+            UrlResource urlResource = (UrlResource) resources.newUrlResource(url);
+            is = urlResource.getInputStream();
+        } else {
+            is = new ByteArrayInputStream(droolsConfig.getExcelStream().toByteArray());
+        }
         final Resource resource = resources.newInputStreamResource(is);
         KieModule kModule = kr.addKieModule(resource);
 
