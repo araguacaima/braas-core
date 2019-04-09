@@ -12,6 +12,8 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -25,6 +27,7 @@ public class GoogleDriveUtils {
     private static final String APPLICATION_NAME = "BRaaS";
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final String TOKENS_DIRECTORY_PATH = "tokens";
+    private static final Logger log = LoggerFactory.getLogger(GoogleDriveUtils.class);
 
     /**
      * Global instance of the scopes required by this quickstart.
@@ -62,23 +65,29 @@ public class GoogleDriveUtils {
      * @throws IOException              If the credentials stream is invalid.
      */
     public static ByteArrayOutputStream getSpreadsheet(String fileId, InputStream credentials) throws GeneralSecurityException, IOException {
-        return getFile(fileId, credentials);
+        return getFile(fileId, GoogleDocumentsMime.Types.SPREADSHEET.value(), credentials);
     }
 
     /**
      * @param fileId      Identifier of the file to retrieve
+     * @param mime        The mime type for a Google Document, when it's not binary
      * @param credentials Stream that contains a json object with user credentials info
      * @return A stream with the requested file
      * @throws GeneralSecurityException If there is any security issue trying tio use the provided credentials
      * @throws IOException              If the credentials stream is invalid.
      */
-    public static ByteArrayOutputStream getFile(String fileId, InputStream credentials) throws GeneralSecurityException, IOException {
+    public static ByteArrayOutputStream getFile(String fileId, String mime, InputStream credentials) throws GeneralSecurityException, IOException {
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT, credentials))
                 .setApplicationName(APPLICATION_NAME)
                 .build();
-        service.files().get(fileId).executeMediaAndDownloadTo(outputStream);
+        try {
+            service.files().get(fileId).executeMediaAndDownloadTo(outputStream);
+        } catch (Throwable t) {
+            log.info("Error trying to retrieve file as binary. Trying as Google document instead");
+            service.files().export(fileId, mime).executeMediaAndDownloadTo(outputStream);
+        }
         return outputStream;
     }
 }
