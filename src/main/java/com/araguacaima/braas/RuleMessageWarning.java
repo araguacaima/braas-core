@@ -5,7 +5,7 @@ package com.araguacaima.braas;
  */
 public class RuleMessageWarning extends RuleMessage {
 
-    public static MessageType type = MessageType.WARNING;
+    public MessageType type = MessageType.WARNING;
 
     public RuleMessageWarning(String language, String ruleName, String comment, String expectedValue, String parent, String fieldName, Object object) {
         super(language, ruleName, comment, expectedValue, parent, fieldName, object);
