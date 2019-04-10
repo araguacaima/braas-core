@@ -60,7 +60,7 @@ public class DroolsConfig {
                 .build("scannerPeriod", bundle.getProperty("scannerPeriod"))
                 .build("drools.workbench.server.name", bundle.getProperty("drools.workbench.server.name"))
                 .build("urlResourceStrategy", bundle.getProperty("urlResourceStrategy"))
-                .build("drools.engine.verbose", bundle.getProperty("drools.engine.verbose"))
+                .build("drools.engine.verbosedrools.engine.verbose", bundle.getProperty("drools.engine.verbose"))
                 .build("drools.maven.version", bundle.getProperty("drools.maven.version"));
     }
 

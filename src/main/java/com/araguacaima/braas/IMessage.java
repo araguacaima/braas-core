@@ -1,5 +1,7 @@
 package com.araguacaima.braas;
 
+import java.util.Map;
+
 public interface IMessage {
 
     MessageType getType();
@@ -31,4 +33,8 @@ public interface IMessage {
     String getExpectedValue();
 
     void setExpectedValue(String expectedValue);
+
+    Map<String, String> getContext();
+
+    void setContext(Map<String, String> context);
 }

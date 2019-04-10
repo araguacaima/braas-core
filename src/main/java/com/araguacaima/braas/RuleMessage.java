@@ -1,5 +1,7 @@
 package com.araguacaima.braas;
 
+import java.util.Map;
+
 /**
  * Created by Alejandro on 08/12/2014.
  */
@@ -12,12 +14,18 @@ public abstract class RuleMessage implements IMessage {
     private String parent;
     private String fieldName;
     private Object object;
+    private Map<String, String> context;
 
     public RuleMessage() {
 
     }
 
+
     public RuleMessage(String language, String ruleName, String comment, String expectedValue, String parent, String fieldName, Object object) {
+        this(language, ruleName, comment, expectedValue, parent, fieldName, object, null);
+    }
+
+    public RuleMessage(String language, String ruleName, String comment, String expectedValue, String parent, String fieldName, Object object, Map<String, String> context) {
         this.language = language;
         this.ruleName = ruleName;
         this.comment = comment;
@@ -25,6 +33,7 @@ public abstract class RuleMessage implements IMessage {
         this.parent = parent;
         this.fieldName = fieldName;
         this.object = object;
+        this.context = context;
     }
 
     @Override
@@ -95,5 +104,13 @@ public abstract class RuleMessage implements IMessage {
     @Override
     public void setExpectedValue(String expectedValue) {
         this.expectedValue = expectedValue;
+    }
+
+    public Map<String, String> getContext() {
+        return context;
+    }
+
+    public void setContext(Map<String, String> context) {
+        this.context = context;
     }
 }
