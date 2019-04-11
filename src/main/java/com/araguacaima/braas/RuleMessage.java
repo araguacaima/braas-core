@@ -14,7 +14,7 @@ public abstract class RuleMessage implements IMessage {
     private String parent;
     private String fieldName;
     private Object object;
-    private Map<String, String> context;
+    private Map<String, Object> context;
 
     public RuleMessage() {
 
@@ -25,7 +25,7 @@ public abstract class RuleMessage implements IMessage {
         this(language, ruleName, comment, expectedValue, parent, fieldName, object, null);
     }
 
-    public RuleMessage(String language, String ruleName, String comment, String expectedValue, String parent, String fieldName, Object object, Map<String, String> context) {
+    public RuleMessage(String language, String ruleName, String comment, String expectedValue, String parent, String fieldName, Object object, Map<String, Object> context) {
         this.language = language;
         this.ruleName = ruleName;
         this.comment = comment;
@@ -106,11 +106,11 @@ public abstract class RuleMessage implements IMessage {
         this.expectedValue = expectedValue;
     }
 
-    public Map<String, String> getContext() {
+    public Map<String, Object> getContext() {
         return context;
     }
 
-    public void setContext(Map<String, String> context) {
+    public void setContext(Map<String, Object> context) {
         this.context = context;
     }
 }

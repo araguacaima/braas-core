@@ -34,7 +34,7 @@ public interface IMessage {
 
     void setExpectedValue(String expectedValue);
 
-    Map<String, String> getContext();
+    Map<String, Object> getContext();
 
-    void setContext(Map<String, String> context);
+    void setContext(Map<String, Object> context);
 }
