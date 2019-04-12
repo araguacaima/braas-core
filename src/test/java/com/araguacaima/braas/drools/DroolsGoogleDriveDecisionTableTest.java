@@ -3,6 +3,7 @@ package com.araguacaima.braas.drools;
 import com.araguacaima.braas.IMessage;
 import com.araguacaima.braas.RuleMessage;
 import com.araguacaima.braas.drools.Model.Person;
+import com.araguacaima.commons.utils.FileUtils;
 import com.araguacaima.commons.utils.JsonUtils;
 import io.codearte.jfairy.Fairy;
 import org.apache.commons.collections4.CollectionUtils;
@@ -15,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -46,9 +48,8 @@ public class DroolsGoogleDriveDecisionTableTest {
 
     @SuppressWarnings("ConstantConditions")
     @Before
-    public void init() throws FileNotFoundException, MalformedURLException, URISyntaxException {
-        URL resource = DroolsGoogleDriveDecisionTableTest.class.getClassLoader().getResource("./drools-google-drive-decision-table.properties");
-        String fullconfigFile = resource.toURI().getPath();
+    public void init() throws IOException, URISyntaxException {
+        String fullconfigFile = FileUtils.getFile("drools-google-drive-decision-table.properties").getCanonicalPath();
         if (OSValidator.isWindows() && fullconfigFile.startsWith("/")) {
             fullconfigFile = fullconfigFile.substring(1);
         }
