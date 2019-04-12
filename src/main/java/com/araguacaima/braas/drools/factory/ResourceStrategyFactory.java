@@ -76,7 +76,7 @@ public class ResourceStrategyFactory {
             case GOOGLE_DRIVE_DECISION_TABLE_PATH:
                 rulesPath = droolsConfig.getRulesPath();
                 try {
-                    ByteArrayOutputStream excelStream = GoogleDriveUtils.getSpreadsheet(rulesPath, droolsConfig.getCredentialsStream());
+                    ByteArrayOutputStream excelStream = GoogleDriveUtils.getSpreadsheet(rulesPath, droolsConfig.getCredentialsStream(), droolsConfig.getCredentialStrategy());
                     return new StreamDecisionTableResourceStrategy(excelStream);
                 } catch (Throwable t) {
                     t.printStackTrace();

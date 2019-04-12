@@ -92,6 +92,7 @@
         <com.google.oauth-client-google-oauth-client-jetty>1.28.0</com.google.oauth-client-google-oauth-client-jetty>
         <com.google.apis-google-api-services-sheets>v4-rev571-1.25.0</com.google.apis-google-api-services-sheets>
         <com.google.apis-google-api-services-drive>v3-rev157-1.25.0</com.google.apis-google-api-services-drive>
+        <com.google.oauth-client-google-oauth-client-servlet>1.23.0</com.google.oauth-client-google-oauth-client-servlet>
 
     </properties>
 
@@ -144,6 +145,11 @@
             <groupId>com.google.api-client</groupId>
             <artifactId>google-api-client</artifactId>
             <version>${com.google.api-client-google-api-client}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.oauth-client</groupId>
+            <artifactId>google-oauth-client-servlet</artifactId>
+            <version>${com.google.oauth-client-google-oauth-client-servlet}</version>
         </dependency>
         <dependency>
             <groupId>com.google.oauth-client</groupId>

@@ -50,8 +50,9 @@ public class Constants {
         DECISION_TABLE
     }
 
-    public enum GOOGLE_DRIVE_CREDENTIALS_STRATEGIES {
-        SERVER_TO_SERVER
+    public enum CREDENTIALS_ORIGIN_STRATEGIES {
+        SERVER,
+        LOCAL
     }
 
     public enum UrlParams {

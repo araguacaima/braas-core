@@ -41,6 +41,7 @@ public class DroolsConfig {
     private String urlResourceStrategy;
     private boolean verbose;
     private String version;
+    private String credentialStrategy;
 
     public DroolsConfig(String configFile) throws FileNotFoundException, URISyntaxException, MalformedURLException {
         PropertiesHandlerUtils propertiesHandlerUtils = new PropertiesHandlerUtils(null, new FileUtils(), null);
@@ -61,8 +62,9 @@ public class DroolsConfig {
                 .build("scannerPeriod", bundle.getProperty("scannerPeriod"))
                 .build("drools.workbench.server.name", bundle.getProperty("drools.workbench.server.name"))
                 .build("urlResourceStrategy", bundle.getProperty("urlResourceStrategy"))
-                .build("drools.engine.verbosedrools.engine.verbose", bundle.getProperty("drools.engine.verbose"))
-                .build("drools.maven.version", bundle.getProperty("drools.maven.version"));
+                .build("drools.engine.verbose", bundle.getProperty("drools.engine.verbose"))
+                .build("drools.maven.version", bundle.getProperty("drools.maven.version"))
+                .build("credentialStrategy", bundle.getProperty("credentialStrategy"));
     }
 
     public DroolsConfig build(String key, String value) throws FileNotFoundException, MalformedURLException, URISyntaxException {
@@ -103,6 +105,8 @@ public class DroolsConfig {
             this.setRulesRepositoryStrategy(value);
         } else if ("decision.table.path".equals(key)) {
             this.setDecisionTablePath(value);
+        } else if ("credentialStrategy".equals(key)) {
+            this.setCredentialStrategy(value);
         }
         return this;
     }
@@ -283,5 +287,13 @@ public class DroolsConfig {
 
     public void setVerbose(boolean verbose) {
         this.verbose = verbose;
+    }
+
+    public String getCredentialStrategy() {
+        return credentialStrategy;
+    }
+
+    public void setCredentialStrategy(String credentialStrategy) {
+        this.credentialStrategy = credentialStrategy;
     }
 }
