@@ -10,6 +10,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Properties;
+import java.util.ResourceBundle;
 
 /**
  * Created by Alejandro on 04/12/2014.
@@ -118,37 +119,14 @@ public class DroolsConfig {
         return credentialsPath;
     }
 
-    public void setCredentialsPath(String credentialsPath) throws FileNotFoundException, URISyntaxException, MalformedURLException {
+    public void setCredentialsPath(String credentialsPath) throws FileNotFoundException {
         this.credentialsPath = credentialsPath;
         if (this.credentialsPath != null) {
             try {
-                // First try as an absolute file path
-                credentialsStream = new FileInputStream(new File(this.credentialsPath));
+                credentialsStream = new FileInputStream(FileUtils.getFile(this.credentialsPath));
             } catch (Throwable t1) {
-                // If absolute file path is not valid try as relative (to the classloader)
-                log.info("credentialsPath of '" + this.credentialsPath + "' is not a valid absolute path. Attempting as a relative one");
-                try {
-                    URL resource = DroolsConfig.class.getClassLoader().getResource(this.credentialsPath);
-                    String credentialsPath_ = resource.toURI().getPath();
-                    if (OSValidator.isWindows() && credentialsPath_.startsWith("/")) {
-                        credentialsPath_ = credentialsPath_.substring(1);
-                        credentialsStream = new FileInputStream(new File(credentialsPath_));
-                    }
-                } catch (Throwable t2) {
-                    // If relative file path fails try as URL
-                    log.info("credentialsPath of '" + this.credentialsPath + "' is not a valid relative path (to the classloader). Attempting as an URL");
-                    try {
-                        URL resource = new URL(this.credentialsPath);
-                        String credentialsPath_ = resource.toURI().getPath();
-                        if (OSValidator.isWindows() && credentialsPath_.startsWith("/")) {
-                            credentialsPath_ = credentialsPath_.substring(1);
-                            credentialsStream = new FileInputStream(new File(credentialsPath_));
-                        }
-                    } catch (Throwable t3) {
-                        log.error("There is no a valid credential path. No credential available in order to use Google Drive Rules Strategy");
-                        throw t3;
-                    }
-                }
+                log.info("credentialsPath of '" + this.credentialsPath + "' not found!");
+                throw new FileNotFoundException("credentialsPath of '" + this.credentialsPath + "' not found!");
             }
         }
     }
