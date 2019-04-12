@@ -123,7 +123,9 @@ public class DroolsConfig {
         this.credentialsPath = credentialsPath;
         if (this.credentialsPath != null) {
             try {
-                credentialsStream = new FileInputStream(FileUtils.getFile(this.credentialsPath));
+                File file = FileUtils.getFile(this.credentialsPath);
+                log.info("credentials found in '" + file.getCanonicalPath() + "'!");
+                credentialsStream = new FileInputStream(file);
             } catch (Throwable t1) {
                 log.info("credentialsPath of '" + this.credentialsPath + "' not found!");
                 throw new FileNotFoundException("credentialsPath of '" + this.credentialsPath + "' not found!");
