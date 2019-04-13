@@ -95,12 +95,12 @@ public class GoogleDriveUtils {
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         Credential credential;
-        Constants.CREDENTIALS_ORIGIN_STRATEGIES credentialsStrategies = null;
+        Constants.CREDENTIALS_ORIGIN_STRATEGIES credentialsStrategy = null;
         try {
-            credentialsStrategies = Constants.CREDENTIALS_ORIGIN_STRATEGIES.SERVER.valueOf(googleDriveCredentialStrategy);
+            credentialsStrategy = Constants.CREDENTIALS_ORIGIN_STRATEGIES.valueOf(googleDriveCredentialStrategy);
         } catch (Throwable ignored) {
         }
-        if (credentialsStrategies != null) {
+        if (Constants.CREDENTIALS_ORIGIN_STRATEGIES.SERVER.equals(credentialsStrategy)) {
             credential = getCredentialsWeb(credentials);
         } else {
             credential = getCredentialsStandalone(HTTP_TRANSPORT, credentials);
@@ -110,7 +110,6 @@ public class GoogleDriveUtils {
                 .build();
         try {
             service.files().export(fileId, mime).executeMediaAndDownloadTo(outputStream);
-
         } catch (Throwable t) {
             log.info("Error trying to retrieve file as a Google document. Trying as binary instead");
             service.files().get(fileId).executeMediaAndDownloadTo(outputStream);
