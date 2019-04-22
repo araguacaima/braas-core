@@ -4,16 +4,16 @@ import com.araguacaima.braas.Constants;
 import com.araguacaima.braas.drools.factory.*;
 import org.drools.core.impl.InternalKnowledgeBase;
 import org.drools.core.impl.KnowledgeBaseFactory;
+import org.kie.api.internal.utils.ServiceRegistry;
 import org.kie.api.io.Resource;
 import org.kie.api.io.ResourceType;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.kie.api.runtime.StatelessKieSession;
-import org.kie.internal.builder.DecisionTableConfiguration;
-import org.kie.internal.builder.DecisionTableInputType;
-import org.kie.internal.builder.KnowledgeBuilder;
-import org.kie.internal.builder.KnowledgeBuilderFactory;
+import org.kie.internal.builder.*;
 import org.kie.internal.io.ResourceFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -24,6 +24,9 @@ import java.util.Map;
  * Created by Alejandro on 01/12/2014.
  */
 public class KieSessionFactory {
+
+    private static final Logger log = LoggerFactory.getLogger(KieSessionFactory.class);
+
     public static KieSessionImpl getSession(DroolsUtils droolsUtils)
             throws IOException {
         Map<String, Object> globals = droolsUtils.getGlobals();
@@ -64,13 +67,17 @@ public class KieSessionFactory {
                 try {
                     InternalKnowledgeBase knowledgeBase;
                     if (url != null) {
+                        log.info("Using url: " + url);
                         knowledgeBase = createKnowledgeBaseFromSpreadsheet(url);
                     } else {
-                        knowledgeBase = createKnowledgeBaseFromSpreadsheet(droolsConfig.getExcelStream());
+                        ByteArrayOutputStream excelStream = droolsConfig.getExcelStream();
+                        knowledgeBase = createKnowledgeBaseFromSpreadsheet(excelStream);
                     }
+                    log.info("knowledge base created!");
                     statelessSession = knowledgeBase.newStatelessKieSession();
                     return new KieStatelessDecisionTableSessionImpl(statelessSession, verbose, globals);
                 } catch (Exception e) {
+                    e.printStackTrace();
                     throw new RuntimeException(e);
                 }
             } else {
@@ -84,9 +91,11 @@ public class KieSessionFactory {
 
     private static InternalKnowledgeBase getInternalKnowledgeBase(DecisionTableConfiguration dtconf, KnowledgeBuilder knowledgeBuilder, Resource resource) {
         knowledgeBuilder.add(resource, ResourceType.DTABLE, dtconf);
+        log.info("Resource added to knowledge builder");
         if (knowledgeBuilder.hasErrors()) {
             throw new RuntimeException(knowledgeBuilder.getErrors().toString());
         }
+        log.info("Knowledge builder does not detect any error in rules definition");
         InternalKnowledgeBase knowledgeBase = KnowledgeBaseFactory.newKnowledgeBase();
         knowledgeBase.addPackages(knowledgeBuilder.getKnowledgePackages());
         return knowledgeBase;
@@ -96,7 +105,9 @@ public class KieSessionFactory {
         DecisionTableConfiguration dtconf = KnowledgeBuilderFactory.newDecisionTableConfiguration();
         dtconf.setInputType(DecisionTableInputType.XLS);
         KnowledgeBuilder knowledgeBuilder = KnowledgeBuilderFactory.newKnowledgeBuilder();
+        log.info("Retrieving resource...");
         Resource resource = ResourceFactory.newByteArrayResource(excelStream.toByteArray());
+        log.info("Resource retrieved");
         return getInternalKnowledgeBase(dtconf, knowledgeBuilder, resource);
     }
 

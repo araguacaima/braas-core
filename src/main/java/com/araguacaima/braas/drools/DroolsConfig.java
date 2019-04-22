@@ -8,9 +8,8 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.Properties;
-import java.util.ResourceBundle;
 
 /**
  * Created by Alejandro on 04/12/2014.
