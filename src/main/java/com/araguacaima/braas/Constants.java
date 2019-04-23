@@ -21,17 +21,6 @@ public class Constants {
         }
     };
 
-    public enum SOURCE_TYPE {
-        LOCAL,
-        GOOGLE_DRIVE,
-        REMOTE
-    }
-
-    public enum DROOLS_SESSION_TYPE {
-        STATELESS,
-        STATEFULL
-    }
-
     public enum URL_RESOURCE_STRATEGIES {
         WORKBENCH,
         MAVEN,
@@ -52,13 +41,8 @@ public class Constants {
 
     public enum CREDENTIALS_ORIGIN_STRATEGIES {
         SERVER,
-        LOCAL
-    }
-
-    public enum UrlParams {
-        PATH,
-        QUERY_PARAM,
-        PAYLOAD
+        LOCAL,
+        DB
     }
 
 }

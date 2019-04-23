@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
 import java.util.Properties;
 
 /**
@@ -20,7 +19,7 @@ public class DroolsConfig {
     private static final Logger log = LoggerFactory.getLogger(DroolsConfig.class);
 
     private String rulesPath;
-    private String credentialsPath;
+    private String credentialsPath = System.getProperty("user.home") + File.separator + ".braas" + File.separator + "credentials.json";
     private String appName;
     private String artifactName;
     private String artifactid;
@@ -42,9 +41,7 @@ public class DroolsConfig {
     private String version;
     private String credentialStrategy;
 
-    public DroolsConfig(String configFile) throws FileNotFoundException, URISyntaxException, MalformedURLException {
-        PropertiesHandlerUtils propertiesHandlerUtils = new PropertiesHandlerUtils(null, new FileUtils(), null);
-        Properties bundle = propertiesHandlerUtils.getHandler(configFile).getProperties();
+    public DroolsConfig(Properties bundle) throws FileNotFoundException, URISyntaxException, MalformedURLException {
         this.build("rulesPath", bundle.getProperty("rulesPath"))
                 .build("credentialsPath", bundle.getProperty("credentialsPath"))
                 .build("drools.workbench.app.name", bundle.getProperty("drools.workbench.app.name"))
@@ -64,6 +61,10 @@ public class DroolsConfig {
                 .build("drools.engine.verbose", bundle.getProperty("drools.engine.verbose"))
                 .build("drools.maven.version", bundle.getProperty("drools.maven.version"))
                 .build("credentialStrategy", bundle.getProperty("credentialStrategy"));
+    }
+
+    public DroolsConfig(String configFile) throws FileNotFoundException, URISyntaxException, MalformedURLException {
+        this(new PropertiesHandlerUtils(null, new FileUtils(), null).getHandler(configFile).getProperties());
     }
 
     public DroolsConfig build(String key, String value) throws FileNotFoundException, MalformedURLException, URISyntaxException {
@@ -126,7 +127,7 @@ public class DroolsConfig {
         this.credentialsPath = credentialsPath;
         if (this.credentialsPath != null) {
             try {
-                File file = FileUtils.getFile(this.credentialsPath);
+                File file = FileUtils.getFile("./" + this.credentialsPath);
                 log.info("credentials found in '" + file.getCanonicalPath() + "'!");
                 credentialsStream = new FileInputStream(file);
             } catch (Throwable t1) {

@@ -25,7 +25,7 @@ import java.util.Collection;
 import java.util.Locale;
 
 @SuppressWarnings("unchecked")
-//@Ignore
+@Ignore
 public class DroolsGoogleDriveDecisionTableTest {
 
     private static final String PERSON_FIRST_NAME_CANNOT_BE_NULL = "Person's first name cannot be null";
