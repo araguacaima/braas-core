@@ -2,6 +2,7 @@ package com.araguacaima.braas.drools;
 
 import com.araguacaima.commons.utils.FileUtils;
 import com.araguacaima.commons.utils.PropertiesHandlerUtils;
+import org.codehaus.plexus.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,7 +97,9 @@ public class DroolsConfig {
         } else if ("rulesPath".equals(key)) {
             this.setRulesPath(value);
         } else if ("credentialsPath".equals(key)) {
-            this.setCredentialsPath(value);
+            if (StringUtils.isNotBlank(value)) {
+                this.setCredentialsPath(value);
+            }
         } else if ("artifactName".equals(key)) {
             this.setArtifactName(value);
         } else if ("scannerPeriod".equals(key)) {

@@ -4,9 +4,11 @@ import com.araguacaima.braas.Constants;
 import com.araguacaima.braas.drools.DroolsConfig;
 import com.araguacaima.braas.drools.strategy.*;
 import com.araguacaima.braas.google.GoogleDriveUtils;
+import org.apache.commons.io.FileUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.net.URL;
 
 /**
@@ -76,7 +78,14 @@ public class ResourceStrategyFactory {
             case GOOGLE_DRIVE_DECISION_TABLE_PATH:
                 rulesPath = droolsConfig.getRulesPath();
                 try {
-                    ByteArrayOutputStream excelStream = GoogleDriveUtils.getSpreadsheet(rulesPath, droolsConfig.getCredentialsStream(), droolsConfig.getCredentialStrategy());
+                    InputStream credentialsStream = droolsConfig.getCredentialsStream();
+                    if (credentialsStream == null) {
+                        String path = droolsConfig.getCredentialsPath();
+                        if (path != null) {
+                            credentialsStream = FileUtils.openInputStream(new File(path));
+                        }
+                    }
+                    ByteArrayOutputStream excelStream = GoogleDriveUtils.getSpreadsheet(rulesPath, credentialsStream, droolsConfig.getCredentialStrategy());
                     return new StreamDecisionTableResourceStrategy(excelStream);
                 } catch (Throwable t) {
                     t.printStackTrace();
