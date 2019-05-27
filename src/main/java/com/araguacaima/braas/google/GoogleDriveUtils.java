@@ -85,7 +85,8 @@ public class GoogleDriveUtils {
             service.files().export(fileId, mime).executeMediaAndDownloadTo(outputStream);
         } catch (Throwable t) {
             log.info("Error trying to retrieve file as a Google document. Trying as binary instead");
-            service.files().get(fileId).executeMediaAndDownloadTo(outputStream);
+            Drive.Files.Get get = service.files().get(fileId);
+            get.executeMediaAndDownloadTo(outputStream);
         }
         return outputStream;
     }
