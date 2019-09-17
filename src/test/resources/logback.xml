@@ -9,7 +9,7 @@
         </encoder>
     </appender>
 
-    <logger name="com.araguacaima.braas.drools" level="DEBUG" additivity="false">
+    <logger name="com.araguacaima.braas.core.drools" level="DEBUG" additivity="false">
         <appender-ref ref="STDOUT"/>
     </logger>
 
