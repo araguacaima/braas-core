@@ -35,6 +35,7 @@ public class Account implements Serializable {
     private boolean firstAccess = true;
 
     private Set<Role> roles;
+    private boolean enabled;
 
     public Account() {
         this.id = UUID.randomUUID().toString();
@@ -129,5 +130,13 @@ public class Account implements Serializable {
                 .append(firstAccess)
                 .append(roles)
                 .toHashCode();
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 }
