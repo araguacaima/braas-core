@@ -25,17 +25,16 @@ public class Account implements Serializable {
 
     private String email;
 
-
     private String login;
 
-
     private String password;
-
 
     private boolean firstAccess = true;
 
     private Set<Role> roles;
     private boolean enabled;
+
+    private boolean enabled = false;
 
     public Account() {
         this.id = UUID.randomUUID().toString();
@@ -102,6 +101,14 @@ public class Account implements Serializable {
         this.firstAccess = firstAccess;
     }
 
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -117,6 +124,7 @@ public class Account implements Serializable {
                 .append(login, account.login)
                 .append(password, account.password)
                 .append(roles, account.roles)
+                .append(enabled, account.enabled)
                 .isEquals();
     }
 
@@ -129,6 +137,7 @@ public class Account implements Serializable {
                 .append(password)
                 .append(firstAccess)
                 .append(roles)
+                .append(enabled)
                 .toHashCode();
     }
 
