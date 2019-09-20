@@ -2,10 +2,11 @@ package com.araguacaima.braas.core.drools;
 
 import com.araguacaima.commons.utils.ClassLoaderUtils;
 import com.araguacaima.commons.utils.JsonUtils;
+import com.araguacaima.commons.utils.ReflectionUtils;
+import com.araguacaima.commons.utils.StringUtils;
 import javassist.*;
 import javassist.bytecode.DuplicateMemberException;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,18 +20,10 @@ public class RulesBaseToClasses {
 
     private static final Logger log = LoggerFactory.getLogger(RulesBaseToClasses.class);
 
-    private com.araguacaima.commons.utils.ReflectionUtils reflectionUtils = new com.araguacaima.commons.utils.ReflectionUtils(null);
-
-
+    private ReflectionUtils reflectionUtils = new ReflectionUtils(null);
     private ClassLoaderUtils classLoaderUtils = new ClassLoaderUtils(null);
-
-
-    private CommonUtils commonUtils = new CommonUtils();
-
-
+    private StringUtils stringUtils = new StringUtils(null, null);
     private List<CtClass> createdClasses = new ArrayList<>();
-
-
     private JsonUtils jsonUtils = new JsonUtils();
 
     private Map<String, File> files = new HashMap<>();
@@ -98,7 +91,7 @@ public class RulesBaseToClasses {
                 String superClassName = superClass.getName();
                 if (!Object.class.getName().equals(superClassName) && reflectionUtils.getSimpleJavaTypeOrNull(
                         superClassName,
-                        true) == null && !ReflectionUtils.isCollectionImplementation(superClassName)) {
+                        true) == null && !reflectionUtils.isCollectionImplementation(superClassName)) {
                     String superClassname = superClass.getSimpleName();
                     if (files.get(superClassname) == null) {
                         storeClass(superClass);
@@ -204,7 +197,7 @@ public class RulesBaseToClasses {
         }
         switch (dataTypes) {
             case ARRAY:
-                CtClass collectionType = createCollectionClass(commonUtils.pluralizeTypeName(field_));
+                CtClass collectionType = createCollectionClass(stringUtils.pluralizeTypeName(field_));
                 dataType = collectionType.getName();
                 pool.importPackage(Collection.class.getPackage().getName());
                 break;

@@ -32,7 +32,6 @@ public class Account implements Serializable {
     private boolean firstAccess = true;
 
     private Set<Role> roles;
-    private boolean enabled;
 
     private boolean enabled = false;
 
@@ -141,11 +140,4 @@ public class Account implements Serializable {
                 .toHashCode();
     }
 
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
 }

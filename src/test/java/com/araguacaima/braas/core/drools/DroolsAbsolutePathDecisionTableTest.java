@@ -2,7 +2,7 @@ package com.araguacaima.braas.core.drools;
 
 import com.araguacaima.braas.core.IMessage;
 import com.araguacaima.braas.core.RuleMessage;
-import com.araguacaima.braas.core.drools.Model.Person;
+import com.araguacaima.braas.core.drools.model.Person;
 import com.araguacaima.commons.utils.JsonUtils;
 import io.codearte.jfairy.Fairy;
 import org.apache.commons.collections4.CollectionUtils;
