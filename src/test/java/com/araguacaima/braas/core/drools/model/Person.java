@@ -1,4 +1,4 @@
-package com.araguacaima.braas.core.drools.Model;
+package com.araguacaima.braas.core.drools.model;
 
 import com.araguacaima.braas.core.drools.Commons;
 import io.codearte.jfairy.producer.company.Company;

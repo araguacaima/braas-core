@@ -1,4 +1,4 @@
-package com.araguacaima.braas.core.drools.Model;
+package com.araguacaima.braas.core.drools.model;
 
 import org.joda.time.DateTime;
 
