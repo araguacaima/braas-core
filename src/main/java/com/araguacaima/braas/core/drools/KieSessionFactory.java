@@ -2,8 +2,10 @@ package com.araguacaima.braas.core.drools;
 
 import com.araguacaima.braas.core.Constants;
 import com.araguacaima.braas.core.drools.factory.*;
+import org.drools.core.impl.InternalKieContainer;
 import org.drools.core.impl.InternalKnowledgeBase;
 import org.drools.core.impl.KnowledgeBaseFactory;
+import org.kie.api.KieServices;
 import org.kie.api.io.Resource;
 import org.kie.api.io.ResourceType;
 import org.kie.api.runtime.KieContainer;
@@ -37,6 +39,7 @@ public class KieSessionFactory {
         final KieSession session;
         final StatelessKieSession statelessSession;
         String url = droolsConfig.getUrl();
+        ClassLoader classLoader = droolsConfig.getClassLoader();
         if (Constants.RULES_SESSION_TYPE.STATEFUL.name().equalsIgnoreCase(kieSessionType)) {
             if (Constants.RULES_REPOSITORY_STRATEGIES.DRL.name().equalsIgnoreCase(rulesRepositoryStrategy)) {
                 KieContainer kieContainer = droolsUtils.getKieContainer();
@@ -45,7 +48,7 @@ public class KieSessionFactory {
             } else if (Constants.RULES_REPOSITORY_STRATEGIES.DECISION_TABLE.name().equalsIgnoreCase(
                     rulesRepositoryStrategy)) {
                 try {
-                    InternalKnowledgeBase knowledgeBase = createKnowledgeBaseFromSpreadsheet(url);
+                    InternalKnowledgeBase knowledgeBase = createKnowledgeBaseFromSpreadsheet(url, classLoader);
                     session = knowledgeBase.newKieSession();
                     return new KieStatefulDecisionTableSessionImpl(session, verbose, globals);
                 } catch (Exception e) {
@@ -67,10 +70,10 @@ public class KieSessionFactory {
                     InternalKnowledgeBase knowledgeBase;
                     if (url != null) {
                         log.info("Using url: " + url);
-                        knowledgeBase = createKnowledgeBaseFromSpreadsheet(url);
+                        knowledgeBase = createKnowledgeBaseFromSpreadsheet(url, classLoader);
                     } else {
                         ByteArrayOutputStream excelStream = droolsConfig.getExcelStream();
-                        knowledgeBase = createKnowledgeBaseFromSpreadsheet(excelStream);
+                        knowledgeBase = createKnowledgeBaseFromSpreadsheet(excelStream, classLoader);
                     }
                     log.info("knowledge base created!");
                     statelessSession = knowledgeBase.newStatelessKieSession();
@@ -88,32 +91,49 @@ public class KieSessionFactory {
         }
     }
 
-    private static InternalKnowledgeBase getInternalKnowledgeBase(DecisionTableConfiguration dtconf, KnowledgeBuilder knowledgeBuilder, Resource resource) {
+    private static InternalKnowledgeBase getInternalKnowledgeBase(DecisionTableConfiguration dtconf, KnowledgeBuilder knowledgeBuilder, Resource resource, ClassLoader classLoader) {
+        InternalKnowledgeBase knowledgeBase = KnowledgeBaseFactory.newKnowledgeBase();
+        if (classLoader != null) {
+            String containerId = knowledgeBase.getContainerId();
+            KieServices ks = KieServices.Factory.get();
+            ks.getKieClasspathContainer(containerId, classLoader);
+            KieContainer kContainer = ks.getKieClasspathContainer(containerId, classLoader);
+            knowledgeBase.setKieContainer((InternalKieContainer) kContainer);
+        }
         knowledgeBuilder.add(resource, ResourceType.DTABLE, dtconf);
         log.info("Resource added to knowledge builder");
         if (knowledgeBuilder.hasErrors()) {
             throw new RuntimeException(knowledgeBuilder.getErrors().toString());
         }
         log.info("Knowledge builder does not detect any error in rules definition");
-        InternalKnowledgeBase knowledgeBase = KnowledgeBaseFactory.newKnowledgeBase();
         knowledgeBase.addPackages(knowledgeBuilder.getKnowledgePackages());
         return knowledgeBase;
     }
 
     public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(ByteArrayOutputStream excelStream) {
+        return createKnowledgeBaseFromSpreadsheet(excelStream, null);
+    }
+
+    public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(ByteArrayOutputStream excelStream, ClassLoader classLoader) {
         DecisionTableConfiguration dtconf = KnowledgeBuilderFactory.newDecisionTableConfiguration();
         dtconf.setInputType(DecisionTableInputType.XLS);
-        KnowledgeBuilder knowledgeBuilder = KnowledgeBuilderFactory.newKnowledgeBuilder();
+        KnowledgeBuilderConfiguration configuration = KnowledgeBuilderFactory.newKnowledgeBuilderConfiguration(null, classLoader);
+        KnowledgeBuilder knowledgeBuilder = KnowledgeBuilderFactory.newKnowledgeBuilder(configuration);
         log.info("Retrieving resource...");
         Resource resource = ResourceFactory.newByteArrayResource(excelStream.toByteArray());
         log.info("Resource retrieved");
-        return getInternalKnowledgeBase(dtconf, knowledgeBuilder, resource);
+        return getInternalKnowledgeBase(dtconf, knowledgeBuilder, resource, classLoader);
     }
 
     public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(String path) {
+        return createKnowledgeBaseFromSpreadsheet(path, null);
+    }
+
+    public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(String path, ClassLoader classLoader) {
         DecisionTableConfiguration dtconf = KnowledgeBuilderFactory.newDecisionTableConfiguration();
         dtconf.setInputType(DecisionTableInputType.XLS);
-        KnowledgeBuilder knowledgeBuilder = KnowledgeBuilderFactory.newKnowledgeBuilder();
+        KnowledgeBuilderConfiguration configuration = KnowledgeBuilderFactory.newKnowledgeBuilderConfiguration(null, classLoader);
+        KnowledgeBuilder knowledgeBuilder = KnowledgeBuilderFactory.newKnowledgeBuilder(configuration);
         Resource resource;
         File file = new File(path);
         if (file.exists()) {
@@ -121,6 +141,6 @@ public class KieSessionFactory {
         } else {
             resource = ResourceFactory.newClassPathResource(path);
         }
-        return getInternalKnowledgeBase(dtconf, knowledgeBuilder, resource);
+        return getInternalKnowledgeBase(dtconf, knowledgeBuilder, resource, classLoader);
     }
 }
