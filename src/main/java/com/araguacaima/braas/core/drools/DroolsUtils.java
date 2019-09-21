@@ -127,12 +127,17 @@ public class DroolsUtils {
         final Resource resource = resources.newInputStreamResource(is);
         KieModule kModule = kr.addKieModule(resource);
 
-        KieContainer kContainer = ks.newKieContainer(kModule.getReleaseId());
+        KieContainer kContainer;
+        if (droolsConfig.getClassLoader() == null) {
+            kContainer = ks.newKieContainer(kModule.getReleaseId());
+        } else {
+            kContainer = ks.getKieClasspathContainer(droolsConfig.getClassLoader());
+        }
         try {
             Long scannerPeriod = Long.valueOf(this.droolsConfig.getScannerPeriod());
 
+            KieScanner kieScanner = ks.newKieScanner(kContainer);
             if (scannerPeriod != null) {
-                KieScanner kieScanner = ks.newKieScanner(kContainer);
                 kieScanner.start(50000L);
             }
         } catch (NumberFormatException ignored) {
