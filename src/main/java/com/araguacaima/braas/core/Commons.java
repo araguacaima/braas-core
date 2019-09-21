@@ -5,7 +5,9 @@ import com.araguacaima.commons.utils.ClassLoaderUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.net.URL;
+import java.util.Vector;
 
 public class Commons {
     private static ClassLoaderUtils classLoaderUtils = new ClassLoaderUtils(null, null);
@@ -62,5 +64,21 @@ public class Commons {
         }
         inputstream.close();
         return new File(filePath);
+    }
+
+    public static Class[] getClassesFromClassLoader(ClassLoader classLoader) throws NoSuchFieldException, IllegalAccessException {
+        Field f;
+        Class[] classes = null;
+        f = ClassLoader.class.getDeclaredField("classes");
+        f.setAccessible(true);
+        Vector<Class> classes_ = (Vector<Class>) f.get(classLoader);
+        int classesSize = classes_.size();
+        if (classesSize > 0) {
+            classes = new Class[classesSize];
+            for (int i = 0; i < classesSize; i++) {
+                classes[i] = classes_.get(i);
+            }
+        }
+        return classes;
     }
 }

@@ -1,7 +1,10 @@
 package com.araguacaima.braas.core.drools;
 
+import com.araguacaima.braas.core.Commons;
 import com.araguacaima.braas.core.Constants;
 import com.araguacaima.braas.core.drools.factory.*;
+import com.araguacaima.braas.core.drools.utils.InstrumentHook;
+import org.drools.compiler.builder.impl.KnowledgeBuilderConfigurationImpl;
 import org.drools.core.impl.InternalKieContainer;
 import org.drools.core.impl.InternalKnowledgeBase;
 import org.drools.core.impl.KnowledgeBaseFactory;
@@ -19,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.lang.instrument.Instrumentation;
 import java.util.Map;
 
 /**
@@ -96,7 +100,6 @@ public class KieSessionFactory {
         if (classLoader != null) {
             String containerId = knowledgeBase.getContainerId();
             KieServices ks = KieServices.Factory.get();
-            ks.getKieClasspathContainer(containerId, classLoader);
             KieContainer kContainer = ks.getKieClasspathContainer(containerId, classLoader);
             knowledgeBase.setKieContainer((InternalKieContainer) kContainer);
         }
@@ -110,14 +113,15 @@ public class KieSessionFactory {
         return knowledgeBase;
     }
 
-    public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(ByteArrayOutputStream excelStream) {
+    public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(ByteArrayOutputStream excelStream) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
         return createKnowledgeBaseFromSpreadsheet(excelStream, null);
     }
 
-    public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(ByteArrayOutputStream excelStream, ClassLoader classLoader) {
+    public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(ByteArrayOutputStream excelStream, ClassLoader classLoader) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
         DecisionTableConfiguration dtconf = KnowledgeBuilderFactory.newDecisionTableConfiguration();
         dtconf.setInputType(DecisionTableInputType.XLS);
         KnowledgeBuilderConfiguration configuration = KnowledgeBuilderFactory.newKnowledgeBuilderConfiguration(null, classLoader);
+        injectClassesToConfiguration(classLoader, configuration);
         KnowledgeBuilder knowledgeBuilder = KnowledgeBuilderFactory.newKnowledgeBuilder(configuration);
         log.info("Retrieving resource...");
         Resource resource = ResourceFactory.newByteArrayResource(excelStream.toByteArray());
@@ -125,14 +129,15 @@ public class KieSessionFactory {
         return getInternalKnowledgeBase(dtconf, knowledgeBuilder, resource, classLoader);
     }
 
-    public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(String path) {
+    public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(String path) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
         return createKnowledgeBaseFromSpreadsheet(path, null);
     }
 
-    public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(String path, ClassLoader classLoader) {
+    public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(String path, ClassLoader classLoader) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
         DecisionTableConfiguration dtconf = KnowledgeBuilderFactory.newDecisionTableConfiguration();
         dtconf.setInputType(DecisionTableInputType.XLS);
         KnowledgeBuilderConfiguration configuration = KnowledgeBuilderFactory.newKnowledgeBuilderConfiguration(null, classLoader);
+        injectClassesToConfiguration(classLoader, configuration);
         KnowledgeBuilder knowledgeBuilder = KnowledgeBuilderFactory.newKnowledgeBuilder(configuration);
         Resource resource;
         File file = new File(path);
@@ -142,5 +147,19 @@ public class KieSessionFactory {
             resource = ResourceFactory.newClassPathResource(path);
         }
         return getInternalKnowledgeBase(dtconf, knowledgeBuilder, resource, classLoader);
+    }
+
+    private static void injectClassesToConfiguration(ClassLoader classLoader, KnowledgeBuilderConfiguration configuration) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+        ClassLoader cl = ((KnowledgeBuilderConfigurationImpl) configuration).getClassLoader();
+        Class[] classes;
+        Instrumentation instrumentation = InstrumentHook.getInstrumentation();
+        if (instrumentation != null) {
+            classes = instrumentation.getInitiatedClasses(classLoader);
+        } else {
+            classes = Commons.getClassesFromClassLoader(classLoader);
+        }
+        for (Class clazz : classes) {
+            cl.loadClass(clazz.getName());
+        }
     }
 }

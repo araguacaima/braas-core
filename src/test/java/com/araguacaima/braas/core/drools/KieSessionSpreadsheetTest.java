@@ -42,7 +42,7 @@ public class KieSessionSpreadsheetTest {
     private Fairy fairy;
 
     @Before
-    public void init()  {
+    public void init() throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
         jsonUtils = new JsonUtils();
         String path = "rules.xlsx";
         InternalKnowledgeBase knowledgeBase = KieSessionFactory.createKnowledgeBaseFromSpreadsheet(path);

@@ -327,4 +327,5 @@ public class DroolsConfig {
     public void setClassLoader(ClassLoader classLoader) {
         this.classLoader = classLoader;
     }
+
 }
