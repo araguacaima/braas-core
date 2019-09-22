@@ -4,6 +4,7 @@ import com.araguacaima.braas.core.Commons;
 import com.araguacaima.braas.core.Constants;
 import com.araguacaima.braas.core.drools.factory.*;
 import com.araguacaima.braas.core.drools.utils.InstrumentHook;
+import com.araguacaima.commons.utils.ClassLoaderUtils;
 import org.drools.compiler.builder.impl.KnowledgeBuilderConfigurationImpl;
 import org.drools.core.RuleBaseConfiguration;
 import org.drools.core.common.ProjectClassLoader;
@@ -151,20 +152,30 @@ public class KieSessionFactory {
     private static void injectClassesToConfiguration(ClassLoader classLoader, KieBaseConfiguration configuration) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
         if (classLoader != null) {
             ClassLoader cl = ((RuleBaseConfiguration) configuration).getClassLoader();
-            injectClassesBetweenClassloaders(cl, classLoader);
+            injectClassesBetweenClassLoaders(cl, classLoader);
             if (ProjectClassLoader.class.isAssignableFrom(cl.getClass())) {
-                ClassLoader droolsClassLoader = getDroolsClassLoader(((ProjectClassLoader) classLoader));
-                injectClassesBetweenClassloaders(droolsClassLoader, classLoader);
+                ProjectClassLoader projectClassLoader = (ProjectClassLoader) cl;
+                ClassLoader droolsClassLoader = getDroolsClassLoader(projectClassLoader);
+                try {
+                    Class[] classes = Commons.getClassesFromClassLoader(classLoader);
+                    for (Class clazz : classes) {
+                        droolsClassLoader.loadClass(clazz.getName());
+                    }
+                } catch (ClassNotFoundException cnfe) {
+                    ClassLoader newClassLoader = new ReloadableClassLoader(projectClassLoader);
+                    injectClassesBetweenClassLoaders(newClassLoader, classLoader);
+                    projectClassLoader.setDroolsClassLoader(newClassLoader);
+                }
             }
         }
     }
 
     private static void injectClassesToConfiguration(ClassLoader classLoader, KnowledgeBuilderConfiguration configuration) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
         ClassLoader cl = ((KnowledgeBuilderConfigurationImpl) configuration).getClassLoader();
-        injectClassesBetweenClassloaders(cl, classLoader);
+        injectClassesBetweenClassLoaders(cl, classLoader);
     }
 
-    private static void injectClassesBetweenClassloaders(ClassLoader destination, ClassLoader origin) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+    private static void injectClassesBetweenClassLoaders(ClassLoader destination, ClassLoader origin) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
         Class[] classes;
         Instrumentation instrumentation = InstrumentHook.getInstrumentation();
         if (instrumentation != null) {
@@ -173,14 +184,18 @@ public class KieSessionFactory {
             classes = Commons.getClassesFromClassLoader(origin);
         }
         for (Class clazz : classes) {
-            destination.loadClass(clazz.getName());
+            try {
+                destination.loadClass(clazz.getName());
+            } catch (ClassNotFoundException cnfe) {
+
+                (new ClassLoaderUtils(origin)).removeClass(clazz);
+                (new ClassLoaderUtils(destination)).loadClass(clazz);
+            }
         }
     }
 
     public static ClassLoader getDroolsClassLoader(ProjectClassLoader classLoader) throws NoSuchFieldException, IllegalAccessException {
-        Field f;
-        Class[] classes = null;
-        f = ProjectClassLoader.class.getDeclaredField("droolsClassLoader");
+        Field f = ProjectClassLoader.class.getDeclaredField("droolsClassLoader");
         f.setAccessible(true);
         return (ClassLoader) f.get(classLoader);
     }
