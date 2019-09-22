@@ -11,6 +11,8 @@ import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.kie.api.runtime.StatelessKieSession;
 import org.kie.internal.builder.*;
+import org.kie.internal.builder.conf.DefaultPackageNameOption;
+import org.kie.internal.builder.conf.TrimCellsInDTableOption;
 import org.kie.internal.io.ResourceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,8 +115,10 @@ public class KieSessionFactory {
     public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(ByteArrayOutputStream excelStream, URLClassLoader classLoader) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
         DecisionTableConfiguration dtconf = KnowledgeBuilderFactory.newDecisionTableConfiguration();
         dtconf.setInputType(DecisionTableInputType.XLS);
+        dtconf.setTrimCell(false);
         KnowledgeBuilderConfiguration configuration = KnowledgeBuilderFactory.newKnowledgeBuilderConfiguration(null, classLoader);
-        //injectClassesToConfiguration(classLoader, configuration);
+        configuration.setOption(TrimCellsInDTableOption.DISABLED);
+        configuration.setProperty(DefaultPackageNameOption.PROPERTY_NAME, "com.araguacaima.braas");
         KnowledgeBuilder knowledgeBuilder = KnowledgeBuilderFactory.newKnowledgeBuilder(configuration);
         log.info("Retrieving resource...");
         Resource resource = ResourceFactory.newByteArrayResource(excelStream.toByteArray());
@@ -129,8 +133,10 @@ public class KieSessionFactory {
     public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(String path, URLClassLoader classLoader) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
         DecisionTableConfiguration dtconf = KnowledgeBuilderFactory.newDecisionTableConfiguration();
         dtconf.setInputType(DecisionTableInputType.XLS);
+        dtconf.setTrimCell(false);
         KnowledgeBuilderConfiguration configuration = KnowledgeBuilderFactory.newKnowledgeBuilderConfiguration(null, classLoader);
-        //injectClassesToConfiguration(classLoader, configuration);
+        configuration.setOption(TrimCellsInDTableOption.DISABLED);
+        configuration.setProperty(DefaultPackageNameOption.PROPERTY_NAME, "com.araguacaima.braas");
         KnowledgeBuilder knowledgeBuilder = KnowledgeBuilderFactory.newKnowledgeBuilder(configuration);
         Resource resource;
         File file = new File(path);
@@ -141,58 +147,4 @@ public class KieSessionFactory {
         }
         return getInternalKnowledgeBase(dtconf, knowledgeBuilder, resource, classLoader);
     }
-/*
-
-    private static void injectClassesToConfiguration(ClassLoader classLoader, KieBaseConfiguration configuration) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
-        if (classLoader != null) {
-            ClassLoader cl = ((RuleBaseConfiguration) configuration).getClassLoader();
-            injectClassesBetweenClassLoaders(cl, classLoader);
-            if (ProjectClassLoader.class.isAssignableFrom(cl.getClass())) {
-                ProjectClassLoader projectClassLoader = (ProjectClassLoader) cl;
-                ClassLoader droolsClassLoader = getDroolsClassLoader(projectClassLoader);
-                try {
-                    Class[] classes = Commons.getClassesFromClassLoader(classLoader);
-                    for (Class clazz : classes) {
-                        droolsClassLoader.loadClass(clazz.getName());
-                    }
-                } catch (ClassNotFoundException cnfe) {
-                    ClassLoader newClassLoader = new ReloadableClassLoader(projectClassLoader);
-                    injectClassesBetweenClassLoaders(newClassLoader, classLoader);
-                    projectClassLoader.setDroolsClassLoader(newClassLoader);
-                }
-            }
-        }
-    }
-
-    private static void injectClassesToConfiguration(ClassLoader classLoader, KnowledgeBuilderConfiguration configuration) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
-        ClassLoader cl = ((KnowledgeBuilderConfigurationImpl) configuration).getClassLoader();
-        injectClassesBetweenClassLoaders(cl, classLoader);
-    }
-
-    private static void injectClassesBetweenClassLoaders(ClassLoader destination, ClassLoader origin) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
-        Class[] classes;
-        Instrumentation instrumentation = InstrumentHook.getInstrumentation();
-        if (instrumentation != null) {
-            classes = instrumentation.getInitiatedClasses(origin);
-        } else {
-            classes = Commons.getClassesFromClassLoader(origin);
-        }
-        for (Class clazz : classes) {
-            try {
-                destination.loadClass(clazz.getName());
-            } catch (ClassNotFoundException cnfe) {
-
-                (new ClassLoaderUtils(origin)).removeClass(clazz);
-                (new ClassLoaderUtils(destination)).loadClass(clazz);
-            }
-        }
-    }
-
-    public static ClassLoader getDroolsClassLoader(ProjectClassLoader classLoader) throws NoSuchFieldException, IllegalAccessException {
-        Field f = ProjectClassLoader.class.getDeclaredField("droolsClassLoader");
-        f.setAccessible(true);
-        return (ClassLoader) f.get(classLoader);
-    }
-*/
-
 }
