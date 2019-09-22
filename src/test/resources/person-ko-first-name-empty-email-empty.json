@@ -1,0 +1,32 @@
+{
+  "address": {
+    "street": "Atkins Avenue",
+    "streetNumber": "60",
+    "apartmentNumber": "60",
+    "postalCode": "36679",
+    "city": "San Francisco"
+  },
+  "firstName": "",
+  "middleName": "Bailey",
+  "lastName": "Keith",
+  "email": "",
+  "username": "hkeith",
+  "password": "rvaofBtD",
+  "sex": "FEMALE",
+  "telephoneNumber": "742-568-8718",
+  "dateOfBirth": "1956-07-13T21:08:27.128-06:00",
+  "age": 63,
+  "company": {
+    "name": "QuickLink Industries",
+    "domain": "quicklinkindustries.eu",
+    "email": "company@quicklinkindustries.eu",
+    "vatIdentificationNumber": "77-0007233",
+    "url": "http://www.quicklinkindustries.eu"
+  },
+  "nationalIdentityCardNumber": "680-50-9352",
+  "nationalIdentificationNumber": "",
+  "passportNumber": "doEBtXjHU",
+  "fullName": "Hannah Keith",
+  "male": false,
+  "female": true
+}
