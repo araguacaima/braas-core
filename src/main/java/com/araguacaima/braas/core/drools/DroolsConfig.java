@@ -2,7 +2,6 @@ package com.araguacaima.braas.core.drools;
 
 import com.araguacaima.commons.utils.FileUtils;
 import com.araguacaima.commons.utils.PropertiesHandlerUtils;
-import org.apache.commons.collections4.CollectionUtils;
 import org.codehaus.plexus.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,9 +10,7 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URLClassLoader;
-import java.util.HashSet;
 import java.util.Properties;
-import java.util.Set;
 
 /**
  * Created by Alejandro on 04/12/2014.
@@ -45,7 +42,6 @@ public class DroolsConfig {
     private boolean verbose;
     private String version;
     private String credentialStrategy;
-    private Set<Class> classes = new HashSet<>();
     private URLClassLoader classLoader;
 
     public DroolsConfig(Properties bundle) throws FileNotFoundException, URISyntaxException, MalformedURLException {
@@ -305,21 +301,6 @@ public class DroolsConfig {
     public void setCredentialStrategy(String credentialStrategy) {
         this.credentialStrategy = credentialStrategy;
     }
-
-    public void addClasses(Set<Class<?>> classes) {
-        if (CollectionUtils.isNotEmpty(classes)) {
-            this.classes.addAll(classes);
-            classes.forEach(clazz -> {
-                ClassLoader classLoader = clazz.getClassLoader();
-                if (this.classLoader == null) {
-                    if (!classLoader.getClass().getName().equals(this.getClassLoader().getClass().getName())) {
-                        this.classLoader = new DroolsURLClassLoader(, classLoader);
-                    }
-                }
-            });
-        }
-    }
-
 
     public URLClassLoader getClassLoader() {
         return classLoader;
