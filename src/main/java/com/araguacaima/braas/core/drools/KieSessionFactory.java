@@ -5,10 +5,11 @@ import com.araguacaima.braas.core.Constants;
 import com.araguacaima.braas.core.drools.factory.*;
 import com.araguacaima.braas.core.drools.utils.InstrumentHook;
 import org.drools.compiler.builder.impl.KnowledgeBuilderConfigurationImpl;
-import org.drools.core.impl.InternalKieContainer;
+import org.drools.core.RuleBaseConfiguration;
+import org.drools.core.common.ProjectClassLoader;
 import org.drools.core.impl.InternalKnowledgeBase;
 import org.drools.core.impl.KnowledgeBaseFactory;
-import org.kie.api.KieServices;
+import org.kie.api.KieBaseConfiguration;
 import org.kie.api.io.Resource;
 import org.kie.api.io.ResourceType;
 import org.kie.api.runtime.KieContainer;
@@ -23,6 +24,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
+import java.lang.reflect.Field;
 import java.util.Map;
 
 /**
@@ -95,17 +97,14 @@ public class KieSessionFactory {
         }
     }
 
-    private static InternalKnowledgeBase getInternalKnowledgeBase(DecisionTableConfiguration dtconf, KnowledgeBuilder knowledgeBuilder, Resource resource, ClassLoader classLoader) {
-        InternalKnowledgeBase knowledgeBase = KnowledgeBaseFactory.newKnowledgeBase();
-        if (classLoader != null) {
-            String containerId = knowledgeBase.getContainerId();
-            KieServices ks = KieServices.Factory.get();
-            KieContainer kContainer = ks.getKieClasspathContainer(containerId, classLoader);
-            knowledgeBase.setKieContainer((InternalKieContainer) kContainer);
-        }
+    private static InternalKnowledgeBase getInternalKnowledgeBase(DecisionTableConfiguration dtconf, KnowledgeBuilder knowledgeBuilder, Resource resource, ClassLoader classLoader) throws IllegalAccessException, NoSuchFieldException, ClassNotFoundException {
+        KieBaseConfiguration conf = KnowledgeBaseFactory.newKnowledgeBaseConfiguration(null, classLoader);
+        injectClassesToConfiguration(classLoader, conf);
+        InternalKnowledgeBase knowledgeBase = KnowledgeBaseFactory.newKnowledgeBase(conf);
         knowledgeBuilder.add(resource, ResourceType.DTABLE, dtconf);
         log.info("Resource added to knowledge builder");
         if (knowledgeBuilder.hasErrors()) {
+            log.info("Knowledge builder detected some error in rules definition");
             throw new RuntimeException(knowledgeBuilder.getErrors().toString());
         }
         log.info("Knowledge builder does not detect any error in rules definition");
@@ -149,17 +148,41 @@ public class KieSessionFactory {
         return getInternalKnowledgeBase(dtconf, knowledgeBuilder, resource, classLoader);
     }
 
+    private static void injectClassesToConfiguration(ClassLoader classLoader, KieBaseConfiguration configuration) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+        if (classLoader != null) {
+            ClassLoader cl = ((RuleBaseConfiguration) configuration).getClassLoader();
+            injectClassesBetweenClassloaders(cl, classLoader);
+            if (ProjectClassLoader.class.isAssignableFrom(cl.getClass())) {
+                ClassLoader droolsClassLoader = getDroolsClassLoader(((ProjectClassLoader) classLoader));
+                injectClassesBetweenClassloaders(droolsClassLoader, classLoader);
+            }
+        }
+    }
+
     private static void injectClassesToConfiguration(ClassLoader classLoader, KnowledgeBuilderConfiguration configuration) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
         ClassLoader cl = ((KnowledgeBuilderConfigurationImpl) configuration).getClassLoader();
+        injectClassesBetweenClassloaders(cl, classLoader);
+    }
+
+    private static void injectClassesBetweenClassloaders(ClassLoader destination, ClassLoader origin) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
         Class[] classes;
         Instrumentation instrumentation = InstrumentHook.getInstrumentation();
         if (instrumentation != null) {
-            classes = instrumentation.getInitiatedClasses(classLoader);
+            classes = instrumentation.getInitiatedClasses(origin);
         } else {
-            classes = Commons.getClassesFromClassLoader(classLoader);
+            classes = Commons.getClassesFromClassLoader(origin);
         }
         for (Class clazz : classes) {
-            cl.loadClass(clazz.getName());
+            destination.loadClass(clazz.getName());
         }
     }
+
+    public static ClassLoader getDroolsClassLoader(ProjectClassLoader classLoader) throws NoSuchFieldException, IllegalAccessException {
+        Field f;
+        Class[] classes = null;
+        f = ProjectClassLoader.class.getDeclaredField("droolsClassLoader");
+        f.setAccessible(true);
+        return (ClassLoader) f.get(classLoader);
+    }
+
 }
