@@ -100,7 +100,7 @@ public class KieSessionFactory {
 
     private static InternalKnowledgeBase getInternalKnowledgeBase(DecisionTableConfiguration dtconf, KnowledgeBuilder knowledgeBuilder, Resource resource, ClassLoader classLoader) throws IllegalAccessException, NoSuchFieldException, ClassNotFoundException {
         KieBaseConfiguration conf = KnowledgeBaseFactory.newKnowledgeBaseConfiguration(null, classLoader);
-        injectClassesToConfiguration(classLoader, conf);
+        //injectClassesToConfiguration(classLoader, conf);
         InternalKnowledgeBase knowledgeBase = KnowledgeBaseFactory.newKnowledgeBase(conf);
         knowledgeBuilder.add(resource, ResourceType.DTABLE, dtconf);
         log.info("Resource added to knowledge builder");
@@ -121,7 +121,7 @@ public class KieSessionFactory {
         DecisionTableConfiguration dtconf = KnowledgeBuilderFactory.newDecisionTableConfiguration();
         dtconf.setInputType(DecisionTableInputType.XLS);
         KnowledgeBuilderConfiguration configuration = KnowledgeBuilderFactory.newKnowledgeBuilderConfiguration(null, classLoader);
-        injectClassesToConfiguration(classLoader, configuration);
+        //injectClassesToConfiguration(classLoader, configuration);
         KnowledgeBuilder knowledgeBuilder = KnowledgeBuilderFactory.newKnowledgeBuilder(configuration);
         log.info("Retrieving resource...");
         Resource resource = ResourceFactory.newByteArrayResource(excelStream.toByteArray());
@@ -137,7 +137,7 @@ public class KieSessionFactory {
         DecisionTableConfiguration dtconf = KnowledgeBuilderFactory.newDecisionTableConfiguration();
         dtconf.setInputType(DecisionTableInputType.XLS);
         KnowledgeBuilderConfiguration configuration = KnowledgeBuilderFactory.newKnowledgeBuilderConfiguration(null, classLoader);
-        injectClassesToConfiguration(classLoader, configuration);
+        //injectClassesToConfiguration(classLoader, configuration);
         KnowledgeBuilder knowledgeBuilder = KnowledgeBuilderFactory.newKnowledgeBuilder(configuration);
         Resource resource;
         File file = new File(path);
