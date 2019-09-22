@@ -1,13 +1,7 @@
 package com.araguacaima.braas.core.drools;
 
-import com.araguacaima.braas.core.Commons;
 import com.araguacaima.braas.core.Constants;
 import com.araguacaima.braas.core.drools.factory.*;
-import com.araguacaima.braas.core.drools.utils.InstrumentHook;
-import com.araguacaima.commons.utils.ClassLoaderUtils;
-import org.drools.compiler.builder.impl.KnowledgeBuilderConfigurationImpl;
-import org.drools.core.RuleBaseConfiguration;
-import org.drools.core.common.ProjectClassLoader;
 import org.drools.core.impl.InternalKnowledgeBase;
 import org.drools.core.impl.KnowledgeBaseFactory;
 import org.kie.api.KieBaseConfiguration;
@@ -24,8 +18,7 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.lang.instrument.Instrumentation;
-import java.lang.reflect.Field;
+import java.net.URLClassLoader;
 import java.util.Map;
 
 /**
@@ -46,7 +39,7 @@ public class KieSessionFactory {
         final KieSession session;
         final StatelessKieSession statelessSession;
         String url = droolsConfig.getUrl();
-        ClassLoader classLoader = droolsConfig.getClassLoader();
+        URLClassLoader classLoader = droolsConfig.getClassLoader();
         if (Constants.RULES_SESSION_TYPE.STATEFUL.name().equalsIgnoreCase(kieSessionType)) {
             if (Constants.RULES_REPOSITORY_STRATEGIES.DRL.name().equalsIgnoreCase(rulesRepositoryStrategy)) {
                 KieContainer kieContainer = droolsUtils.getKieContainer();
@@ -98,7 +91,7 @@ public class KieSessionFactory {
         }
     }
 
-    private static InternalKnowledgeBase getInternalKnowledgeBase(DecisionTableConfiguration dtconf, KnowledgeBuilder knowledgeBuilder, Resource resource, ClassLoader classLoader) throws IllegalAccessException, NoSuchFieldException, ClassNotFoundException {
+    private static InternalKnowledgeBase getInternalKnowledgeBase(DecisionTableConfiguration dtconf, KnowledgeBuilder knowledgeBuilder, Resource resource, URLClassLoader classLoader) throws IllegalAccessException, NoSuchFieldException, ClassNotFoundException {
         KieBaseConfiguration conf = KnowledgeBaseFactory.newKnowledgeBaseConfiguration(null, classLoader);
         //injectClassesToConfiguration(classLoader, conf);
         InternalKnowledgeBase knowledgeBase = KnowledgeBaseFactory.newKnowledgeBase(conf);
@@ -117,7 +110,7 @@ public class KieSessionFactory {
         return createKnowledgeBaseFromSpreadsheet(excelStream, null);
     }
 
-    public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(ByteArrayOutputStream excelStream, ClassLoader classLoader) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+    public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(ByteArrayOutputStream excelStream, URLClassLoader classLoader) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
         DecisionTableConfiguration dtconf = KnowledgeBuilderFactory.newDecisionTableConfiguration();
         dtconf.setInputType(DecisionTableInputType.XLS);
         KnowledgeBuilderConfiguration configuration = KnowledgeBuilderFactory.newKnowledgeBuilderConfiguration(null, classLoader);
@@ -133,7 +126,7 @@ public class KieSessionFactory {
         return createKnowledgeBaseFromSpreadsheet(path, null);
     }
 
-    public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(String path, ClassLoader classLoader) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+    public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(String path, URLClassLoader classLoader) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
         DecisionTableConfiguration dtconf = KnowledgeBuilderFactory.newDecisionTableConfiguration();
         dtconf.setInputType(DecisionTableInputType.XLS);
         KnowledgeBuilderConfiguration configuration = KnowledgeBuilderFactory.newKnowledgeBuilderConfiguration(null, classLoader);
@@ -148,6 +141,7 @@ public class KieSessionFactory {
         }
         return getInternalKnowledgeBase(dtconf, knowledgeBuilder, resource, classLoader);
     }
+/*
 
     private static void injectClassesToConfiguration(ClassLoader classLoader, KieBaseConfiguration configuration) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
         if (classLoader != null) {
@@ -199,5 +193,6 @@ public class KieSessionFactory {
         f.setAccessible(true);
         return (ClassLoader) f.get(classLoader);
     }
+*/
 
 }

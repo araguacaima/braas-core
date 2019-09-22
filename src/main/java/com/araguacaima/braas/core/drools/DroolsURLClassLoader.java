@@ -7,9 +7,9 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 
-public class BraasClassLoader extends URLClassLoader {
+public class DroolsURLClassLoader extends URLClassLoader {
 
-    public BraasClassLoader(URL url, ClassLoader parent) {
+    public DroolsURLClassLoader(URL url, ClassLoader parent) {
         super(new URL[]{url}, parent);
     }
 
@@ -20,7 +20,7 @@ public class BraasClassLoader extends URLClassLoader {
             b = loadClassFromFile(name);
             return defineClass(name, b, 0, b.length);
         } catch (IOException e) {
-            String msg = "Class '" + name + "' has not been loaded by Classloader[" + BraasClassLoader.class.getName() + "] yet!";
+            String msg = "Class '" + name + "' has not been loaded by Classloader[" + DroolsURLClassLoader.class.getName() + "] yet!";
             throw new ClassNotFoundException(msg);
         }
     }

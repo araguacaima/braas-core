@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.net.URLClassLoader;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -45,7 +46,7 @@ public class DroolsConfig {
     private String version;
     private String credentialStrategy;
     private Set<Class> classes = new HashSet<>();
-    private ClassLoader classLoader;
+    private URLClassLoader classLoader;
 
     public DroolsConfig(Properties bundle) throws FileNotFoundException, URISyntaxException, MalformedURLException {
         this.build("rulesPath", bundle.getProperty("rulesPath"))
@@ -312,7 +313,7 @@ public class DroolsConfig {
                 ClassLoader classLoader = clazz.getClassLoader();
                 if (this.classLoader == null) {
                     if (!classLoader.getClass().getName().equals(this.getClassLoader().getClass().getName())) {
-                        this.classLoader = classLoader;
+                        this.classLoader = new DroolsURLClassLoader(, classLoader);
                     }
                 }
             });
@@ -320,11 +321,11 @@ public class DroolsConfig {
     }
 
 
-    public ClassLoader getClassLoader() {
+    public URLClassLoader getClassLoader() {
         return classLoader;
     }
 
-    public void setClassLoader(ClassLoader classLoader) {
+    public void setClassLoader(URLClassLoader classLoader) {
         this.classLoader = classLoader;
     }
 
