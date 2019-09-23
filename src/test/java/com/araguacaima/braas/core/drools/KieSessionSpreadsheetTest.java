@@ -1,13 +1,11 @@
 package com.araguacaima.braas.core.drools;
 
-import com.araguacaima.braas.core.IMessage;
 import com.araguacaima.braas.core.RuleMessage;
 import com.araguacaima.braas.core.drools.factory.KieStatelessDrlSessionImpl;
 import com.araguacaima.braas.core.drools.model.Person;
 import com.araguacaima.commons.utils.JsonUtils;
 import io.codearte.jfairy.Fairy;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.Predicate;
 import org.drools.core.impl.InternalKnowledgeBase;
 import org.junit.Assert;
 import org.junit.Before;
@@ -17,6 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+
+import static com.araguacaima.braas.core.drools.utils.RuleMessageUtils.getMessages;
 
 @SuppressWarnings("unchecked")
 public class KieSessionSpreadsheetTest {
@@ -31,14 +31,6 @@ public class KieSessionSpreadsheetTest {
     private KieStatelessDrlSessionImpl ksession;
     private Collection<Object> facts = new ArrayList<>();
     private JsonUtils jsonUtils;
-    private Locale locale = Locale.ENGLISH;
-    private Predicate predicateMessage = object -> RuleMessage.class.isAssignableFrom(object.getClass());
-    private Predicate transformerLocalizedComments = input -> {
-        IMessage message = (IMessage) input;
-        String language = message.getLanguage();
-        String localeLanguage = locale.getLanguage();
-        return localeLanguage.equals(language);
-    };
     private Fairy fairy;
 
     @Before
@@ -48,7 +40,7 @@ public class KieSessionSpreadsheetTest {
         InternalKnowledgeBase knowledgeBase = KieSessionFactory.createKnowledgeBaseFromSpreadsheet(path);
         StatelessKieSession session = knowledgeBase.newStatelessKieSession();
         Map<String, Object> globals = new HashMap<>();
-        globals.put("locale", locale);
+        globals.put("locale", Locale.ENGLISH);
         globals.put("logger", log);
         this.ksession = new KieStatelessDrlSessionImpl(session, VERBOSE, globals);
         fairy = Fairy.create();
@@ -187,9 +179,4 @@ public class KieSessionSpreadsheetTest {
 
     }
 
-    private Collection getMessages(Collection result) {
-        Collection collection = CollectionUtils.select(result, predicateMessage);
-        CollectionUtils.filter(collection, transformerLocalizedComments);
-        return collection;
-    }
 }
