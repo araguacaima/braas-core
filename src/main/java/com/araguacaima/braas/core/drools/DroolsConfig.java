@@ -2,6 +2,7 @@ package com.araguacaima.braas.core.drools;
 
 import com.araguacaima.commons.utils.FileUtils;
 import com.araguacaima.commons.utils.PropertiesHandlerUtils;
+import org.apache.commons.lang3.LocaleUtils;
 import org.codehaus.plexus.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +11,7 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URLClassLoader;
+import java.util.Locale;
 import java.util.Properties;
 
 /**
@@ -43,6 +45,7 @@ public class DroolsConfig {
     private String version;
     private String credentialStrategy;
     private URLClassLoader classLoader;
+    private Locale locale;
 
     public DroolsConfig(Properties bundle) throws FileNotFoundException, URISyntaxException, MalformedURLException {
         this.build("rulesPath", bundle.getProperty("rulesPath"))
@@ -63,7 +66,8 @@ public class DroolsConfig {
                 .build("urlResourceStrategy", bundle.getProperty("urlResourceStrategy"))
                 .build("drools.engine.verbose", bundle.getProperty("drools.engine.verbose"))
                 .build("drools.maven.version", bundle.getProperty("drools.maven.version"))
-                .build("credentialStrategy", bundle.getProperty("credentialStrategy"));
+                .build("credentialStrategy", bundle.getProperty("credentialStrategy"))
+                .build("locale", bundle.getProperty("locale"));
     }
 
     public DroolsConfig(String configFile) throws FileNotFoundException, URISyntaxException, MalformedURLException {
@@ -112,8 +116,22 @@ public class DroolsConfig {
             this.setDecisionTablePath(value);
         } else if ("credentialStrategy".equals(key)) {
             this.setCredentialStrategy(value);
+        } else if ("locale".equals(key)) {
+            this.setLocale(value);
         }
         return this;
+    }
+
+    public Locale getLocale() {
+        return locale;
+    }
+
+    public void setLocale(String localeStr) {
+        this.locale = LocaleUtils.toLocale(localeStr);
+    }
+
+    public void setLocale(Locale locale) {
+        this.locale = locale;
     }
 
     public String getRulesPath() {
