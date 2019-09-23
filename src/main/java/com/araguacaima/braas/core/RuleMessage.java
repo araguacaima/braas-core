@@ -2,8 +2,9 @@ package com.araguacaima.braas.core;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
+
+import static com.araguacaima.braas.core.Commons.DEFAULT_ENCODING;
 
 /**
  * Created by Alejandro on 08/12/2014.
@@ -18,8 +19,6 @@ public abstract class RuleMessage implements IMessage {
     private String fieldName;
     private Object object;
     private Map<String, Object> context;
-
-    private static final String DEFAULT_ENCODING = StandardCharsets.UTF_8.toString();
 
     public RuleMessage() {
 

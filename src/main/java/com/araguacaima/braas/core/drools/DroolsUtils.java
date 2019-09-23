@@ -3,6 +3,7 @@ package com.araguacaima.braas.core.drools;
 import com.araguacaima.braas.core.drools.factory.KieSessionImpl;
 import com.araguacaima.braas.core.drools.factory.ResourceStrategyFactory;
 import com.araguacaima.braas.core.drools.strategy.ResourceStrategy;
+import com.araguacaima.commons.utils.ReflectionUtils;
 import org.drools.core.io.impl.UrlResource;
 import org.kie.api.KieServices;
 import org.kie.api.builder.KieModule;
@@ -36,6 +37,7 @@ public class DroolsUtils {
 
     private DroolsConfig droolsConfig;
     private Map<String, Object> globals = new HashMap<>();
+    private ReflectionUtils reflectionUtils = new ReflectionUtils(null);
 
     public DroolsUtils(DroolsConfig droolsConfig) {
         this.droolsConfig = droolsConfig;
@@ -134,8 +136,7 @@ public class DroolsUtils {
             kContainer = ks.getKieClasspathContainer(droolsConfig.getClassLoader());
         }
         try {
-            Long scannerPeriod = Long.valueOf(this.droolsConfig.getScannerPeriod());
-
+            Long scannerPeriod = Long.valueOf(droolsConfig.getScannerPeriod());
             KieScanner kieScanner = ks.newKieScanner(kContainer);
             if (scannerPeriod != null) {
                 kieScanner.start(50000L);

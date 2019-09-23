@@ -5,6 +5,11 @@ import com.araguacaima.commons.utils.EnumsUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+
+import static com.araguacaima.braas.core.Commons.DEFAULT_ENCODING;
+
 /**
  * Function for use in DRL files.
  */
@@ -17,8 +22,12 @@ public class RuleLogging {
      * Log a trace message from a rule
      */
     public static void trace(final String message, final Object... parameters) {
-
-        final String formattedMessage = String.format(message, parameters);
+        String message1 = message;
+        try {
+            message1 = URLDecoder.decode(message, DEFAULT_ENCODING);
+        } catch (UnsupportedEncodingException ignored) {
+        }
+        final String formattedMessage = String.format(message1, parameters);
         log.trace(formattedMessage);
     }
 
@@ -26,8 +35,12 @@ public class RuleLogging {
      * Log a info message from a rule
      */
     public static void info(final String message, final Object... parameters) {
-
-        final String formattedMessage = String.format(message, parameters);
+        String message1 = message;
+        try {
+            message1 = URLDecoder.decode(message, DEFAULT_ENCODING);
+        } catch (UnsupportedEncodingException ignored) {
+        }
+        final String formattedMessage = String.format(message1, parameters);
         log.info(formattedMessage);
     }
 
@@ -35,8 +48,12 @@ public class RuleLogging {
      * Log a debug message from a rule
      */
     public static void debug(final String message, final Object... parameters) {
-
-        final String formattedMessage = String.format(message, parameters);
+        String message1 = message;
+        try {
+            message1 = URLDecoder.decode(message, DEFAULT_ENCODING);
+        } catch (UnsupportedEncodingException ignored) {
+        }
+        final String formattedMessage = String.format(message1, parameters);
         log.debug(formattedMessage);
     }
 
@@ -44,8 +61,12 @@ public class RuleLogging {
      * Log a error message from a rule
      */
     public static void error(final String message, final Object... parameters) {
-
-        final String formattedMessage = String.format(message, parameters);
+        String message1 = message;
+        try {
+            message1 = URLDecoder.decode(message, DEFAULT_ENCODING);
+        } catch (UnsupportedEncodingException ignored) {
+        }
+        final String formattedMessage = String.format(message1, parameters);
         log.error(formattedMessage);
     }
 
@@ -53,8 +74,12 @@ public class RuleLogging {
      * Log a warn message from a rule
      */
     public static void warn(final String message, final Object... parameters) {
-
-        final String formattedMessage = String.format(message, parameters);
+        String message1 = message;
+        try {
+            message1 = URLDecoder.decode(message, DEFAULT_ENCODING);
+        } catch (UnsupportedEncodingException ignored) {
+        }
+        final String formattedMessage = String.format(message1, parameters);
         log.warn(formattedMessage);
     }
 
@@ -62,9 +87,14 @@ public class RuleLogging {
      * Log a message from a rule
      */
     public static void log(String type_, final String message, final Object... parameters) {
+        String message1 = message;
+        try {
+            message1 = URLDecoder.decode(message, DEFAULT_ENCODING);
+        } catch (UnsupportedEncodingException ignored) {
+        }
         try {
             MessageType type = ENUMS_UTILS.getEnum(MessageType.class, type_);
-            log(type, message, parameters);
+            log(type, message1, parameters);
         } catch (Throwable t) {
             t.printStackTrace();
         }
@@ -75,24 +105,29 @@ public class RuleLogging {
      */
     public static void log(MessageType type, final String message, final Object... parameters) {
 
+        String message1 = message;
+        try {
+            message1 = URLDecoder.decode(message, DEFAULT_ENCODING);
+        } catch (UnsupportedEncodingException ignored) {
+        }
         switch (type) {
             case SUCCESS:
-                info(message, parameters);
+                info(message1, parameters);
                 break;
             case DEBUG:
-                debug(message, parameters);
+                debug(message1, parameters);
                 break;
             case WARNING:
-                warn(message, parameters);
+                warn(message1, parameters);
                 break;
             case ERROR:
-                error(message, parameters);
+                error(message1, parameters);
                 break;
             case INFO:
-                info(message, parameters);
+                info(message1, parameters);
                 break;
             default:
-                info(message, parameters);
+                info(message1, parameters);
                 break;
         }
     }

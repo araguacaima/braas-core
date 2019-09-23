@@ -7,11 +7,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Vector;
 
 public class Commons {
     private static ClassLoaderUtils classLoaderUtils = new ClassLoaderUtils(null, null);
-
+    public static final String DEFAULT_ENCODING = StandardCharsets.UTF_8.toString();
 
     public static File findFile(String filePath) throws IOException {
         return findFile(filePath, null);
