@@ -191,8 +191,7 @@
         "enum": [
           "MALE",
           "FEMALE"
-        ],
-        "$id": "com.araguacaima.braas.model.person.Person$Sex"
+        ]
       },
       "telephoneNumber": {
         "type": "string"
