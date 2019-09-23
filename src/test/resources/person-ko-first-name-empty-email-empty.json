@@ -20,13 +20,10 @@
     "name": "QuickLink Industries",
     "domain": "quicklinkindustries.eu",
     "email": "company@quicklinkindustries.eu",
-    "vatIdentificationNumber": "77-0007233",
-    "url": "http://www.quicklinkindustries.eu"
+    "vatIdentificationNumber": "77-0007233"
   },
   "nationalIdentityCardNumber": "680-50-9352",
   "nationalIdentificationNumber": "",
   "passportNumber": "doEBtXjHU",
-  "fullName": "Hannah Keith",
-  "male": false,
-  "female": true
+  "fullName": "Hannah Keith"
 }
