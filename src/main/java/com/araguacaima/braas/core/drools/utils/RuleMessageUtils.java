@@ -10,18 +10,20 @@ import java.util.Locale;
 
 public class RuleMessageUtils {
 
-    private static Locale locale = Locale.getDefault();
     private static Predicate predicateMessage = object -> RuleMessage.class.isAssignableFrom(object.getClass());
-    private static Predicate transformerLocalizedComments = input -> {
-        IMessage message = (IMessage) input;
-        String language = message.getLanguage();
-        String localeLanguage = locale.getLanguage();
-        return localeLanguage.equals(language);
-    };
 
     public static Collection<?> getMessages(Collection result) {
+        return getMessages(result, Locale.ENGLISH);
+    }
+
+    public static Collection<?> getMessages(Collection result, Locale locale) {
         Collection collection = CollectionUtils.select(result, predicateMessage);
-        CollectionUtils.filter(collection, transformerLocalizedComments);
+        CollectionUtils.filter(collection, input -> {
+            IMessage message = (IMessage) input;
+            String language = message.getLanguage();
+            String localeLanguage = locale.getLanguage();
+            return localeLanguage.equals(language);
+        });
         return collection;
     }
 }

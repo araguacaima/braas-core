@@ -1,5 +1,8 @@
 package com.araguacaima.braas.core;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 /**
@@ -16,6 +19,8 @@ public abstract class RuleMessage implements IMessage {
     private Object object;
     private Map<String, Object> context;
 
+    private static final String DEFAULT_ENCODING = StandardCharsets.UTF_8.toString();
+
     public RuleMessage() {
 
     }
@@ -27,9 +32,21 @@ public abstract class RuleMessage implements IMessage {
 
     public RuleMessage(String language, String ruleName, String comment, String expectedValue, String parent, String fieldName, Object object, Map<String, Object> context) {
         this.language = language;
-        this.ruleName = ruleName;
-        this.comment = comment;
-        this.expectedValue = expectedValue;
+        try {
+            this.ruleName = URLDecoder.decode(ruleName, DEFAULT_ENCODING);
+        } catch (UnsupportedEncodingException ignored) {
+            this.ruleName = ruleName;
+        }
+        try {
+            this.comment = URLDecoder.decode(comment, DEFAULT_ENCODING);
+        } catch (UnsupportedEncodingException ignored) {
+            this.comment = comment;
+        }
+        try {
+            this.expectedValue = URLDecoder.decode(expectedValue, DEFAULT_ENCODING);
+        } catch (UnsupportedEncodingException ignored) {
+            this.expectedValue = expectedValue;
+        }
         this.parent = parent;
         this.fieldName = fieldName;
         this.object = object;
