@@ -2,6 +2,7 @@ package com.araguacaima.braas.core.drools;
 
 import com.araguacaima.commons.utils.FileUtils;
 import com.araguacaima.commons.utils.PropertiesHandlerUtils;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.LocaleUtils;
 import org.codehaus.plexus.util.StringUtils;
 import org.slf4j.Logger;
@@ -26,9 +27,9 @@ public class DroolsConfig {
     private String credentialsPath = System.getProperty("user.home") + File.separator + ".braas" + File.separator + "credentials.json";
     private String appName;
     private String artifactName;
-    private String artifactid;
+    private String artifactId;
     private String decisionTablePath;
-    private String groupid;
+    private String groupId;
     private String kieSession;
     private String kieSessionType;
     private String mavenLocalRepositoryPath;
@@ -38,12 +39,15 @@ public class DroolsConfig {
     private String scannerPeriod;
     private String server;
     private String url;
+    @JsonIgnore
     private ByteArrayOutputStream excelStream;
+    @JsonIgnore
     private InputStream credentialsStream;
     private String urlResourceStrategy;
     private boolean verbose;
     private String version;
     private String credentialStrategy;
+    @JsonIgnore
     private URLClassLoader classLoader;
     private Locale locale;
 
@@ -93,9 +97,9 @@ public class DroolsConfig {
         } else if ("drools.kie.session.type".equals(key)) {
             this.setKieSessionType(value);
         } else if ("drools.maven.groupid".equals(key)) {
-            this.setGroupid(value);
+            this.setGroupId(value);
         } else if ("drools.maven.artifactid".equals(key)) {
-            this.setArtifactid(value);
+            this.setArtifactId(value);
         } else if ("drools.maven.version".equals(key)) {
             this.setVersion(value);
         } else if ("drools.engine.verbose".equals(key)) {
@@ -176,12 +180,12 @@ public class DroolsConfig {
         this.artifactName = artifactName;
     }
 
-    public String getArtifactid() {
-        return artifactid;
+    public String getArtifactId() {
+        return artifactId;
     }
 
-    public void setArtifactid(String artifactid) {
-        this.artifactid = artifactid;
+    public void setArtifactId(String artifactId) {
+        this.artifactId = artifactId;
     }
 
     public String getDecisionTablePath() {
@@ -192,12 +196,12 @@ public class DroolsConfig {
         this.decisionTablePath = decisionTablePath;
     }
 
-    public String getGroupid() {
-        return groupid;
+    public String getGroupId() {
+        return groupId;
     }
 
-    public void setGroupid(String groupid) {
-        this.groupid = groupid;
+    public void setGroupId(String groupId) {
+        this.groupId = groupId;
     }
 
     public String getKieSession() {

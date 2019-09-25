@@ -37,8 +37,8 @@ public class ResourceStrategyFactory {
                 server = droolsConfig.getServer();
                 port = droolsConfig.getPort();
                 appName = droolsConfig.getAppName();
-                groupid = droolsConfig.getGroupid();
-                artifactid = droolsConfig.getArtifactid();
+                groupid = droolsConfig.getGroupId();
+                artifactid = droolsConfig.getArtifactId();
                 version = droolsConfig.getVersion();
                 return new WorkbenchRepositoryResourceStrategy(protocol,
                         server,
@@ -48,8 +48,8 @@ public class ResourceStrategyFactory {
                         artifactid,
                         version);
             case MAVEN:
-                groupid = droolsConfig.getGroupid();
-                artifactid = droolsConfig.getArtifactid();
+                groupid = droolsConfig.getGroupId();
+                artifactid = droolsConfig.getArtifactId();
                 version = droolsConfig.getVersion();
                 mavenLocalRepositoryPath = droolsConfig.getMavenLocalRepositoryPath();
                 return new MavenRepositoryDrlResourceStrategy(mavenLocalRepositoryPath,
