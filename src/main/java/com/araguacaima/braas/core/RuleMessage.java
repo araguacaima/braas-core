@@ -17,7 +17,7 @@ public abstract class RuleMessage implements IMessage {
     private String expectedValue;
     private String parent;
     private String fieldName;
-    private Object object;
+    private Object value;
     private Map<String, Object> context;
 
     public RuleMessage() {
@@ -25,11 +25,11 @@ public abstract class RuleMessage implements IMessage {
     }
 
 
-    public RuleMessage(String language, String ruleName, String comment, String expectedValue, String parent, String fieldName, Object object) {
-        this(language, ruleName, comment, expectedValue, parent, fieldName, object, null);
+    public RuleMessage(String language, String ruleName, String comment, String expectedValue, String parent, String fieldName, Object value) {
+        this(language, ruleName, comment, expectedValue, parent, fieldName, value, null);
     }
 
-    public RuleMessage(String language, String ruleName, String comment, String expectedValue, String parent, String fieldName, Object object, Map<String, Object> context) {
+    public RuleMessage(String language, String ruleName, String comment, String expectedValue, String parent, String fieldName, Object value, Map<String, Object> context) {
         this.language = language;
         try {
             this.ruleName = URLDecoder.decode(ruleName, DEFAULT_ENCODING);
@@ -48,7 +48,7 @@ public abstract class RuleMessage implements IMessage {
         }
         this.parent = parent;
         this.fieldName = fieldName;
-        this.object = object;
+        this.value = value;
         this.context = context;
     }
 
@@ -63,13 +63,13 @@ public abstract class RuleMessage implements IMessage {
     }
 
     @Override
-    public Object getObject() {
-        return object;
+    public Object getValue() {
+        return value;
     }
 
     @Override
-    public void setObject(Object object) {
-        this.object = object;
+    public void setValue(Object value) {
+        this.value = value;
     }
 
     @Override

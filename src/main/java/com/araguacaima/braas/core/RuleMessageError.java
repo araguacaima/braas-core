@@ -9,12 +9,12 @@ import java.util.Map;
 public class RuleMessageError extends RuleMessage {
     public MessageType type = MessageType.ERROR;
 
-    public RuleMessageError(String language, String ruleName, String comment, String expectedValue, String parent, String fieldName, Object object) {
-        this(language, ruleName, comment, expectedValue, parent, fieldName, object, null);
+    public RuleMessageError(String language, String ruleName, String comment, String expectedValue, String parent, String fieldName, Object value) {
+        this(language, ruleName, comment, expectedValue, parent, fieldName, value, null);
     }
 
-    public RuleMessageError(String language, String ruleName, String comment, String expectedValue, String parent, String fieldName, Object object, Map<String, Object> context) {
-        super(language, ruleName, comment, expectedValue, parent, fieldName, object, context);
+    public RuleMessageError(String language, String ruleName, String comment, String expectedValue, String parent, String fieldName, Object value, Map<String, Object> context) {
+        super(language, ruleName, comment, expectedValue, parent, fieldName, value, context);
     }
 
     @Override

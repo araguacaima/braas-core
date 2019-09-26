@@ -10,9 +10,9 @@ public interface IMessage {
 
     void setFieldName(String fieldName);
 
-    Object getObject();
+    Object getValue();
 
-    void setObject(Object object);
+    void setValue(Object value);
 
     String getParent();
 
