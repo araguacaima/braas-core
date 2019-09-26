@@ -9,16 +9,16 @@ import java.io.IOException;
  */
 public class AbsolutePathDecisionTableResourceStrategy implements ResourceStrategy {
 
-    String excelFileName;
+    String spreadsheetFileName;
 
-    public AbsolutePathDecisionTableResourceStrategy(File excelFile)
+    public AbsolutePathDecisionTableResourceStrategy(File spreadsheetFile)
             throws IOException {
-        this.excelFileName = excelFile.getCanonicalPath();
+        this.spreadsheetFileName = spreadsheetFile.getCanonicalPath();
     }
 
     @Override
     public String buildUrl() {
-        return excelFileName;
+        return spreadsheetFileName;
     }
 
     @Override

@@ -12,6 +12,7 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URLClassLoader;
+import java.util.Base64;
 import java.util.Locale;
 import java.util.Properties;
 
@@ -40,7 +41,7 @@ public class DroolsConfig {
     private String server;
     private String url;
     @JsonIgnore
-    private ByteArrayOutputStream excelStream;
+    private ByteArrayOutputStream spreadsheetStream;
     @JsonIgnore
     private InputStream credentialsStream;
     private String urlResourceStrategy;
@@ -276,12 +277,22 @@ public class DroolsConfig {
         this.url = url;
     }
 
-    public ByteArrayOutputStream getExcelStream() {
-        return excelStream;
+    public ByteArrayOutputStream getSpreadsheetStream() {
+        return spreadsheetStream;
     }
 
-    public void setExcelStream(ByteArrayOutputStream excelStream) {
-        this.excelStream = excelStream;
+    public void setSpreadsheetStream(ByteArrayOutputStream spreadsheetStream) {
+        this.spreadsheetStream = spreadsheetStream;
+    }
+
+    public void setSpreadsheetStreamFromString(String spreadsheetAsBase64String) throws IOException {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        DataOutputStream out = new DataOutputStream(byteArrayOutputStream);
+        byte[] spreadsheetBytes = Base64.getDecoder().decode(spreadsheetAsBase64String);
+        out.write(spreadsheetBytes);
+        byteArrayOutputStream.flush();
+        byteArrayOutputStream.close();
+        this.spreadsheetStream = byteArrayOutputStream;
     }
 
     public InputStream getCredentialsStream() {

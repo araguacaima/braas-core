@@ -85,8 +85,16 @@ public class ResourceStrategyFactory {
                             credentialsStream = FileUtils.openInputStream(new File(path));
                         }
                     }
-                    ByteArrayOutputStream excelStream = GoogleDriveUtils.getSpreadsheet(rulesPath, credentialsStream, droolsConfig.getCredentialStrategy());
-                    return new StreamDecisionTableResourceStrategy(excelStream);
+                    ByteArrayOutputStream spreadsheetStream = GoogleDriveUtils.getSpreadsheet(rulesPath, credentialsStream, droolsConfig.getCredentialStrategy());
+                    return new StreamDecisionTableResourceStrategy(spreadsheetStream);
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                    return null;
+                }
+            case STREAM_DECISION_TABLE:
+                try {
+                    ByteArrayOutputStream spreadsheetStream = droolsConfig.getSpreadsheetStream();
+                    return new StreamDecisionTableResourceStrategy(spreadsheetStream);
                 } catch (Throwable t) {
                     t.printStackTrace();
                     return null;

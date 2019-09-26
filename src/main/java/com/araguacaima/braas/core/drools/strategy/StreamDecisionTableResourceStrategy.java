@@ -7,10 +7,10 @@ import java.io.ByteArrayOutputStream;
  */
 public class StreamDecisionTableResourceStrategy implements ResourceStrategy {
 
-    private ByteArrayOutputStream excelStream;
+    private ByteArrayOutputStream spreadsheetStream;
 
-    public StreamDecisionTableResourceStrategy(ByteArrayOutputStream excelStream) {
-        this.excelStream = excelStream;
+    public StreamDecisionTableResourceStrategy(ByteArrayOutputStream spreadsheetStream) {
+        this.spreadsheetStream = spreadsheetStream;
     }
 
     @Override
@@ -20,6 +20,6 @@ public class StreamDecisionTableResourceStrategy implements ResourceStrategy {
 
     @Override
     public ByteArrayOutputStream getStream() {
-        return this.excelStream;
+        return this.spreadsheetStream;
     }
 }

@@ -26,7 +26,8 @@ public class Constants {
         MAVEN,
         ABSOLUTE_DECISION_TABLE_PATH,
         GOOGLE_DRIVE_DECISION_TABLE_PATH,
-        ABSOLUTE_DRL_PATH
+        ABSOLUTE_DRL_PATH,
+        STREAM_DECISION_TABLE
     }
 
     public enum RULES_SESSION_TYPE {

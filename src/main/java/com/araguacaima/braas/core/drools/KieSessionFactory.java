@@ -74,8 +74,8 @@ public class KieSessionFactory {
                         log.info("Using url: " + url);
                         knowledgeBase = createKnowledgeBaseFromSpreadsheet(url, classLoader);
                     } else {
-                        ByteArrayOutputStream excelStream = droolsConfig.getExcelStream();
-                        knowledgeBase = createKnowledgeBaseFromSpreadsheet(excelStream, classLoader);
+                        ByteArrayOutputStream spreadsheetStream = droolsConfig.getSpreadsheetStream();
+                        knowledgeBase = createKnowledgeBaseFromSpreadsheet(spreadsheetStream, classLoader);
                     }
                     log.info("knowledge base created!");
                     statelessSession = knowledgeBase.newStatelessKieSession();
@@ -108,11 +108,11 @@ public class KieSessionFactory {
         return knowledgeBase;
     }
 
-    public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(ByteArrayOutputStream excelStream) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
-        return createKnowledgeBaseFromSpreadsheet(excelStream, null);
+    public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(ByteArrayOutputStream spreadsheetStream) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+        return createKnowledgeBaseFromSpreadsheet(spreadsheetStream, null);
     }
 
-    public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(ByteArrayOutputStream excelStream, URLClassLoader classLoader) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+    public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(ByteArrayOutputStream spreadsheetStream, URLClassLoader classLoader) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
         DecisionTableConfiguration dtconf = KnowledgeBuilderFactory.newDecisionTableConfiguration();
         dtconf.setInputType(DecisionTableInputType.XLS);
         dtconf.setTrimCell(false);
@@ -121,7 +121,7 @@ public class KieSessionFactory {
         configuration.setProperty(DefaultPackageNameOption.PROPERTY_NAME, "com.araguacaima.braas");
         KnowledgeBuilder knowledgeBuilder = KnowledgeBuilderFactory.newKnowledgeBuilder(configuration);
         log.info("Retrieving resource...");
-        Resource resource = ResourceFactory.newByteArrayResource(excelStream.toByteArray());
+        Resource resource = ResourceFactory.newByteArrayResource(spreadsheetStream.toByteArray());
         log.info("Resource retrieved");
         return getInternalKnowledgeBase(dtconf, knowledgeBuilder, resource, classLoader);
     }

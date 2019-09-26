@@ -76,7 +76,7 @@ public class DroolsUtils {
             if (url != null) {
                 droolsConfig.setUrl(url);
             } else {
-                droolsConfig.setExcelStream(urlResourceStrategy.getStream());
+                droolsConfig.setSpreadsheetStream(urlResourceStrategy.getStream());
             }
         } catch (Throwable t) {
             t.printStackTrace();
@@ -124,7 +124,7 @@ public class DroolsUtils {
             UrlResource urlResource = (UrlResource) resources.newUrlResource(url);
             is = urlResource.getInputStream();
         } else {
-            is = new ByteArrayInputStream(droolsConfig.getExcelStream().toByteArray());
+            is = new ByteArrayInputStream(droolsConfig.getSpreadsheetStream().toByteArray());
         }
         final Resource resource = resources.newInputStreamResource(is);
         KieModule kModule = kr.addKieModule(resource);
