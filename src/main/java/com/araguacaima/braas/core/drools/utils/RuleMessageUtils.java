@@ -19,6 +19,9 @@ public class RuleMessageUtils {
     public static Collection<?> getMessages(Collection result, Locale locale) {
         Collection collection = CollectionUtils.select(result, predicateMessage);
         CollectionUtils.filter(collection, input -> {
+            if (locale == null) {
+                return true;
+            }
             IMessage message = (IMessage) input;
             String language = message.getLanguage();
             String localeLanguage = locale.getLanguage();

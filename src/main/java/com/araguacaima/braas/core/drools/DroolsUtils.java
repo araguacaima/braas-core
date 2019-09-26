@@ -83,12 +83,12 @@ public class DroolsUtils {
         }
     }
 
-    public Collection<Object> executeRules(Object... assets)
+    public Collection<Object> executeRules(Object assets)
             throws Exception {
         return executeRules(assets, globals, true);
     }
 
-    public Collection<Object> executeRules(boolean expandLists, Object... assets)
+    public Collection<Object> executeRules(boolean expandLists, Object assets)
             throws Exception {
         return executeRules(assets, globals, expandLists);
     }

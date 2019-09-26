@@ -132,7 +132,9 @@ public class DroolsConfig {
     }
 
     public void setLocale(String localeStr) {
-        this.locale = LocaleUtils.toLocale(localeStr);
+        if (StringUtils.isNotBlank(localeStr)) {
+            this.locale = LocaleUtils.toLocale(localeStr);
+        }
     }
 
     public void setLocale(Locale locale) {
