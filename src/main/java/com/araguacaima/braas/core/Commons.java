@@ -11,8 +11,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Vector;
 
 public class Commons {
-    private static ClassLoaderUtils classLoaderUtils = new ClassLoaderUtils(null, null);
     public static final String DEFAULT_ENCODING = StandardCharsets.UTF_8.toString();
+    private static ClassLoaderUtils classLoaderUtils = new ClassLoaderUtils(null, null);
 
     public static File findFile(String filePath) throws IOException {
         return findFile(filePath, null);

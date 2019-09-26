@@ -1,7 +1,6 @@
 package com.araguacaima.braas.core.drools;
 
 import com.araguacaima.commons.utils.ClassLoaderUtils;
-import com.araguacaima.commons.utils.JsonUtils;
 import com.araguacaima.commons.utils.ReflectionUtils;
 import com.araguacaima.commons.utils.StringUtils;
 import javassist.*;
@@ -24,7 +23,6 @@ public class RulesBaseToClasses {
     private ClassLoaderUtils classLoaderUtils = new ClassLoaderUtils(null);
     private StringUtils stringUtils = new StringUtils(null, null);
     private List<CtClass> createdClasses = new ArrayList<>();
-    private JsonUtils jsonUtils = new JsonUtils();
 
     private Map<String, File> files = new HashMap<>();
     public static String PACKAGE_PREFIX = "com.bbva.functional.document";
