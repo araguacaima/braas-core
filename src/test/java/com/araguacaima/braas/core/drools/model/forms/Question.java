@@ -4,12 +4,23 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class Question {
+
+    private String id;
     private String title;
     private String description;
     private QuestionType type;
+    private QuestionCategory category;
     private int maxScore;
     private double calculatedScore;
     private Set<QuestionOption> options = new LinkedHashSet<>();
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getTitle() {
         return title;
@@ -33,6 +44,14 @@ public class Question {
 
     public void setType(QuestionType type) {
         this.type = type;
+    }
+
+    public QuestionCategory getCategory() {
+        return category;
+    }
+
+    public void setCategory(QuestionCategory category) {
+        this.category = category;
     }
 
     public int getMaxScore() {

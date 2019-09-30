@@ -5,9 +5,10 @@ import java.util.Set;
 
 public class Form {
 
+    private String id;
+    private FormLocale locale;
     private String title;
     private String description;
-    private String id;
     private String url;
     private Set<Question> questions = new LinkedHashSet<>();
 
@@ -41,6 +42,14 @@ public class Form {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public FormLocale getLocale() {
+        return locale;
+    }
+
+    public void setLocale(FormLocale locale) {
+        this.locale = locale;
     }
 
     public Set<Question> getQuestions() {
