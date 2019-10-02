@@ -4,6 +4,7 @@ public class QuestionOption {
     private String title;
     private String description;
     private double weighing;
+    private boolean isText;
     private boolean selected = false;
 
     public String getTitle() {
@@ -36,5 +37,13 @@ public class QuestionOption {
 
     public void setSelected(boolean selected) {
         this.selected = selected;
+    }
+
+    public boolean isText() {
+        return isText;
+    }
+
+    public void setText(boolean text) {
+        isText = text;
     }
 }
