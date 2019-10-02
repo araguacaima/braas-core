@@ -1,6 +1,6 @@
 package com.araguacaima.braas.core;
 
-import com.araguacaima.commons.utils.ClassLoaderUtils;
+import com.araguacaima.commons.utils.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,11 +12,11 @@ import java.util.Vector;
 
 public class Commons {
     public static final String DEFAULT_ENCODING = StandardCharsets.UTF_8.toString();
-    private static ClassLoaderUtils classLoaderUtils = new ClassLoaderUtils(null, null);
-
-    public static File findFile(String filePath) throws IOException {
-        return findFile(filePath, null);
-    }
+    public static final ClassLoaderUtils classLoaderUtils = new ClassLoaderUtils(Commons.class.getClassLoader());
+    public static final PropertiesHandlerUtils propertiesHandlerUtils = PropertiesHandlerUtils.getInstance();
+    public static final ReflectionUtils reflectionUtils = ReflectionUtils.getInstance();
+    public static final EnumsUtils<MessageType> enumsUtils = EnumsUtils.getInstance();
+    public static final StringUtils stringUtils = StringUtils.getInstance();
 
     public static File findFile(String filePath, ClassLoader cl) throws IOException {
         if (cl == null) {

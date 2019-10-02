@@ -1,5 +1,7 @@
 package com.araguacaima.braas.core;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Map;
@@ -31,20 +33,26 @@ public abstract class RuleMessage implements IMessage {
 
     public RuleMessage(String language, String ruleName, String comment, String expectedValue, String parent, String fieldName, Object value, Map<String, Object> context) {
         this.language = language;
-        try {
-            this.ruleName = URLDecoder.decode(ruleName, DEFAULT_ENCODING);
-        } catch (UnsupportedEncodingException ignored) {
-            this.ruleName = ruleName;
+        if (StringUtils.isNotBlank(ruleName)) {
+            try {
+                this.ruleName = URLDecoder.decode(ruleName, DEFAULT_ENCODING);
+            } catch (UnsupportedEncodingException ignored) {
+                this.ruleName = ruleName;
+            }
         }
-        try {
-            this.comment = URLDecoder.decode(comment, DEFAULT_ENCODING);
-        } catch (UnsupportedEncodingException ignored) {
-            this.comment = comment;
+        if (StringUtils.isNotBlank(ruleName)) {
+            try {
+                this.comment = URLDecoder.decode(comment, DEFAULT_ENCODING);
+            } catch (UnsupportedEncodingException ignored) {
+                this.comment = comment;
+            }
         }
-        try {
-            this.expectedValue = URLDecoder.decode(expectedValue, DEFAULT_ENCODING);
-        } catch (UnsupportedEncodingException ignored) {
-            this.expectedValue = expectedValue;
+        if (StringUtils.isNotBlank(ruleName)) {
+            try {
+                this.expectedValue = URLDecoder.decode(expectedValue, DEFAULT_ENCODING);
+            } catch (UnsupportedEncodingException ignored) {
+                this.expectedValue = expectedValue;
+            }
         }
         this.parent = parent;
         this.fieldName = fieldName;

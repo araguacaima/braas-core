@@ -1,7 +1,6 @@
 package com.araguacaima.braas.core;
 
 
-import com.araguacaima.commons.utils.EnumsUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,6 +8,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
 import static com.araguacaima.braas.core.Commons.DEFAULT_ENCODING;
+import static com.araguacaima.braas.core.Commons.enumsUtils;
 
 /**
  * Function for use in DRL files.
@@ -16,7 +16,6 @@ import static com.araguacaima.braas.core.Commons.DEFAULT_ENCODING;
 
 public class RuleLogging {
     private static final Logger log = LoggerFactory.getLogger(RuleLogging.class);
-    private static final EnumsUtils<MessageType> ENUMS_UTILS = new EnumsUtils<>();
 
     /**
      * Log a trace message from a rule
@@ -93,7 +92,7 @@ public class RuleLogging {
         } catch (UnsupportedEncodingException ignored) {
         }
         try {
-            MessageType type = ENUMS_UTILS.getEnum(MessageType.class, type_);
+            MessageType type = enumsUtils.getEnum(MessageType.class, type_);
             log(type, message1, parameters);
         } catch (Throwable t) {
             t.printStackTrace();

@@ -1,7 +1,6 @@
 package com.araguacaima.braas.core.drools;
 
 import com.araguacaima.commons.utils.FileUtils;
-import com.araguacaima.commons.utils.PropertiesHandlerUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.LocaleUtils;
 import org.codehaus.plexus.util.StringUtils;
@@ -15,6 +14,8 @@ import java.net.URLClassLoader;
 import java.util.Base64;
 import java.util.Locale;
 import java.util.Properties;
+
+import static com.araguacaima.braas.core.Commons.propertiesHandlerUtils;
 
 /**
  * Created by Alejandro on 04/12/2014.
@@ -78,7 +79,7 @@ public class DroolsConfig {
     }
 
     public DroolsConfig(String configFile) throws FileNotFoundException, URISyntaxException, MalformedURLException {
-        this(new PropertiesHandlerUtils(null, new FileUtils(), null).getHandler(configFile).getProperties());
+        this(propertiesHandlerUtils.getHandler(configFile).getProperties());
     }
 
     public DroolsConfig build(String key, String value) throws FileNotFoundException, MalformedURLException, URISyntaxException {

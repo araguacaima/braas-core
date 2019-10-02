@@ -1,6 +1,5 @@
 package com.araguacaima.braas.core.drools.factory;
 
-import com.araguacaima.commons.utils.ReflectionUtils;
 import org.drools.core.ClassObjectFilter;
 import org.drools.core.impl.StatelessKnowledgeSessionImpl;
 import org.kie.api.event.rule.DebugAgendaEventListener;
@@ -14,11 +13,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
+import static com.araguacaima.braas.core.Commons.reflectionUtils;
+
 /**
  * Created by Alejandro on 01/12/2014.
  */
 public class KieStatelessDecisionTableSessionImpl implements KieSessionImpl {
-    private static final ReflectionUtils reflectionUtils = new ReflectionUtils(null);
+
     private final StatelessKnowledgeSessionImpl statelessSession;
 
     public KieStatelessDecisionTableSessionImpl(StatelessKieSession statelessKieSession,

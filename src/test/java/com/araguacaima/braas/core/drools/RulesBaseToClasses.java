@@ -1,8 +1,5 @@
 package com.araguacaima.braas.core.drools;
 
-import com.araguacaima.commons.utils.ClassLoaderUtils;
-import com.araguacaima.commons.utils.ReflectionUtils;
-import com.araguacaima.commons.utils.StringUtils;
 import javassist.*;
 import javassist.bytecode.DuplicateMemberException;
 import org.apache.commons.io.FileUtils;
@@ -14,14 +11,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+import static com.araguacaima.braas.core.Commons.*;
+
 
 public class RulesBaseToClasses {
 
     private static final Logger log = LoggerFactory.getLogger(RulesBaseToClasses.class);
 
-    private ReflectionUtils reflectionUtils = new ReflectionUtils(null);
-    private ClassLoaderUtils classLoaderUtils = new ClassLoaderUtils(null);
-    private StringUtils stringUtils = new StringUtils(null, null);
     private List<CtClass> createdClasses = new ArrayList<>();
 
     private Map<String, File> files = new HashMap<>();
@@ -103,7 +99,7 @@ public class RulesBaseToClasses {
         File directory = new File(directoryOutputPath + "/" + PACKAGE_PREFIX.replaceAll("\\.", "/"));
         FileUtils.forceMkdir(directory);
 
-        File file = new File(directory.getCanonicalPath() + "/" + StringUtils.capitalize(shortClassname) + ".class");
+        File file = new File(directory.getCanonicalPath() + "/" + stringUtils.capitalize(shortClassname) + ".class");
 
         FileUtils.writeByteArrayToFile(file, cc.toBytecode());
         try {
@@ -131,15 +127,15 @@ public class RulesBaseToClasses {
         if (className.contains(".")) {
             fullyQualifiedClassname = className;
         } else {
-            fullyQualifiedClassname = PACKAGE_PREFIX + "." + StringUtils.capitalize(className);
+            fullyQualifiedClassname = PACKAGE_PREFIX + "." + stringUtils.capitalize(className);
         }
         CtClass cc = null;
         try {
             cc = pool.get(fullyQualifiedClassname);
-            if (StringUtils.isNotEmpty(superClass)) {
+            if (stringUtils.isNotEmpty(superClass)) {
                 CtClass superClass_;
                 try {
-                    superClass_ = pool.get(PACKAGE_PREFIX + "." + StringUtils.capitalize(superClass));
+                    superClass_ = pool.get(PACKAGE_PREFIX + "." + stringUtils.capitalize(superClass));
                 } catch (NotFoundException ignored) {
                     superClass_ = createClass(superClass);
                 }
@@ -159,10 +155,10 @@ public class RulesBaseToClasses {
         }
         if (cc == null) {
             cc = pool.makeClass(fullyQualifiedClassname);
-            if (StringUtils.isNotEmpty(superClass)) {
+            if (stringUtils.isNotEmpty(superClass)) {
                 CtClass superClass_;
                 try {
-                    superClass_ = pool.get(PACKAGE_PREFIX + "." + StringUtils.capitalize(superClass));
+                    superClass_ = pool.get(PACKAGE_PREFIX + "." + stringUtils.capitalize(superClass));
                 } catch (NotFoundException ignored) {
                     superClass_ = createClass(superClass);
                 }
@@ -200,7 +196,7 @@ public class RulesBaseToClasses {
                 pool.importPackage(Collection.class.getPackage().getName());
                 break;
             case OBJECT:
-                dataType = StringUtils.capitalize(fieldName);
+                dataType = stringUtils.capitalize(fieldName);
                 break;
             case DATE:
                 dataType = Date.class.getName();
@@ -226,7 +222,7 @@ public class RulesBaseToClasses {
                     String[] dataTypeSplitted = dataType.split("\\.");
                     dataType = dataTypeSplitted[dataTypeSplitted.length - 1];
                 } else {
-                    dataType = StringUtils.capitalize(dataType);
+                    dataType = stringUtils.capitalize(dataType);
                 }
                 break;
         }
@@ -242,8 +238,8 @@ public class RulesBaseToClasses {
             CtField field = new CtField(fieldClass, field_, cc);
             try {
                 cc.addField(field);
-                cc.addMethod(ReflectionUtils.generateGetter(cc, field_, fieldClass));
-                cc.addMethod(ReflectionUtils.generateSetter(cc, field_, fieldClass));
+                cc.addMethod(reflectionUtils.generateGetter(cc, field_, fieldClass));
+                cc.addMethod(reflectionUtils.generateSetter(cc, field_, fieldClass));
             } catch (DuplicateMemberException ignored) {
             }
         }
@@ -255,7 +251,7 @@ public class RulesBaseToClasses {
         cc.defrost();
         ClassFile cfile = cc.getClassFile();
         ConstPool cpool = cfile.getConstPool();
-        String entity = StringUtils.uncapitalize(cc.getSimpleName());
+        String entity = stringUtils.uncapitalize(cc.getSimpleName());
 
         AnnotationsAttribute attr = new AnnotationsAttribute(cpool, AnnotationsAttribute.visibleTag);
 
@@ -296,7 +292,7 @@ public class RulesBaseToClasses {
         if (className.contains(".")) {
             fullyQualifiedClassname = className;
         } else {
-            fullyQualifiedClassname = PACKAGE_PREFIX + "." + StringUtils.capitalize(className);
+            fullyQualifiedClassname = PACKAGE_PREFIX + "." + stringUtils.capitalize(className);
         }
         CtClass cc = null;
         try {
@@ -360,11 +356,11 @@ public class RulesBaseToClasses {
 
         for (final Object Object : Objects) {
             String field = Object.toString();
-            if (StringUtils.isNotBlank(field)) {
-                String[] splittedField = StringUtils.split(field, ".");
+            if (stringUtils.isNotBlank(field)) {
+                String[] splittedField = stringUtils.split(field, ".");
                 String[] enumValues = null;
                 String enumValuesStr = Object.toString();
-                if (StringUtils.isNotBlank(enumValuesStr)) {
+                if (stringUtils.isNotBlank(enumValuesStr)) {
                     enumValues = enumValuesStr.split("\n");
                 }
                 if (splittedField.length > 1) {
@@ -390,18 +386,18 @@ public class RulesBaseToClasses {
                 Matcher m = p.matcher(firstToken);
                 if (m.find()) {
                     field = m.group(m.groupCount());
-                    String s_ = StringUtils.replace(firstToken, field, StringUtils.EMPTY);
-                    String[] splittedField = StringUtils.split(s_, ".");
+                    String s_ = stringUtils.replace(firstToken, field, stringUtils.EMPTY);
+                    String[] splittedField = stringUtils.split(s_, ".");
                     String superClass = splittedField[splittedField.length - 1];
-                    superClass = superClass.replaceAll("\\[.*?\\]", StringUtils.EMPTY).replaceAll("<.*?>",
-                            StringUtils.EMPTY);
+                    superClass = superClass.replaceAll("\\[.*?\\]", stringUtils.EMPTY).replaceAll("<.*?>",
+                            stringUtils.EMPTY);
                     createClass(field, superClass);
                 } else {
-                    field = firstToken.replaceAll("\\[.*?\\]", StringUtils.EMPTY).replaceAll("<.*?>",
-                            StringUtils.EMPTY);
+                    field = firstToken.replaceAll("\\[.*?\\]", stringUtils.EMPTY).replaceAll("<.*?>",
+                            stringUtils.EMPTY);
                 }
             } else {
-                field = firstToken.replaceAll("\\[.*?\\]", StringUtils.EMPTY);
+                field = firstToken.replaceAll("\\[.*?\\]", stringUtils.EMPTY);
             }
             if (fullyQualifiedField.length > 1) {
                 String[] remainingFields = Arrays.copyOfRange(fullyQualifiedField, 1, fullyQualifiedField.length);
@@ -433,10 +429,10 @@ public class RulesBaseToClasses {
         ClassFile cfile = field.getDeclaringClass().getClassFile();
         ConstPool cpool = cfile.getConstPool();
         AnnotationsAttribute attr = new AnnotationsAttribute(cpool, AnnotationsAttribute.visibleTag);
-        String en_description = StringUtils.defaultIfEmpty(Object.getDescription_en().getValue(),
-                StringUtils.EMPTY);
-        String es_description = StringUtils.defaultIfEmpty(Object.getDescription_es().getValue(),
-                StringUtils.EMPTY);
+        String en_description = stringUtils.defaultIfEmpty(Object.getDescription_en().getValue(),
+                stringUtils.EMPTY);
+        String es_description = stringUtils.defaultIfEmpty(Object.getDescription_es().getValue(),
+                stringUtils.EMPTY);
         String entity = field.getName();
         CtClass type = field.getType();
         String dataType = type.getName();
@@ -468,7 +464,7 @@ public class RulesBaseToClasses {
         List<Annotation> countryExceptionList = new ArrayList<>();
 
         String countrySpecific_es = Object.getCountrySpecific_es().getValue();
-        if (StringUtils.isNotBlank(countrySpecific_es)) {
+        if (stringUtils.isNotBlank(countrySpecific_es)) {
             params.put("country", "ES");
             params.put("description", countrySpecific_es);
             Annotation countrySpecificAnnot = ReflectionUtils.createStringValuesAnnotation(cpool,
@@ -478,7 +474,7 @@ public class RulesBaseToClasses {
         }
         String countrySpecific_mx = Object.getCountrySpecific_mx().getValue();
 
-        if (StringUtils.isNotBlank(countrySpecific_mx)) {
+        if (stringUtils.isNotBlank(countrySpecific_mx)) {
             params.put("country", "MX");
             params.put("description", countrySpecific_mx);
             Annotation countrySpecificAnnot = ReflectionUtils.createStringValuesAnnotation(cpool,
@@ -488,7 +484,7 @@ public class RulesBaseToClasses {
         }
         String countrySpecific_co = Object.getCountrySpecific_co().getValue();
 
-        if (StringUtils.isNotBlank(countrySpecific_co)) {
+        if (stringUtils.isNotBlank(countrySpecific_co)) {
             params.put("country", "CO");
             params.put("description", countrySpecific_co);
             Annotation countrySpecificAnnot = ReflectionUtils.createStringValuesAnnotation(cpool,
@@ -498,7 +494,7 @@ public class RulesBaseToClasses {
         }
         String countrySpecific_cl = Object.getCountrySpecific_cl().getValue();
 
-        if (StringUtils.isNotBlank(countrySpecific_cl)) {
+        if (stringUtils.isNotBlank(countrySpecific_cl)) {
             params.put("country", "CL");
             params.put("description", countrySpecific_cl);
             Annotation countrySpecificAnnot = ReflectionUtils.createStringValuesAnnotation(cpool,
@@ -508,7 +504,7 @@ public class RulesBaseToClasses {
         }
         String countrySpecific_pe = Object.getCountrySpecific_pe().getValue();
 
-        if (StringUtils.isNotBlank(countrySpecific_pe)) {
+        if (stringUtils.isNotBlank(countrySpecific_pe)) {
             params.put("country", "PE");
             params.put("description", countrySpecific_pe);
             Annotation countrySpecificAnnot = ReflectionUtils.createStringValuesAnnotation(cpool,
@@ -518,7 +514,7 @@ public class RulesBaseToClasses {
         }
         String countrySpecific_ar = Object.getCountrySpecific_ar().getValue();
 
-        if (StringUtils.isNotBlank(countrySpecific_ar)) {
+        if (stringUtils.isNotBlank(countrySpecific_ar)) {
             params.put("country", "AR");
             params.put("description", countrySpecific_ar);
             Annotation countrySpecificAnnot = ReflectionUtils.createStringValuesAnnotation(cpool,
@@ -528,7 +524,7 @@ public class RulesBaseToClasses {
         }
         String countrySpecific_ve = Object.getCountrySpecific_ve().getValue();
 
-        if (StringUtils.isNotBlank(countrySpecific_ve)) {
+        if (stringUtils.isNotBlank(countrySpecific_ve)) {
             params.put("country", "VE");
             params.put("description", countrySpecific_ve);
             Annotation countrySpecificAnnot = ReflectionUtils.createStringValuesAnnotation(cpool,
@@ -538,7 +534,7 @@ public class RulesBaseToClasses {
         }
         String countrySpecific_usa = Object.getCountrySpecific_usa().getValue();
 
-        if (StringUtils.isNotBlank(countrySpecific_usa)) {
+        if (stringUtils.isNotBlank(countrySpecific_usa)) {
             params.put("country", "US");
             params.put("description", countrySpecific_usa);
             Annotation countrySpecificAnnot = ReflectionUtils.createStringValuesAnnotation(cpool,
@@ -549,7 +545,7 @@ public class RulesBaseToClasses {
 
         String countryException_es = Object.getCountryException_es().getValue();
 
-        if (StringUtils.isNotBlank(countryException_es)) {
+        if (stringUtils.isNotBlank(countryException_es)) {
             params.put("country", "ES");
             params.put("description", countryException_es);
             Annotation countryExceptionAnnot = ReflectionUtils.createStringValuesAnnotation(cpool,
@@ -560,7 +556,7 @@ public class RulesBaseToClasses {
 
         String countryException_mx = Object.getCountryException_mx().getValue();
 
-        if (StringUtils.isNotBlank(countryException_mx)) {
+        if (stringUtils.isNotBlank(countryException_mx)) {
             params.put("country", "MX");
             params.put("description", countryException_mx);
             Annotation countryExceptionAnnot = ReflectionUtils.createStringValuesAnnotation(cpool,
@@ -571,7 +567,7 @@ public class RulesBaseToClasses {
 
         String countryException_co = Object.getCountryException_co().getValue();
 
-        if (StringUtils.isNotBlank(countryException_co)) {
+        if (stringUtils.isNotBlank(countryException_co)) {
             params.put("country", "CO");
             params.put("description", countryException_co);
             Annotation countryExceptionAnnot = ReflectionUtils.createStringValuesAnnotation(cpool,
@@ -582,7 +578,7 @@ public class RulesBaseToClasses {
 
         String countryException_cl = Object.getCountryException_cl().getValue();
 
-        if (StringUtils.isNotBlank(countryException_cl)) {
+        if (stringUtils.isNotBlank(countryException_cl)) {
             params.put("country", "CL");
             params.put("description", countryException_cl);
             Annotation countryExceptionAnnot = ReflectionUtils.createStringValuesAnnotation(cpool,
@@ -593,7 +589,7 @@ public class RulesBaseToClasses {
 
         String countryException_pe = Object.getCountryException_pe().getValue();
 
-        if (StringUtils.isNotBlank(countryException_pe)) {
+        if (stringUtils.isNotBlank(countryException_pe)) {
             params.put("country", "PE");
             params.put("description", countryException_pe);
             Annotation countryExceptionAnnot = ReflectionUtils.createStringValuesAnnotation(cpool,
@@ -604,7 +600,7 @@ public class RulesBaseToClasses {
 
         String countryException_ar = Object.getCountryException_ar().getValue();
 
-        if (StringUtils.isNotBlank(countryException_ar)) {
+        if (stringUtils.isNotBlank(countryException_ar)) {
             params.put("country", "AR");
             params.put("description", countryException_ar);
             Annotation countryExceptionAnnot = ReflectionUtils.createStringValuesAnnotation(cpool,
@@ -615,7 +611,7 @@ public class RulesBaseToClasses {
 
         String countryException_ve = Object.getCountryException_ve().getValue();
 
-        if (StringUtils.isNotBlank(countryException_ve)) {
+        if (stringUtils.isNotBlank(countryException_ve)) {
             params.put("country", "VE");
             params.put("description", countryException_ve);
             Annotation countryExceptionAnnot = ReflectionUtils.createStringValuesAnnotation(cpool,
@@ -626,7 +622,7 @@ public class RulesBaseToClasses {
 
         String countryException_usa = Object.getCountryException_usa().getValue();
 
-        if (StringUtils.isNotBlank(countryException_usa)) {
+        if (stringUtils.isNotBlank(countryException_usa)) {
             params.put("country", "US");
             params.put("description", countryException_usa);
             Annotation countryExceptionAnnot = ReflectionUtils.createStringValuesAnnotation(cpool,
