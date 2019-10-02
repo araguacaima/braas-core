@@ -3,7 +3,6 @@ package com.araguacaima.braas.core.drools;
 import com.araguacaima.braas.core.drools.factory.KieSessionImpl;
 import com.araguacaima.braas.core.drools.factory.ResourceStrategyFactory;
 import com.araguacaima.braas.core.drools.strategy.ResourceStrategy;
-import com.araguacaima.commons.utils.ReflectionUtils;
 import org.drools.core.io.impl.UrlResource;
 import org.kie.api.KieServices;
 import org.kie.api.builder.KieModule;
@@ -35,9 +34,9 @@ import java.util.Map;
 
 public class DroolsUtils {
 
+    public static final String RULES_TABLES_DEFAULT_NAME = "Decision Tables";
     private DroolsConfig droolsConfig;
     private Map<String, Object> globals = new HashMap<>();
-    private ReflectionUtils reflectionUtils = new ReflectionUtils(null);
 
     public DroolsUtils(DroolsConfig droolsConfig) {
         this.droolsConfig = droolsConfig;

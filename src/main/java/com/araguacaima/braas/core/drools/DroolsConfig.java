@@ -40,6 +40,7 @@ public class DroolsConfig {
     private String scannerPeriod;
     private String server;
     private String url;
+    private String rulesTabName = DroolsUtils.RULES_TABLES_DEFAULT_NAME;
     @JsonIgnore
     private ByteArrayOutputStream spreadsheetStream;
     @JsonIgnore
@@ -72,7 +73,8 @@ public class DroolsConfig {
                 .build("drools.engine.verbose", bundle.getProperty("drools.engine.verbose"))
                 .build("drools.maven.version", bundle.getProperty("drools.maven.version"))
                 .build("credentialStrategy", bundle.getProperty("credentialStrategy"))
-                .build("locale", bundle.getProperty("locale"));
+                .build("locale", bundle.getProperty("locale"))
+                .build("rulesTabName", bundle.getProperty("rulesTabName"));
     }
 
     public DroolsConfig(String configFile) throws FileNotFoundException, URISyntaxException, MalformedURLException {
@@ -123,8 +125,18 @@ public class DroolsConfig {
             this.setCredentialStrategy(value);
         } else if ("locale".equals(key)) {
             this.setLocale(value);
+        } else if ("rulesTabName".equals(key)) {
+            this.setRulesTabName(value);
         }
         return this;
+    }
+
+    public String getRulesTabName() {
+        return rulesTabName;
+    }
+
+    public void setRulesTabName(String rulesTabName) {
+        this.rulesTabName = rulesTabName;
     }
 
     public Locale getLocale() {

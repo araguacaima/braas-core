@@ -2,6 +2,7 @@ package com.araguacaima.braas.core.drools;
 
 import com.araguacaima.braas.core.Constants;
 import com.araguacaima.braas.core.drools.factory.*;
+import org.apache.commons.lang.StringUtils;
 import org.drools.core.impl.InternalKnowledgeBase;
 import org.drools.core.impl.KnowledgeBaseFactory;
 import org.kie.api.KieBaseConfiguration;
@@ -41,6 +42,7 @@ public class KieSessionFactory {
         final KieSession session;
         final StatelessKieSession statelessSession;
         String url = droolsConfig.getUrl();
+        String rulesTabName = droolsConfig.getRulesTabName();
         URLClassLoader classLoader = droolsConfig.getClassLoader();
         if (Constants.RULES_SESSION_TYPE.STATEFUL.name().equalsIgnoreCase(kieSessionType)) {
             if (Constants.RULES_REPOSITORY_STRATEGIES.DRL.name().equalsIgnoreCase(rulesRepositoryStrategy)) {
@@ -50,7 +52,7 @@ public class KieSessionFactory {
             } else if (Constants.RULES_REPOSITORY_STRATEGIES.DECISION_TABLE.name().equalsIgnoreCase(
                     rulesRepositoryStrategy)) {
                 try {
-                    InternalKnowledgeBase knowledgeBase = createKnowledgeBaseFromSpreadsheet(url, classLoader);
+                    InternalKnowledgeBase knowledgeBase = createKnowledgeBaseFromSpreadsheet(url, classLoader, rulesTabName);
                     session = knowledgeBase.newKieSession();
                     return new KieStatefulDecisionTableSessionImpl(session, verbose, globals);
                 } catch (Exception e) {
@@ -72,10 +74,10 @@ public class KieSessionFactory {
                     InternalKnowledgeBase knowledgeBase;
                     if (url != null) {
                         log.info("Using url: " + url);
-                        knowledgeBase = createKnowledgeBaseFromSpreadsheet(url, classLoader);
+                        knowledgeBase = createKnowledgeBaseFromSpreadsheet(url, classLoader, rulesTabName);
                     } else {
                         ByteArrayOutputStream spreadsheetStream = droolsConfig.getSpreadsheetStream();
-                        knowledgeBase = createKnowledgeBaseFromSpreadsheet(spreadsheetStream, classLoader);
+                        knowledgeBase = createKnowledgeBaseFromSpreadsheet(spreadsheetStream, classLoader, rulesTabName);
                     }
                     log.info("knowledge base created!");
                     statelessSession = knowledgeBase.newStatelessKieSession();
@@ -95,7 +97,6 @@ public class KieSessionFactory {
 
     private static InternalKnowledgeBase getInternalKnowledgeBase(DecisionTableConfiguration dtconf, KnowledgeBuilder knowledgeBuilder, Resource resource, URLClassLoader classLoader) throws IllegalAccessException, NoSuchFieldException, ClassNotFoundException {
         KieBaseConfiguration conf = KnowledgeBaseFactory.newKnowledgeBaseConfiguration(null, classLoader);
-        //injectClassesToConfiguration(classLoader, conf);
         InternalKnowledgeBase knowledgeBase = KnowledgeBaseFactory.newKnowledgeBase(conf);
         knowledgeBuilder.add(resource, ResourceType.DTABLE, dtconf);
         log.info("Resource added to knowledge builder");
@@ -108,13 +109,18 @@ public class KieSessionFactory {
         return knowledgeBase;
     }
 
-    public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(ByteArrayOutputStream spreadsheetStream) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
-        return createKnowledgeBaseFromSpreadsheet(spreadsheetStream, null);
+    public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(ByteArrayOutputStream spreadsheetStream, String rulesTabName) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+        return createKnowledgeBaseFromSpreadsheet(spreadsheetStream, null, rulesTabName);
     }
 
-    public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(ByteArrayOutputStream spreadsheetStream, URLClassLoader classLoader) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+    public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(ByteArrayOutputStream spreadsheetStream) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+        return createKnowledgeBaseFromSpreadsheet(spreadsheetStream, null, null);
+    }
+
+    public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(ByteArrayOutputStream spreadsheetStream, URLClassLoader classLoader, String rulesTabName) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
         DecisionTableConfiguration dtconf = KnowledgeBuilderFactory.newDecisionTableConfiguration();
         dtconf.setInputType(DecisionTableInputType.XLS);
+        dtconf.setWorksheetName(StringUtils.isNotBlank(rulesTabName) ? rulesTabName : DroolsUtils.RULES_TABLES_DEFAULT_NAME);
         dtconf.setTrimCell(false);
         KnowledgeBuilderConfiguration configuration = KnowledgeBuilderFactory.newKnowledgeBuilderConfiguration(null, classLoader);
         configuration.setOption(TrimCellsInDTableOption.DISABLED);
@@ -126,14 +132,19 @@ public class KieSessionFactory {
         return getInternalKnowledgeBase(dtconf, knowledgeBuilder, resource, classLoader);
     }
 
-    public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(String path) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
-        return createKnowledgeBaseFromSpreadsheet(path, null);
+    public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(String path, String rulesTabName) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+        return createKnowledgeBaseFromSpreadsheet(path, null, rulesTabName);
     }
 
-    public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(String path, URLClassLoader classLoader) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+    public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(String path) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+        return createKnowledgeBaseFromSpreadsheet(path, null, null);
+    }
+
+    public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(String path, URLClassLoader classLoader, String rulesTabName) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
         DecisionTableConfiguration dtconf = KnowledgeBuilderFactory.newDecisionTableConfiguration();
         dtconf.setInputType(DecisionTableInputType.XLS);
         dtconf.setTrimCell(false);
+        dtconf.setWorksheetName(StringUtils.isNotBlank(rulesTabName) ? rulesTabName : DroolsUtils.RULES_TABLES_DEFAULT_NAME);
         KnowledgeBuilderConfiguration configuration = KnowledgeBuilderFactory.newKnowledgeBuilderConfiguration(null, classLoader);
         configuration.setOption(TrimCellsInDTableOption.DISABLED);
         configuration.setProperty(DefaultPackageNameOption.PROPERTY_NAME, "com.araguacaima.braas");
