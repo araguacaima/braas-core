@@ -1,9 +1,10 @@
 package com.araguacaima.braas.core.drools.model;
 
-import com.araguacaima.braas.core.drools.Commons;
 import io.codearte.jfairy.producer.company.Company;
 import io.codearte.jfairy.producer.person.Address;
 import org.joda.time.DateTime;
+
+import static com.araguacaima.braas.core.Commons.reflectionUtils;
 
 public class Person extends io.codearte.jfairy.producer.person.Person {
 
@@ -13,67 +14,67 @@ public class Person extends io.codearte.jfairy.producer.person.Person {
     }
 
     public void setAddress(Address address) {
-        Commons.setProperty(this, "address", address);
+        reflectionUtils.invokeSimpleSetter(this, "address", address);
     }
 
     public void setFirstName(String firstName) {
-        Commons.setProperty(this, "firstName", firstName);
+        reflectionUtils.invokeSimpleSetter(this, "firstName", firstName);
     }
 
     public void setMiddleName(String middleName) {
-        Commons.setProperty(this, "middleName", middleName);
+        reflectionUtils.invokeSimpleSetter(this, "middleName", middleName);
     }
 
     public void setLastName(String lastName) {
-        Commons.setProperty(this, "lastName", lastName);
+        reflectionUtils.invokeSimpleSetter(this, "lastName", lastName);
     }
 
     public void setEmail(String email) {
-        Commons.setProperty(this, "email", email);
+        reflectionUtils.invokeSimpleSetter(this, "email", email);
     }
 
     public void setUsername(String username) {
-        Commons.setProperty(this, "username", username);
+        reflectionUtils.invokeSimpleSetter(this, "username", username);
     }
 
     public void setPassword(String password) {
-        Commons.setProperty(this, "password", password);
+        reflectionUtils.invokeSimpleSetter(this, "password", password);
     }
 
     public void setSex(Sex sex) {
-        Commons.setProperty(this, "sex", sex);
+        reflectionUtils.invokeSimpleSetter(this, "sex", sex);
     }
 
     public void setTelephoneNumber(String telephoneNumber) {
-        Commons.setProperty(this, "telephoneNumber", telephoneNumber);
+        reflectionUtils.invokeSimpleSetter(this, "telephoneNumber", telephoneNumber);
     }
 
     public void setDateOfBirth(DateTime dateOfBirth) {
-        Commons.setProperty(this, "dateOfBirth", dateOfBirth);
+        reflectionUtils.invokeSimpleSetter(this, "dateOfBirth", dateOfBirth);
     }
 
     public void setAge(Integer age) {
-        Commons.setProperty(this, "age", age);
+        reflectionUtils.invokeSimpleSetter(this, "age", age);
     }
 
     public void setCompany(Company company) {
-        Commons.setProperty(this, "company", company);
+        reflectionUtils.invokeSimpleSetter(this, "company", company);
     }
 
     public void setCompanyEmail(String companyEmail) {
-        Commons.setProperty(this, "companyEmail", companyEmail);
+        reflectionUtils.invokeSimpleSetter(this, "companyEmail", companyEmail);
     }
 
     public void setNationalIdentityCardNumber(String nationalIdentityCardNumber) {
-        Commons.setProperty(this, "nationalIdentityCardNumber", nationalIdentityCardNumber);
+        reflectionUtils.invokeSimpleSetter(this, "nationalIdentityCardNumber", nationalIdentityCardNumber);
     }
 
     public void setNationalIdentificationNumber(String nationalIdentificationNumber) {
-        Commons.setProperty(this, "nationalIdentificationNumber", nationalIdentificationNumber);
+        reflectionUtils.invokeSimpleSetter(this, "nationalIdentificationNumber", nationalIdentificationNumber);
     }
 
     public void setPassportNumber(String passportNumber) {
-        Commons.setProperty(this, "passportNumber", passportNumber);
+        reflectionUtils.invokeSimpleSetter(this, "passportNumber", passportNumber);
     }
 
     public static class PersonWrapper {
