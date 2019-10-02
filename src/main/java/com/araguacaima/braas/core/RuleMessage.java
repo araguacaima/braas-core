@@ -40,14 +40,14 @@ public abstract class RuleMessage implements IMessage {
                 this.ruleName = ruleName;
             }
         }
-        if (StringUtils.isNotBlank(ruleName)) {
+        if (StringUtils.isNotBlank(comment)) {
             try {
                 this.comment = URLDecoder.decode(comment, DEFAULT_ENCODING);
             } catch (UnsupportedEncodingException ignored) {
                 this.comment = comment;
             }
         }
-        if (StringUtils.isNotBlank(ruleName)) {
+        if (StringUtils.isNotBlank(expectedValue)) {
             try {
                 this.expectedValue = URLDecoder.decode(expectedValue, DEFAULT_ENCODING);
             } catch (UnsupportedEncodingException ignored) {

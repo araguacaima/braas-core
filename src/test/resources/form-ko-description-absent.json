@@ -1,0 +1,394 @@
+[
+  {
+    "id": "60bf396c-5c08-42a4-9d78-7100eb3c979c",
+    "locale": "ES",
+    "title": "Evaluador Paquetes Comerciales",
+    "description": "",
+    "url": "https://docs.google.com/forms/d/e/1FAIpQLScucfp6H4s4eQpvg-qaM6YEhO1aC9P7BkKyIY78ZZRXEWL0bA",
+    "questions": [
+      {
+        "id": "4b44037b-a78d-4a64-bd07-617f8111a9b3",
+        "title": "Existe producto similar en el Banco que cubra esta funcionalidad",
+        "description": "",
+        "type": "SINGLE",
+        "category": "CATEGORY_1",
+        "options": [
+          {
+            "title": "Sí",
+            "description": "",
+            "selected": false
+          },
+          {
+            "title": "No",
+            "description": "",
+            "selected": false
+          },
+          {
+            "title": "No lo sé",
+            "description": "",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "id": "1339b2ed-5701-4e8f-bf83-72fbdb997ec4",
+        "title": "Tipo de infraestrutura en la que se despliega el SaaS",
+        "description": "",
+        "type": "MULTIPLE",
+        "category": "CATEGORY_2",
+        "options": [
+          {
+            "title": "Cloud Pública (PaaS)",
+            "description": "",
+            "selected": false
+          },
+          {
+            "title": "Cloud Privada",
+            "description": "",
+            "selected": false
+          },
+          {
+            "title": "Cloud Híbrida (PaaS)",
+            "description": "",
+            "selected": false
+          },
+          {
+            "title": "On-premise (instalación específica, independientemente del tipo de datacenter o cloud)",
+            "description": "",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "id": "424f19dc-a4ee-4402-827a-d0457173967c",
+        "title": "Si su infraestructura reside total o parcialmente en la nube pública indique cuá(es):",
+        "description": "",
+        "type": "MULTIPLE",
+        "category": "CATEGORY_1",
+        "options": [
+          {
+            "title": "Amazon Web Services",
+            "description": "",
+            "selected": false
+          },
+          {
+            "title": "Google Cloud Platform",
+            "description": "",
+            "selected": false
+          },
+          {
+            "title": "Microsoft Azure",
+            "description": "",
+            "selected": false
+          },
+          {
+            "title": "Otro:",
+            "description": "",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "id": "96321bc1-00a3-4c61-8c5b-d54cadf677d1",
+        "title": "Certificaciones de Seguridad acreditadas (PCI DSS, ISO 27001, SOC II, etc)",
+        "description": "",
+        "type": "MULTIPLE",
+        "category": "CATEGORY_2",
+        "options": [
+          {
+            "title": "PCI DSS",
+            "description": "",
+            "selected": false
+          },
+          {
+            "title": "ISO 27001",
+            "description": "",
+            "selected": false
+          },
+          {
+            "title": "SOC II",
+            "description": "",
+            "selected": false
+          },
+          {
+            "title": "Otro:",
+            "description": "",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "id": "a300bd8a-981e-4b39-a2dc-59aba319be1f",
+        "title": "¿Se facilita Acceso a las Instalaciones y el Soporte necesario cuando por solicitud de algún ente regulador del Banco se requiera realizar una Auditoría a la Infraestructura del Producto?",
+        "description": "",
+        "type": "SINGLE",
+        "category": "CATEGORY_2",
+        "options": [
+          {
+            "title": "Sí",
+            "description": "",
+            "selected": false
+          },
+          {
+            "title": "No",
+            "description": "",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "id": "5b0507f9-7681-4400-8302-8d799dd42d1d",
+        "title": "¿Permite autenticación delegada en los sistemas BBVA?",
+        "description": "",
+        "type": "SINGLE",
+        "category": "CATEGORY_1",
+        "options": [
+          {
+            "title": "Sí",
+            "description": "",
+            "selected": false
+          },
+          {
+            "title": "No",
+            "description": "",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "id": "35b626fa-160a-4169-901c-d31820ee3299",
+        "title": "¿Se podría Automatizar la Gestión de Identidades desde el sistema IDM de BBVA (aprovisionamiento de usuarios / roles y asignación de los usuarios a los roles)?",
+        "description": "",
+        "type": "SINGLE",
+        "category": "CATEGORY_1",
+        "options": [
+          {
+            "title": "Sí",
+            "description": "",
+            "selected": false
+          },
+          {
+            "title": "No",
+            "description": "",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "id": "7201dcf4-b09f-4b8c-804c-4dc1acb87ff8",
+        "title": "¿Pueden segregarse las funciones de Administrador del Producto de las de Administrador de Seguridad? (siendo sólo éste el que tenga acceso a la Gestión de Identidades).",
+        "description": "",
+        "type": "SINGLE",
+        "category": "CATEGORY_2",
+        "options": [
+          {
+            "title": "Sí",
+            "description": "",
+            "selected": false
+          },
+          {
+            "title": "No",
+            "description": "",
+            "selected": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "e122af1f-1a78-4245-864e-42ee1afbd43b",
+    "locale": "EN",
+    "title": "Commercial Package Evaluator",
+    "description": "",
+    "url": "https://docs.google.com/forms/d/e/1FAIpQLScucfp6H4s4eQpvg-qaM6YEhO1aC9P7BkKyIY78ZZRXEWL0bA",
+    "questions": [
+      {
+        "id": "4b44037b-a78d-4a64-bd07-617f8111a9b3",
+        "title": "Is there a similar product in the Bank that covers this functionality?",
+        "description": "",
+        "type": "SINGLE",
+        "category": "CATEGORY_1",
+        "options": [
+          {
+            "title": "Yes",
+            "description": "",
+            "selected": false
+          },
+          {
+            "title": "No",
+            "description": "",
+            "selected": false
+          },
+          {
+            "title": "I don't know",
+            "description": "",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "id": "1339b2ed-5701-4e8f-bf83-72fbdb997ec4",
+        "title": "Type of infrastructure in which the SaaS is deployed",
+        "description": "",
+        "type": "MULTIPLE",
+        "category": "CATEGORY_2",
+        "options": [
+          {
+            "title": "Public Cloud (PaaS)",
+            "description": "",
+            "selected": false
+          },
+          {
+            "title": "Private Cloud",
+            "description": "",
+            "selected": false
+          },
+          {
+            "title": "Hybrid Cloud (PaaS)",
+            "description": "",
+            "selected": false
+          },
+          {
+            "title": "On-premise (specific installation, regardless of the type of datacenter or cloud)",
+            "description": "",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "id": "424f19dc-a4ee-4402-827a-d0457173967c",
+        "title": "If your infrastructure resides totally or partially in the public cloud, indicate which:",
+        "description": "",
+        "type": "MULTIPLE",
+        "category": "CATEGORY_1",
+        "options": [
+          {
+            "title": "Amazon Web Services",
+            "description": "",
+            "selected": false
+          },
+          {
+            "title": "Google Cloud Platform",
+            "description": "",
+            "selected": false
+          },
+          {
+            "title": "Microsoft Azure",
+            "description": "",
+            "selected": false
+          },
+          {
+            "title": "Other:",
+            "description": "",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "id": "96321bc1-00a3-4c61-8c5b-d54cadf677d1",
+        "title": "Accredited Security Certifications (PCI DSS, ISO 27001, SOC II, etc.)",
+        "description": "",
+        "type": "MULTIPLE",
+        "category": "CATEGORY_2",
+        "options": [
+          {
+            "title": "PCI DSS",
+            "description": "",
+            "selected": false
+          },
+          {
+            "title": "ISO 27001",
+            "description": "",
+            "selected": false
+          },
+          {
+            "title": "SOC II",
+            "description": "",
+            "selected": false
+          },
+          {
+            "title": "Other:",
+            "description": "",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "id": "a300bd8a-981e-4b39-a2dc-59aba319be1f",
+        "title": "Is Access to the Installations and the necessary Support provided when, at the request of any regulatory entity of the Bank, an Audit of the Product Infrastructure is required?",
+        "description": "",
+        "type": "SINGLE",
+        "category": "CATEGORY_2",
+        "options": [
+          {
+            "title": "Yes",
+            "description": "",
+            "selected": false
+          },
+          {
+            "title": "No",
+            "description": "",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "id": "5b0507f9-7681-4400-8302-8d799dd42d1d",
+        "title": "Does it allow delegated authentication on BBVA systems?",
+        "description": "",
+        "type": "SINGLE",
+        "category": "CATEGORY_1",
+        "options": [
+          {
+            "title": "Yes",
+            "description": "",
+            "selected": false
+          },
+          {
+            "title": "No",
+            "description": "",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "id": "35b626fa-160a-4169-901c-d31820ee3299",
+        "title": "Could Identity Management be automated from the BBVA IDM system (provisioning of users / roles and assigning users to roles)?",
+        "description": "",
+        "type": "SINGLE",
+        "category": "CATEGORY_1",
+        "options": [
+          {
+            "title": "Yes",
+            "description": "",
+            "selected": false
+          },
+          {
+            "title": "No",
+            "description": "",
+            "selected": false
+          }
+        ]
+      },
+      {
+        "id": "7201dcf4-b09f-4b8c-804c-4dc1acb87ff8",
+        "title": "Can the functions of Product Administrator be segregated from those of Security Administrator? (being only this one that has access to Identity Management).",
+        "description": "",
+        "type": "SINGLE",
+        "category": "CATEGORY_2",
+        "options": [
+          {
+            "title": "Yes",
+            "description": "",
+            "selected": false
+          },
+          {
+            "title": "No",
+            "description": "",
+            "selected": false
+          }
+        ]
+      }
+    ]
+  }
+]
