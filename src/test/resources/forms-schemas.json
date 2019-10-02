@@ -6,7 +6,18 @@
       "calculatedScore": {
         "type": "number"
       },
+      "category": {
+        "type": "string",
+        "enum": [
+          "CATEGORY_1",
+          "CATEGORY_2"
+        ],
+        "$id": "com.araguacaima.braas.core.drools.model.forms.QuestionCategory"
+      },
       "description": {
+        "type": "string"
+      },
+      "id": {
         "type": "string"
       },
       "maxScore": {
@@ -14,12 +25,14 @@
       },
       "options": {
         "type": "array",
-        "uniqueItems": true,
         "items": {
           "type": "object",
           "properties": {
             "description": {
               "type": "string"
+            },
+            "isText": {
+              "type": "boolean"
             },
             "selected": {
               "type": "boolean"
@@ -33,7 +46,7 @@
           },
           "$id": "com.araguacaima.braas.core.drools.model.forms.QuestionOption"
         },
-        "$id": "Set<com.araguacaima.braas.core.drools.model.forms.QuestionOption>"
+        "$id": "java.util.Set<com.araguacaima.braas.core.drools.model.forms.QuestionOption>"
       },
       "title": {
         "type": "string"
@@ -41,7 +54,6 @@
       "type": {
         "type": "string",
         "enum": [
-          "BOOLEAN",
           "MULTIPLE",
           "SINGLE"
         ],
@@ -54,7 +66,15 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "string",
     "enum": [
-      "BOOLEAN",
+      "ES",
+      "EN"
+    ],
+    "$id": "com.araguacaima.braas.core.drools.model.forms.FormLocale"
+  },
+  {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "string",
+    "enum": [
       "MULTIPLE",
       "SINGLE"
     ],
@@ -66,6 +86,9 @@
     "properties": {
       "description": {
         "type": "string"
+      },
+      "isText": {
+        "type": "boolean"
       },
       "selected": {
         "type": "boolean"
@@ -81,6 +104,15 @@
   },
   {
     "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "string",
+    "enum": [
+      "CATEGORY_1",
+      "CATEGORY_2"
+    ],
+    "$id": "com.araguacaima.braas.core.drools.model.forms.QuestionCategory"
+  },
+  {
+    "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
     "properties": {
       "description": {
@@ -89,16 +121,34 @@
       "id": {
         "type": "string"
       },
+      "locale": {
+        "type": "string",
+        "enum": [
+          "ES",
+          "EN"
+        ],
+        "$id": "com.araguacaima.braas.core.drools.model.forms.FormLocale"
+      },
       "questions": {
         "type": "array",
-        "uniqueItems": true,
         "items": {
           "type": "object",
           "properties": {
             "calculatedScore": {
               "type": "number"
             },
+            "category": {
+              "type": "string",
+              "enum": [
+                "CATEGORY_1",
+                "CATEGORY_2"
+              ],
+              "$id": "com.araguacaima.braas.core.drools.model.forms.QuestionCategory"
+            },
             "description": {
+              "type": "string"
+            },
+            "id": {
               "type": "string"
             },
             "maxScore": {
@@ -106,12 +156,14 @@
             },
             "options": {
               "type": "array",
-              "uniqueItems": true,
               "items": {
                 "type": "object",
                 "properties": {
                   "description": {
                     "type": "string"
+                  },
+                  "isText": {
+                    "type": "boolean"
                   },
                   "selected": {
                     "type": "boolean"
@@ -125,7 +177,7 @@
                 },
                 "$id": "com.araguacaima.braas.core.drools.model.forms.QuestionOption"
               },
-              "$id": "Set<com.araguacaima.braas.core.drools.model.forms.QuestionOption>"
+              "$id": "java.util.Set<com.araguacaima.braas.core.drools.model.forms.QuestionOption>"
             },
             "title": {
               "type": "string"
@@ -133,7 +185,6 @@
             "type": {
               "type": "string",
               "enum": [
-                "BOOLEAN",
                 "MULTIPLE",
                 "SINGLE"
               ],
@@ -142,7 +193,7 @@
           },
           "$id": "com.araguacaima.braas.core.drools.model.forms.Question"
         },
-        "$id": "Set<com.araguacaima.braas.core.drools.model.forms.Question>"
+        "$id": "java.util.Set<com.araguacaima.braas.core.drools.model.forms.Question>"
       },
       "title": {
         "type": "string"
