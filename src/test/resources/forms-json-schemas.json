@@ -17,6 +17,9 @@
       "description": {
         "type": "string"
       },
+      "formId": {
+        "type": "string"
+      },
       "id": {
         "type": "string"
       },
@@ -33,6 +36,9 @@
             },
             "isText": {
               "type": "boolean"
+            },
+            "questionId": {
+              "type": "string"
             },
             "selected": {
               "type": "boolean"
@@ -89,6 +95,9 @@
       },
       "isText": {
         "type": "boolean"
+      },
+      "questionId": {
+        "type": "string"
       },
       "selected": {
         "type": "boolean"
@@ -148,6 +157,9 @@
             "description": {
               "type": "string"
             },
+            "formId": {
+              "type": "string"
+            },
             "id": {
               "type": "string"
             },
@@ -164,6 +176,9 @@
                   },
                   "isText": {
                     "type": "boolean"
+                  },
+                  "questionId": {
+                    "type": "string"
                   },
                   "selected": {
                     "type": "boolean"

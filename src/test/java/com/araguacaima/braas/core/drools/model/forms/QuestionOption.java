@@ -6,6 +6,7 @@ public class QuestionOption {
     private double weighing;
     private boolean isText;
     private boolean selected = false;
+    private String questionId;
 
     public String getTitle() {
         return title;
@@ -45,5 +46,13 @@ public class QuestionOption {
 
     public void setText(boolean text) {
         isText = text;
+    }
+
+    public String getQuestionId() {
+        return questionId;
+    }
+
+    public void setQuestionId(String questionId) {
+        this.questionId = questionId;
     }
 }

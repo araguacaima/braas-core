@@ -13,6 +13,7 @@ public class Question {
     private int maxScore;
     private double calculatedScore;
     private Set<QuestionOption> options = new LinkedHashSet<>();
+    private String formId;
 
     public String getId() {
         return id;
@@ -76,5 +77,13 @@ public class Question {
 
     public void setOptions(Set<QuestionOption> options) {
         this.options = options;
+    }
+
+    public String getFormId() {
+        return formId;
+    }
+
+    public void setFormId(String formId) {
+        this.formId = formId;
     }
 }
