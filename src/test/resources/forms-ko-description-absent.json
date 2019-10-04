@@ -27,7 +27,7 @@
         }
       ],
       "title": "¿Existe producto similar en el Banco que cubra esta funcionalidad?",
-      "type": "BOOLEAN"
+      "type": "SINGLE"
     },
     {
       "calculatedScore": 0,

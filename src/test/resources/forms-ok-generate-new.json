@@ -1,0 +1,15 @@
+{
+  "id": "de72be43-7531-409b-a358-da66a4fbf9b5",
+  "title": "Evaluador Paquetes Comerciales",
+  "questions": [
+    {
+      "description": "Pregunta para validad si existe un producto similar",
+      "options": [
+        {
+          "title": "Sí"
+        }
+      ],
+      "title": "Existe producto similar en el Banco que cubra esta funcionalidad"
+    }
+  ]
+}
