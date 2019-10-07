@@ -17,6 +17,7 @@ public class Commons {
     public static final ReflectionUtils reflectionUtils = ReflectionUtils.getInstance();
     public static final EnumsUtils<MessageType> enumsUtils = EnumsUtils.getInstance();
     public static final StringUtils stringUtils = StringUtils.getInstance();
+    public static final String DEFAULT_PACKAGE_NAME = "com.araguacaima.braas";
 
     public static File findFile(String filePath, ClassLoader cl) throws IOException {
         if (cl == null) {

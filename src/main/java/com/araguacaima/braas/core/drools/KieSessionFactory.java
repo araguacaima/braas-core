@@ -1,5 +1,6 @@
 package com.araguacaima.braas.core.drools;
 
+import com.araguacaima.braas.core.Commons;
 import com.araguacaima.braas.core.Constants;
 import com.araguacaima.braas.core.drools.factory.*;
 import org.apache.commons.lang.StringUtils;
@@ -120,11 +121,11 @@ public class KieSessionFactory {
     public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(ByteArrayOutputStream spreadsheetStream, URLClassLoader classLoader, String rulesTabName) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
         DecisionTableConfiguration dtconf = KnowledgeBuilderFactory.newDecisionTableConfiguration();
         dtconf.setInputType(DecisionTableInputType.XLS);
-        dtconf.setWorksheetName(StringUtils.isNotBlank(rulesTabName) ? rulesTabName : DroolsUtils.RULES_TABLES_DEFAULT_NAME);
+        dtconf.setWorksheetName(StringUtils.isNotBlank(rulesTabName) ? rulesTabName : DroolsConfig.DEFAULT_RULESHEET_NAME);
         dtconf.setTrimCell(false);
         KnowledgeBuilderConfiguration configuration = KnowledgeBuilderFactory.newKnowledgeBuilderConfiguration(null, classLoader);
         configuration.setOption(TrimCellsInDTableOption.DISABLED);
-        configuration.setProperty(DefaultPackageNameOption.PROPERTY_NAME, "com.araguacaima.braas");
+        configuration.setProperty(DefaultPackageNameOption.PROPERTY_NAME, Commons.DEFAULT_PACKAGE_NAME);
         KnowledgeBuilder knowledgeBuilder = KnowledgeBuilderFactory.newKnowledgeBuilder(configuration);
         log.info("Retrieving resource...");
         Resource resource = ResourceFactory.newByteArrayResource(spreadsheetStream.toByteArray());
@@ -144,10 +145,10 @@ public class KieSessionFactory {
         DecisionTableConfiguration dtconf = KnowledgeBuilderFactory.newDecisionTableConfiguration();
         dtconf.setInputType(DecisionTableInputType.XLS);
         dtconf.setTrimCell(false);
-        dtconf.setWorksheetName(StringUtils.isNotBlank(rulesTabName) ? rulesTabName : DroolsUtils.RULES_TABLES_DEFAULT_NAME);
+        dtconf.setWorksheetName(StringUtils.isNotBlank(rulesTabName) ? rulesTabName : DroolsConfig.DEFAULT_RULESHEET_NAME);
         KnowledgeBuilderConfiguration configuration = KnowledgeBuilderFactory.newKnowledgeBuilderConfiguration(null, classLoader);
         configuration.setOption(TrimCellsInDTableOption.DISABLED);
-        configuration.setProperty(DefaultPackageNameOption.PROPERTY_NAME, "com.araguacaima.braas");
+        configuration.setProperty(DefaultPackageNameOption.PROPERTY_NAME, Commons.DEFAULT_PACKAGE_NAME);
         KnowledgeBuilder knowledgeBuilder = KnowledgeBuilderFactory.newKnowledgeBuilder(configuration);
         Resource resource;
         File file = new File(path);

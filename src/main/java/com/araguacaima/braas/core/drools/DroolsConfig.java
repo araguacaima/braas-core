@@ -4,6 +4,7 @@ import com.araguacaima.commons.utils.FileUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.LocaleUtils;
 import org.codehaus.plexus.util.StringUtils;
+import org.drools.decisiontable.parser.xls.ExcelParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +25,7 @@ import static com.araguacaima.braas.core.Commons.propertiesHandlerUtils;
 public class DroolsConfig {
 
     private static final Logger log = LoggerFactory.getLogger(DroolsConfig.class);
-
+    public static final String DEFAULT_RULESHEET_NAME = ExcelParser.DEFAULT_RULESHEET_NAME;
     private String rulesPath;
     private String credentialsPath = System.getProperty("user.home") + File.separator + ".braas" + File.separator + "credentials.json";
     private String appName;
@@ -41,7 +42,7 @@ public class DroolsConfig {
     private String scannerPeriod;
     private String server;
     private String url;
-    private String rulesTabName = DroolsUtils.RULES_TABLES_DEFAULT_NAME;
+    private String rulesTabName = DEFAULT_RULESHEET_NAME;
     @JsonIgnore
     private ByteArrayOutputStream spreadsheetStream;
     @JsonIgnore

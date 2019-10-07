@@ -3,7 +3,15 @@ package com.araguacaima.braas.core.drools;
 import com.araguacaima.braas.core.drools.factory.KieSessionImpl;
 import com.araguacaima.braas.core.drools.factory.ResourceStrategyFactory;
 import com.araguacaima.braas.core.drools.strategy.ResourceStrategy;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.drools.core.io.impl.UrlResource;
+import org.drools.decisiontable.parser.DefaultRuleSheetListener;
+import org.drools.decisiontable.parser.RuleSheetParserUtil;
+import org.drools.decisiontable.parser.xls.ExcelParser;
+import org.drools.decisiontable.parser.xls.PropertiesSheetListener;
+import org.drools.template.model.Global;
+import org.drools.template.parser.DataListener;
 import org.kie.api.KieServices;
 import org.kie.api.builder.KieModule;
 import org.kie.api.builder.KieRepository;
@@ -12,13 +20,12 @@ import org.kie.api.io.KieResources;
 import org.kie.api.io.Resource;
 import org.kie.api.runtime.KieContainer;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.lang.reflect.Field;
 import java.net.URISyntaxException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+
+import static com.araguacaima.braas.core.Commons.reflectionUtils;
 
 /**
  * Clase utilitaria para manipular repositorio DRL de Jboss Drools <p>
@@ -34,7 +41,6 @@ import java.util.Map;
 
 public class DroolsUtils {
 
-    public static final String RULES_TABLES_DEFAULT_NAME = "Decision Tables";
     private DroolsConfig droolsConfig;
     private Map<String, Object> globals = new HashMap<>();
 
@@ -69,13 +75,47 @@ public class DroolsUtils {
 
     @SuppressWarnings("ConstantConditions")
     private void init() {
+        final List<DataListener> listeners = new ArrayList<>();
+        final DefaultRuleSheetListener listener = new DefaultRuleSheetListener();
+        String rulesTabName = droolsConfig.getRulesTabName();
+        if (StringUtils.isBlank(rulesTabName)) {
+            droolsConfig.setRulesTabName(DroolsConfig.DEFAULT_RULESHEET_NAME);
+        }
+        listener.setWorksheetName(droolsConfig.getRulesTabName());
+        listeners.add(listener);
+        final ExcelParser parser = new ExcelParser(listeners);
+
         try {
-            ResourceStrategy urlResourceStrategy = ResourceStrategyFactory.getUrlResourceStrategy(droolsConfig);
-            String url = urlResourceStrategy.buildUrl();
-            if (url != null) {
-                droolsConfig.setUrl(url);
-            } else {
-                droolsConfig.setSpreadsheetStream(urlResourceStrategy.getStream());
+            Field _useFirstSheet = reflectionUtils.getField(ExcelParser.class, "_useFirstSheet");
+            _useFirstSheet.setAccessible(true);
+            _useFirstSheet.set(parser, false);
+            try {
+                ResourceStrategy urlResourceStrategy = ResourceStrategyFactory.getUrlResourceStrategy(droolsConfig);
+                String url = urlResourceStrategy.buildUrl();
+                if (url != null) {
+                    droolsConfig.setUrl(url);
+                    parser.parseFile(new File(droolsConfig.getUrl()));
+                } else {
+                    ByteArrayOutputStream stream = urlResourceStrategy.getStream();
+                    droolsConfig.setSpreadsheetStream(stream);
+                    parser.parseFile(new ByteArrayInputStream(stream.toByteArray()));
+                }
+            } catch (Throwable t) {
+                t.printStackTrace();
+            }
+            PropertiesSheetListener.CaseInsensitiveMap properties = listener.getProperties();
+            final List<Global> variableList = RuleSheetParserUtil.getVariableList(properties.getProperty(DefaultRuleSheetListener.VARIABLES_TAG));
+            if (CollectionUtils.isNotEmpty(variableList)) {
+                variableList.forEach(variable -> {
+                    String identifier = variable.getIdentifier();
+                    String className = variable.getClassName();
+                    try {
+                        Object instance = reflectionUtils.deepInitialization(Class.forName(className));
+                        addGlobal(identifier, instance);
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                });
             }
         } catch (Throwable t) {
             t.printStackTrace();
