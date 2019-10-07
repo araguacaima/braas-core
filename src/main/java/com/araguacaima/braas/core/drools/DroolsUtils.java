@@ -122,7 +122,9 @@ public class DroolsUtils {
                             addGlobal(identifier, instance);
                         }
                     } catch (ClassNotFoundException e) {
-                        log.warn("It's not possible to initialize global variable '" + identifier + "' due there is no Class named '" + className + "' or it has no an accesible constructor able to create a new object");
+                        String message = "It's not possible to initialize global variable '" + identifier + "' due there is no Class named '" + className + "' or it has no an accesible constructor able to create a new object";
+                        log.error(message);
+                        throw new RuntimeException(message);
                     }
                 });
             }
