@@ -4,6 +4,8 @@ import com.araguacaima.braas.core.drools.factory.KieSessionImpl;
 import com.araguacaima.braas.core.drools.factory.ResourceStrategyFactory;
 import com.araguacaima.braas.core.drools.strategy.ResourceStrategy;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.drools.core.io.impl.UrlResource;
 import org.drools.decisiontable.parser.DefaultRuleSheetListener;
@@ -19,6 +21,8 @@ import org.kie.api.builder.KieScanner;
 import org.kie.api.io.KieResources;
 import org.kie.api.io.Resource;
 import org.kie.api.runtime.KieContainer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -41,6 +45,7 @@ import static com.araguacaima.braas.core.Commons.reflectionUtils;
 
 public class DroolsUtils {
 
+    private static final Logger log = LoggerFactory.getLogger(DroolsUtils.class);
     private DroolsConfig droolsConfig;
     private Map<String, Object> globals = new HashMap<>();
 
@@ -93,16 +98,18 @@ public class DroolsUtils {
                 ResourceStrategy urlResourceStrategy = ResourceStrategyFactory.getUrlResourceStrategy(droolsConfig);
                 String url = urlResourceStrategy.buildUrl();
                 if (url != null) {
+                    ByteArrayOutputStream o = new ByteArrayOutputStream();
+                    IOUtils.copy(FileUtils.openInputStream(new File(droolsConfig.getUrl())), o);
                     droolsConfig.setUrl(url);
-                    parser.parseFile(new File(droolsConfig.getUrl()));
+                    droolsConfig.setSpreadsheetStream(o);
                 } else {
                     ByteArrayOutputStream stream = urlResourceStrategy.getStream();
                     droolsConfig.setSpreadsheetStream(stream);
-                    parser.parseFile(new ByteArrayInputStream(stream.toByteArray()));
                 }
             } catch (Throwable t) {
                 t.printStackTrace();
             }
+            parser.parseFile(new ByteArrayInputStream(droolsConfig.getSpreadsheetStream().toByteArray()));
             PropertiesSheetListener.CaseInsensitiveMap properties = listener.getProperties();
             final List<Global> variableList = RuleSheetParserUtil.getVariableList(properties.getProperty(DefaultRuleSheetListener.VARIABLES_TAG));
             if (CollectionUtils.isNotEmpty(variableList)) {
@@ -110,10 +117,12 @@ public class DroolsUtils {
                     String identifier = variable.getIdentifier();
                     String className = variable.getClassName();
                     try {
-                        Object instance = reflectionUtils.deepInitialization(Class.forName(className));
-                        addGlobal(identifier, instance);
+                        if (reflectionUtils.isCollectionImplementation(className)) {
+                            Object instance = reflectionUtils.deepInitialization(Class.forName(className));
+                            addGlobal(identifier, instance);
+                        }
                     } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
+                        log.warn("It's not possible to initialize global variable '" + identifier + "' due there is no Class named '" + className + "' or it has no an accesible constructor able to create a new object");
                     }
                 });
             }
