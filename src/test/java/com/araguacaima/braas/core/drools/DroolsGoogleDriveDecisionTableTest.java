@@ -5,7 +5,6 @@ import com.araguacaima.braas.core.RuleMessage;
 import com.araguacaima.braas.core.drools.model.Person;
 import com.araguacaima.commons.utils.FileUtils;
 import com.araguacaima.commons.utils.JsonUtils;
-import com.araguacaima.commons.utils.OSValidator;
 import io.codearte.jfairy.Fairy;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Predicate;
@@ -16,6 +15,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -48,7 +48,7 @@ public class DroolsGoogleDriveDecisionTableTest {
     @Before
     public void init() throws IOException, URISyntaxException {
         String fullconfigFile = FileUtils.getFile("drools-google-drive-decision-table.properties").getCanonicalPath();
-        if (OSValidator.isWindows() && fullconfigFile.startsWith("/")) {
+        if (fullconfigFile.startsWith(String.valueOf(File.separatorChar))) {
             fullconfigFile = fullconfigFile.substring(1);
         }
         DroolsConfig droolsConfig = new DroolsConfig(fullconfigFile);

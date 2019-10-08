@@ -17,11 +17,9 @@ import static com.araguacaima.braas.core.Commons.*;
 public class RulesBaseToClasses {
 
     private static final Logger log = LoggerFactory.getLogger(RulesBaseToClasses.class);
-
-    private List<CtClass> createdClasses = new ArrayList<>();
-
-    private Map<String, File> files = new HashMap<>();
     public static String PACKAGE_PREFIX = "com.bbva.functional.document";
+    private List<CtClass> createdClasses = new ArrayList<>();
+    private Map<String, File> files = new HashMap<>();
     private String directoryOutputPath;
     private ClassPool pool = ClassPool.getDefault();
     private String enumConstructorBody = "{\n\tthis.value = value;\n\tthis.description = description;\n}";

@@ -4,7 +4,6 @@ import com.araguacaima.braas.core.IMessage;
 import com.araguacaima.braas.core.RuleMessage;
 import com.araguacaima.braas.core.drools.model.Person;
 import com.araguacaima.commons.utils.JsonUtils;
-import com.araguacaima.commons.utils.OSValidator;
 import io.codearte.jfairy.Fairy;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Predicate;
@@ -14,6 +13,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -48,7 +48,7 @@ public class DroolsAbsolutePathDecisionTablePersonTest {
     public void init() throws FileNotFoundException, MalformedURLException, URISyntaxException {
         URL resource = DroolsAbsolutePathDecisionTablePersonTest.class.getClassLoader().getResource("drools-absolute-path-decision-person-table.properties");
         String fullconfigFile = resource.toURI().getPath();
-        if (OSValidator.isWindows() && fullconfigFile.startsWith("/")) {
+        if (fullconfigFile.startsWith(String.valueOf(File.separatorChar))) {
             fullconfigFile = fullconfigFile.substring(1);
         }
         DroolsConfig droolsConfig = new DroolsConfig(fullconfigFile);

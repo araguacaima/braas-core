@@ -24,8 +24,8 @@ import static com.araguacaima.braas.core.Commons.propertiesHandlerUtils;
 
 public class DroolsConfig {
 
-    private static final Logger log = LoggerFactory.getLogger(DroolsConfig.class);
     public static final String DEFAULT_RULESHEET_NAME = ExcelParser.DEFAULT_RULESHEET_NAME;
+    private static final Logger log = LoggerFactory.getLogger(DroolsConfig.class);
     private String rulesPath;
     private String credentialsPath = System.getProperty("user.home") + File.separator + ".braas" + File.separator + "credentials.json";
     private String appName;

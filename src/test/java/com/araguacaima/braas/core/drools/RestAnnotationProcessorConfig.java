@@ -1,7 +1,5 @@
 package com.araguacaima.braas.core.drools;
 
-import com.araguacaima.commons.utils.ClassLoaderUtils;
-import com.araguacaima.commons.utils.JsonUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.io.File;
@@ -10,18 +8,18 @@ import java.util.*;
 
 
 public class RestAnnotationProcessorConfig {
-    
-    private Map<Pair<Object, String>,
-            Map<Object, Map<Object, Set<File>>>> resourcesMap = new HashMap<>();
+
     protected Method method;
     protected Collection<String> fullArtifactsPath;
+    protected Collection<Class> alreadyProcessedTypes = new ArrayList<>();
+    protected Collection<Class> alreadyProcessedExamples = new ArrayList<>();
+    private Map<Pair<Object, String>,
+            Map<Object, Map<Object, Set<File>>>> resourcesMap = new HashMap<>();
     private String rootPath;
     private String includeCommonTypes;
     private boolean alwaysExpandsParentAttributes;
     private boolean jaxService;
     private Class mainClass;
-    protected Collection<Class> alreadyProcessedTypes = new ArrayList<>();
-    protected Collection<Class> alreadyProcessedExamples = new ArrayList<>();
     private boolean paginatedResource = false;
     private Map<String, String> paramUUID = new HashMap<>();
     private boolean collection = false;
@@ -46,20 +44,20 @@ public class RestAnnotationProcessorConfig {
         return resourcesMap;
     }
 
-    public void setMethod(Method method) {
-        this.method = method;
-    }
-
     public Method getMethod() {
         return method;
     }
 
-    public void setFullArtifactsPath(Collection<String> fullArtifactsPath) {
-        this.fullArtifactsPath = fullArtifactsPath;
+    public void setMethod(Method method) {
+        this.method = method;
     }
 
     public Collection<String> getFullArtifactsPath() {
         return fullArtifactsPath;
+    }
+
+    public void setFullArtifactsPath(Collection<String> fullArtifactsPath) {
+        this.fullArtifactsPath = fullArtifactsPath;
     }
 
     public String getRootPath() {
@@ -169,7 +167,7 @@ public class RestAnnotationProcessorConfig {
     public void setFlattenJoinedEntitiesTypes(boolean flattenJoinedEntitiesTypes) {
         this.flattenJoinedEntitiesTypes = flattenJoinedEntitiesTypes;
     }
-    
+
     public boolean isFunctional() {
         return this.functional;
     }
