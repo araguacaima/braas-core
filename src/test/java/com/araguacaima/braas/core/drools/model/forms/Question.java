@@ -86,4 +86,14 @@ public class Question {
     public void setFormId(String formId) {
         this.formId = formId;
     }
+
+    public enum QuestionCategory {
+        CATEGORY_1,
+        CATEGORY_2
+    }
+
+    public enum QuestionType {
+        MULTIPLE,
+        SINGLE
+    }
 }

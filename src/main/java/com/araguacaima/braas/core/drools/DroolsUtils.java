@@ -99,8 +99,8 @@ public class DroolsUtils {
                 String url = urlResourceStrategy.buildUrl();
                 if (url != null) {
                     ByteArrayOutputStream o = new ByteArrayOutputStream();
-                    IOUtils.copy(FileUtils.openInputStream(new File(droolsConfig.getUrl())), o);
                     droolsConfig.setUrl(url);
+                    IOUtils.copy(FileUtils.openInputStream(new File(droolsConfig.getUrl())), o);
                     droolsConfig.setSpreadsheetStream(o);
                 } else {
                     ByteArrayOutputStream stream = urlResourceStrategy.getStream();

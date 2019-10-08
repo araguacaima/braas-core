@@ -23,14 +23,14 @@ import java.util.Collection;
 import java.util.Locale;
 
 @SuppressWarnings("unchecked")
-public class DroolsAbsolutePathDecisionTableTest {
+public class DroolsAbsolutePathDecisionTablePersonTest {
 
     private static final String PERSON_FIRST_NAME_CANNOT_BE_NULL = "Person's first name cannot be null";
     private static final String PERSON_FIRST_NAME_CANNOT_BE_EMPTY = "Person's first name cannot be empty";
     private static final String PERSON_EMAIL_CANNOT_BE_NULL = "Person's email cannot be null";
     private static final String PERSON_EMAIL_CANNOT_BE_EMPTY = "Person's email cannot be empty";
     private static final String PERSON_EMAIL_IS_INVALID = "Person's email is not valid";
-    private static Logger log = LoggerFactory.getLogger(DroolsAbsolutePathDecisionTableTest.class);
+    private static Logger log = LoggerFactory.getLogger(DroolsAbsolutePathDecisionTablePersonTest.class);
     private JsonUtils jsonUtils;
     private Locale locale = Locale.ENGLISH;
     private Predicate predicateMessage = object -> RuleMessage.class.isAssignableFrom(object.getClass());
@@ -46,7 +46,7 @@ public class DroolsAbsolutePathDecisionTableTest {
     @SuppressWarnings("ConstantConditions")
     @Before
     public void init() throws FileNotFoundException, MalformedURLException, URISyntaxException {
-        URL resource = DroolsAbsolutePathDecisionTableTest.class.getClassLoader().getResource("./drools-absolute-path-decision-table.properties");
+        URL resource = DroolsAbsolutePathDecisionTablePersonTest.class.getClassLoader().getResource("drools-absolute-path-decision-person-table.properties");
         String fullconfigFile = resource.toURI().getPath();
         if (OSValidator.isWindows() && fullconfigFile.startsWith("/")) {
             fullconfigFile = fullconfigFile.substring(1);
