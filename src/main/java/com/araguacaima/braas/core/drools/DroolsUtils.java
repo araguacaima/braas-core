@@ -48,7 +48,7 @@ public class DroolsUtils {
     private static final Logger log = LoggerFactory.getLogger(DroolsUtils.class);
     private DroolsConfig droolsConfig;
     private Map<String, Object> globals = new HashMap<>();
-
+    private Collection<String> globalsDefinedInSheets = new ArrayList<>();
     public DroolsUtils(DroolsConfig droolsConfig) {
         this.droolsConfig = droolsConfig;
         init();
@@ -126,6 +126,7 @@ public class DroolsUtils {
                         log.error(message);
                         throw new RuntimeException(message);
                     }
+                    this.globalsDefinedInSheets.add(identifier);
                 });
             }
         } catch (Throwable t) {
@@ -160,6 +161,10 @@ public class DroolsUtils {
 
     public void setGlobals(Map<String, Object> globals) {
         this.globals = globals;
+    }
+
+    public Collection<String> getGlobalsDefinedInSheets() {
+        return globalsDefinedInSheets;
     }
 
     KieContainer getKieContainer()
