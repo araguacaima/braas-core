@@ -9,7 +9,7 @@
         </encoder>
     </appender>
 
-    <logger name="com.araguacaima.braas.core.drools" level="DEBUG" additivity="false">
+    <logger name="com.araguacaima.braas" level="TRACE" additivity="false">
         <appender-ref ref="STDOUT"/>
     </logger>
 
@@ -17,7 +17,7 @@
         <appender-ref ref="STDOUT"/>
     </logger>
 
-    <logger name="org.drools.core" level="DEBUG" additivity="false">
+    <logger name="org.drools.core" level="TRACE" additivity="false">
         <appender-ref ref="STDOUT"/>
     </logger>
 
