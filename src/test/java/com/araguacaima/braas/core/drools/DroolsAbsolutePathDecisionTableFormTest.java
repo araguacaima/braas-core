@@ -53,8 +53,7 @@ public class DroolsAbsolutePathDecisionTableFormTest {
     }
 
     @Test
-    public void testValidateForm()
-            throws Exception {
+    public void testValidateForm() throws Exception {
         Form form = jsonUtils.fromJSON("{\"id\":\"e122af1f-1a78-4245-864e-42ee1afbd43b\",\"locale\":\"EN\",\"questions\":[{\"id\":\"4e5a67c4-b02e-45dd-be94-d675b622f22a\",\"options\":[{\"title\":\"No\"}]}]}", Form.class);
         Collection<Object> result = droolsUtils.executeRules(form);
         Collection comments = new ArrayList();
