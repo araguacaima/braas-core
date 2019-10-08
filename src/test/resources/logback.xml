@@ -13,6 +13,9 @@
         <appender-ref ref="STDOUT"/>
     </logger>
 
+    <logger name="com.araguacaima.braas.core.RuleLogging" level="TRACE" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
 
     <logger name="org.drools.core" level="DEBUG" additivity="false">
         <appender-ref ref="STDOUT"/>
