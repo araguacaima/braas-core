@@ -46,7 +46,7 @@ public class DroolsGoogleDriveDecisionTableTest {
 
     @SuppressWarnings("ConstantConditions")
     @Before
-    public void init() throws IOException, URISyntaxException {
+    public void init() throws IOException, URISyntaxException, IllegalAccessException {
         String fullconfigFile = FileUtils.getFile("drools-google-drive-decision-table.properties").getCanonicalPath();
         if (fullconfigFile.startsWith(String.valueOf(File.separatorChar))) {
             fullconfigFile = fullconfigFile.substring(1);

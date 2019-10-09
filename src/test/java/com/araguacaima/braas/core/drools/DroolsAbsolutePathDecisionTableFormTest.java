@@ -39,7 +39,7 @@ public class DroolsAbsolutePathDecisionTableFormTest {
 
     @SuppressWarnings("ConstantConditions")
     @Before
-    public void init() throws FileNotFoundException, MalformedURLException, URISyntaxException {
+    public void init() throws FileNotFoundException, MalformedURLException, URISyntaxException, IllegalAccessException {
         URL resource = DroolsAbsolutePathDecisionTableFormTest.class.getClassLoader().getResource("drools-absolute-path-decision-form-table.properties");
         String fullconfigFile = resource.toURI().getPath();
         if (fullconfigFile.startsWith(String.valueOf(File.separatorChar))) {

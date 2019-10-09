@@ -49,9 +49,21 @@ public class DroolsUtils {
     private DroolsConfig droolsConfig;
     private Map<String, Object> globals = new HashMap<>();
     private Collection<String> globalsDefinedInSheets = new ArrayList<>();
-    public DroolsUtils(DroolsConfig droolsConfig) {
+
+    public DroolsUtils(DroolsConfig droolsConfig) throws IllegalAccessException {
+        this(droolsConfig, true);
+    }
+
+    public DroolsUtils(DroolsConfig droolsConfig, boolean initialize) throws IllegalAccessException {
         this.droolsConfig = droolsConfig;
-        init();
+        if (initialize) {
+            init();
+        } else {
+            final List<DataListener> listeners = new ArrayList<>();
+            final DefaultRuleSheetListener listener = new DefaultRuleSheetListener();
+            listeners.add(listener);
+            validate(listeners);
+        }
     }
 
     public void addGlobal(String globalName, Object value) {
@@ -82,34 +94,9 @@ public class DroolsUtils {
     private void init() {
         final List<DataListener> listeners = new ArrayList<>();
         final DefaultRuleSheetListener listener = new DefaultRuleSheetListener();
-        String rulesTabName = droolsConfig.getRulesTabName();
-        if (StringUtils.isBlank(rulesTabName)) {
-            droolsConfig.setRulesTabName(DroolsConfig.DEFAULT_RULESHEET_NAME);
-        }
-        listener.setWorksheetName(droolsConfig.getRulesTabName());
         listeners.add(listener);
-        final ExcelParser parser = new ExcelParser(listeners);
-
         try {
-            Field _useFirstSheet = reflectionUtils.getField(ExcelParser.class, "_useFirstSheet");
-            _useFirstSheet.setAccessible(true);
-            _useFirstSheet.set(parser, false);
-            try {
-                ResourceStrategy urlResourceStrategy = ResourceStrategyFactory.getUrlResourceStrategy(droolsConfig);
-                String url = urlResourceStrategy.buildUrl();
-                if (url != null) {
-                    ByteArrayOutputStream o = new ByteArrayOutputStream();
-                    droolsConfig.setUrl(url);
-                    IOUtils.copy(FileUtils.openInputStream(new File(droolsConfig.getUrl())), o);
-                    droolsConfig.setSpreadsheetStream(o);
-                } else {
-                    ByteArrayOutputStream stream = urlResourceStrategy.getStream();
-                    droolsConfig.setSpreadsheetStream(stream);
-                }
-            } catch (Throwable t) {
-                t.printStackTrace();
-            }
-            parser.parseFile(new ByteArrayInputStream(droolsConfig.getSpreadsheetStream().toByteArray()));
+            validate(listeners);
             PropertiesSheetListener.CaseInsensitiveMap properties = listener.getProperties();
             final List<Global> variableList = RuleSheetParserUtil.getVariableList(properties.getProperty(DefaultRuleSheetListener.VARIABLES_TAG));
             if (CollectionUtils.isNotEmpty(variableList)) {
@@ -120,6 +107,8 @@ public class DroolsUtils {
                         if (reflectionUtils.isCollectionImplementation(className)) {
                             Object instance = reflectionUtils.deepInitialization(Class.forName(className));
                             addGlobal(identifier, instance);
+                        } else {
+                            addGlobal(identifier, new Object());
                         }
                     } catch (ClassNotFoundException e) {
                         String message = "It's not possible to initialize global variable '" + identifier + "' due there is no Class named '" + className + "' or it has no an accesible constructor able to create a new object";
@@ -132,6 +121,35 @@ public class DroolsUtils {
         } catch (Throwable t) {
             t.printStackTrace();
         }
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    public void validate(final List<DataListener> listeners) throws IllegalAccessException {
+        String rulesTabName = droolsConfig.getRulesTabName();
+        if (StringUtils.isBlank(rulesTabName)) {
+            droolsConfig.setRulesTabName(DroolsConfig.DEFAULT_RULESHEET_NAME);
+        }
+        final ExcelParser parser = new ExcelParser(listeners);
+
+        Field _useFirstSheet = reflectionUtils.getField(ExcelParser.class, "_useFirstSheet");
+        _useFirstSheet.setAccessible(true);
+        _useFirstSheet.set(parser, false);
+        try {
+            ResourceStrategy urlResourceStrategy = ResourceStrategyFactory.getUrlResourceStrategy(droolsConfig);
+            String url = urlResourceStrategy.buildUrl();
+            if (url != null) {
+                ByteArrayOutputStream o = new ByteArrayOutputStream();
+                droolsConfig.setUrl(url);
+                IOUtils.copy(FileUtils.openInputStream(new File(droolsConfig.getUrl())), o);
+                droolsConfig.setSpreadsheetStream(o);
+            } else {
+                ByteArrayOutputStream stream = urlResourceStrategy.getStream();
+                droolsConfig.setSpreadsheetStream(stream);
+            }
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+        parser.parseFile(new ByteArrayInputStream(droolsConfig.getSpreadsheetStream().toByteArray()));
     }
 
     public Collection<Object> executeRules(Object assets)
