@@ -105,11 +105,13 @@ public class DroolsUtils {
                     String className = variable.getClassName();
                     try {
                         Class<?> clazz = droolsConfig.getClassLoader().loadClass(className);
-                        if (reflectionUtils.isCollectionImplementation(clazz) || reflectionUtils.isMapImplementation(clazz)) {
-                            Object instance = reflectionUtils.deepInitialization(clazz);
-                            addGlobal(identifier, instance);
-                        } else {
-                            addGlobal(identifier, clazz.newInstance());
+                        if (reflectionUtils.getFullyQualifiedJavaTypeOrNull(clazz) != null) {
+                            if (reflectionUtils.isCollectionImplementation(clazz) || reflectionUtils.isMapImplementation(clazz)) {
+                                Object instance = reflectionUtils.deepInitialization(clazz);
+                                addGlobal(identifier, instance);
+                            } else {
+                                addGlobal(identifier, clazz.newInstance());
+                            }
                         }
                     } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
                         String message = "It's not possible to initialize global variable '" + identifier + "' due there is no Class named '" + className + "' or it has no an accesible constructor able to create a new object";
