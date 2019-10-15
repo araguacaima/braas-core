@@ -31,6 +31,7 @@ public class RuleUtils {
         return result;
     }
 
+    @SuppressWarnings("SpellCheckingInspection")
     public static <T> Collection<T> buildCollectionOfObjects(String str, String fieldSeparator, String headerSeparator, String prefix, Class<T> clazz) throws InternalBraaSException {
 
         Collection<T> collectionOfObjects = new LinkedHashSet<>();
