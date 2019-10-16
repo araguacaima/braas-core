@@ -32,7 +32,7 @@ public class RuleUtils {
     }
 
     @SuppressWarnings("SpellCheckingInspection")
-    public static <T> Collection<T> buildCollectionOfObjects(String str, String fieldSeparator, String headerSeparator, String prefix, Class<T> clazz) throws InternalBraaSException {
+    public static <T> Collection<T> buildCollectionOfObjects(String str, String fieldSeparator, String headerSeparator, String prefix, Class<T> clazz, Map<String, Collection<String>> idFields) throws InternalBraaSException {
 
         Collection<T> collectionOfObjects = new LinkedHashSet<>();
         try {
@@ -57,27 +57,32 @@ public class RuleUtils {
             Object object = null;
             Class<?> fieldType = clazz;
             String innerPrefix = prefix;
+            Object lastObject = null;
             for (int i = 0; i < matrixSize; i++) {
-                if (object == null || ((i % objectSize) == 0)) {
-                    object = clazz.newInstance();
-                    collectionOfObjects.add((T) object);
-                    innerPrefix = prefix;
-                    fieldType = clazz;
-                }
                 String field = fields[i % objectSize];
                 if (StringUtils.isNotBlank(prefix)) {
-                    field = field.replaceFirst(Pattern.quote(prefix), StringUtils.EMPTY);
+                    field = field.replaceFirst(Pattern.quote(innerPrefix), StringUtils.EMPTY);
                 }
                 if (field.startsWith(".")) {
                     field = field.substring(1);
                 }
 
-                object = buildObject(field, fieldType, object, matrix[i]);
-
-                if (field.contains(".")) {
-                    innerPrefix = innerPrefix + "." + field.split("\\.")[0];
+                if (object == null || ((i % objectSize) == 0)) {
+                    object = clazz.newInstance();
+                    lastObject = object;
+                    collectionOfObjects.add((T) object);
+                    innerPrefix = prefix;
                 }
-                fieldType = object.getClass();
+                String value = matrix[i];
+                Object newObject = traverseObject(field, fieldType, object, value);
+                if (newObject != null && !newObject.equals(lastObject)) {
+                    fieldType = newObject.getClass();
+                    if (field.contains(".")) {
+                        String innerField = field.split("\\.")[0];
+                        innerPrefix = innerPrefix + "." + innerField;
+                    }
+                    object = newObject;
+                }
             }
         } catch (Throwable t) {
             throw new InternalBraaSException(t);
@@ -85,9 +90,33 @@ public class RuleUtils {
         return collectionOfObjects;
     }
 
-    public static Object buildObject(String field, Class<?> fieldType, Object parent, Object value) throws InternalBraaSException {
+    private static Object traverseObject(String field, Class<?> parentType, Object parent, String value) throws InstantiationException, IllegalAccessException, InternalBraaSException {
+        String token;
+        if (field.contains(".")) {
+            token = field.split("\\.")[0];
+            Field field_ = reflectionUtils.getField(parentType, token);
+            field_.setAccessible(true);
+            Class childType = field_.getType();
+            if (reflectionUtils.isCollectionImplementation(childType)) {
+                Class innerType = reflectionUtils.extractGenerics(field_);
+                String remainingField = field.replaceFirst(token + "\\.", StringUtils.EMPTY);
+                Object innerObject = innerType.newInstance();
+                innerObject = traverseObject(remainingField, innerType, innerObject, value);
+                Object col = reflectionUtils.deepInitialization(childType);
+                ((Collection) col).add(innerObject);
+                field_.set(parent, col);
+                return innerObject;
+            }
+        }
+        return buildObject(field, parentType, parent, value, null);
+    }
+
+    public static Object buildObject(String field, Class<?> fieldType, Object parent, Object value, String prefix) throws InternalBraaSException {
         Field field_;
         Object innerObject = null;
+        if (StringUtils.isNotBlank(prefix) && field.startsWith(prefix)) {
+            field = field.replace(prefix + ".", StringUtils.EMPTY);
+        }
         String[] fieldTokens = field.split("\\.");
         try {
             if (fieldTokens.length > 1) {
@@ -103,7 +132,7 @@ public class RuleUtils {
                         Object object_;
                         innerObject_ = fieldType.newInstance();
                         String remainingField = StringUtils.join(Arrays.copyOfRange(fieldTokens, 1, fieldTokens.length), ".");
-                        object_ = buildObject(remainingField, fieldType, innerObject_, value);
+                        object_ = buildObject(remainingField, fieldType, innerObject_, value, token);
                         field_.set(parent, innerObject);
                         ((Collection) innerObject).add(object_);
                         return object_;
@@ -115,8 +144,12 @@ public class RuleUtils {
                 field_ = reflectionUtils.getField(fieldType, field);
                 if (field_ != null) {
                     field_.setAccessible(true);
+                    if (parent == null) {
+                        innerObject = fieldType.newInstance();
+                    } else {
+                        innerObject = parent;
+                    }
                     fieldType = field_.getType();
-                    innerObject = parent;
                 }
             }
             return buildObject(fieldType, value, field_, innerObject);
@@ -126,7 +159,7 @@ public class RuleUtils {
     }
 
     private static Object buildObject(Class<?> fieldType, Object value, Field field_, Object innerObject) throws IllegalAccessException, InstantiationException {
-        if (field_ != null && innerObject != null) {
+        if (field_ != null) {
             Object cell = value;
             if (fieldType.isEnum()) {
                 try {
@@ -138,7 +171,10 @@ public class RuleUtils {
                 }
             } else if (String.class.isAssignableFrom(fieldType)) {
                 try {
-                    cell = cell.toString();
+                    cell = cell.toString().trim();
+                    if (StringUtils.EMPTY.equals(cell)) {
+                        cell = null;
+                    }
                 } catch (Throwable t) {
                     log.debug("Unable to bind value of '" + cell + "' as type '" + String.class.getName() + "' for field '" + field_.toString() + "'");
                     cell = null;
@@ -200,13 +236,89 @@ public class RuleUtils {
                     cell = 0.0d;
                 }
             }
+            if (innerObject == null) {
+                innerObject = fieldType.newInstance();
+            }
             field_.set(innerObject, cell);
         }
-        if (innerObject != null) {
-            return innerObject;
-        } else {
-            return fieldType.newInstance();
+        return innerObject;
+    }
+
+    private static Object fixValue(Class<?> targetType, String value) {
+        if (targetType.isEnum()) {
+            try {
+                return enumsUtils.getEnum(targetType, value);
+            } catch (Throwable t) {
+                log.debug("Unable to bind value of '" + value + "' as type '" + String.class.getName() + "'");
+            }
+        } else if (String.class.isAssignableFrom(targetType)) {
+            try {
+                String newValue = value.trim();
+                if (StringUtils.EMPTY.equals(value)) {
+                    return null;
+                }
+                return newValue;
+            } catch (Throwable t) {
+                log.debug("Unable to bind value of '" + value + "' as type '" + String.class.getName() + "'");
+            }
+        } else if (Boolean.class.isAssignableFrom(targetType) || Boolean.TYPE.isAssignableFrom(targetType)) {
+            String booleanValue = value.toString().toLowerCase();
+            try {
+                return Boolean.valueOf(booleanValue);
+            } catch (Throwable t) {
+                log.debug("Unable to bind value of '" + value + "' as type '" + Boolean.class.getName() + "'");
+                return false;
+            }
+        } else if (Character.class.isAssignableFrom(targetType) || Character.TYPE.isAssignableFrom(targetType)) {
+            String characterValue = value.toString();
+            try {
+                return characterValue.charAt(0);
+            } catch (Throwable t) {
+                log.debug("Unable to bind value of '" + value + "' as type '" + Character.class.getName() + "'");
+                return '\u0000';
+            }
+        } else if (Short.class.isAssignableFrom(targetType) || Short.TYPE.isAssignableFrom(targetType)) {
+            String booleanValue = value.toString();
+            try {
+                return Short.valueOf(booleanValue);
+            } catch (Throwable t) {
+                log.debug("Unable to bind value of '" + value + "' as type '" + Short.class.getName() + "'");
+                return 0;
+            }
+        } else if (Integer.class.isAssignableFrom(targetType) || Integer.TYPE.isAssignableFrom(targetType)) {
+            String booleanValue = value.toString();
+            try {
+                return Integer.valueOf(booleanValue);
+            } catch (Throwable t) {
+                log.debug("Unable to bind value of '" + value + "' as type '" + Integer.class.getName() + "'");
+                return 0;
+            }
+        } else if (Long.class.isAssignableFrom(targetType) || Long.TYPE.isAssignableFrom(targetType)) {
+            String booleanValue = value.toString();
+            try {
+                return Long.valueOf(booleanValue);
+            } catch (Throwable t) {
+                log.debug("Unable to bind value of '" + value + "' as type '" + Long.class.getName() + "'");
+                return 0L;
+            }
+        } else if (Float.class.isAssignableFrom(targetType) || Float.TYPE.isAssignableFrom(targetType)) {
+            String booleanValue = value.toString();
+            try {
+                return Float.valueOf(booleanValue);
+            } catch (Throwable t) {
+                log.debug("Unable to bind value of '" + value + "' as type '" + Float.class.getName() + "'");
+                return 0.0f;
+            }
+        } else if (Double.class.isAssignableFrom(targetType) || Double.TYPE.isAssignableFrom(targetType)) {
+            String booleanValue = value.toString();
+            try {
+                return Double.valueOf(booleanValue);
+            } catch (Throwable t) {
+                log.debug("Unable to bind value of '" + value + "' as type '" + Double.class.getName() + "'");
+                return 0.0d;
+            }
         }
+        return null;
     }
 
 }
