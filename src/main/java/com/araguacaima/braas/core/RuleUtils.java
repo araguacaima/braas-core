@@ -70,13 +70,18 @@ public class RuleUtils {
                 String field = fields[i % objectSize];
                 String parentField;
                 if (StringUtils.isNotBlank(innerPrefix)) {
+                    String fullField = field;
                     field = field.replaceFirst(Pattern.quote(innerPrefix + "."), StringUtils.EMPTY);
                     String[] tokens = field.split("\\.");
                     if (tokens.length > 1) {
                         String token = tokens[0];
                         parentField = token.equals(field) ? innerPrefix : token;
                     } else {
-                        parentField = clazz.getName();
+                        if (StringUtils.isNotBlank(innerPrefix)) {
+                            parentField = fullField.substring(0, (fullField.length() - field.length()) - 1);
+                        } else {
+                            parentField = clazz.getSimpleName();
+                        }
                     }
                 } else {
                     parentField = clazz.getName();
@@ -88,8 +93,7 @@ public class RuleUtils {
                 Object newObject = traverseObject(field, fieldType, object, value);
                 if (newObject != null) {
                     Object existentObject;
-                    String childField = newObject.getClass().equals(lastObject.getClass()) ? parentField : field.split("\\.")[0];
-                    existentObject = findById(newObject, lastObject, childField, idFields);
+                    existentObject = findById(newObject, lastObject, parentField, idFields);
                     if (existentObject != null) {
                         newObject = existentObject;
                     }
