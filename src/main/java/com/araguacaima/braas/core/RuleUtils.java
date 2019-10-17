@@ -3,11 +3,14 @@ package com.araguacaima.braas.core;
 import com.araguacaima.braas.core.exception.BraaSParserException;
 import com.araguacaima.braas.core.exception.InternalBraaSException;
 import com.araguacaima.commons.utils.EnumsUtils;
+import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -19,7 +22,7 @@ public class RuleUtils {
     private static final Logger log = LoggerFactory.getLogger(RuleUtils.class);
     private static EnumsUtils enumsUtils = EnumsUtils.getInstance();
 
-    public static Map buildMatrix(String matrixStr) {
+    public static Map<String, String> buildMatrix(String matrixStr) {
         String[] matrixSplitted = matrixStr.split(",");
         Map<String, String> result = new LinkedHashMap<>();
         int length = (matrixSplitted.length / 2);
@@ -34,7 +37,7 @@ public class RuleUtils {
     @SuppressWarnings("SpellCheckingInspection")
     public static <T> Collection<T> buildCollectionOfObjects(String str, String fieldSeparator, String headerSeparator, String prefix, Class<T> clazz, Map<String, Collection<String>> idFields) throws InternalBraaSException {
 
-        Collection<T> collectionOfObjects = new LinkedHashSet<>();
+        LinkedList<T> collectionOfObjects = new LinkedList<T>();
         try {
             String[] strSplitted = str.split(Pattern.quote(headerSeparator));
 
@@ -51,7 +54,6 @@ public class RuleUtils {
 
             String[] fields = headerStr.split(Pattern.quote(fieldSeparator));
             int objectSize = fields.length;
-
             String[] matrix = objectsStr.split(Pattern.quote(fieldSeparator));
             int matrixSize = matrix.length;
             Object object = null;
@@ -62,33 +64,106 @@ public class RuleUtils {
                 if (object == null || ((i % objectSize) == 0)) {
                     object = clazz.newInstance();
                     lastObject = object;
-                    collectionOfObjects.add((T) object);
                     innerPrefix = prefix;
                     fieldType = clazz;
                 }
                 String field = fields[i % objectSize];
-                if (StringUtils.isNotBlank(prefix)) {
-                    field = field.replaceFirst(Pattern.quote(innerPrefix), StringUtils.EMPTY);
+                String parentField;
+                if (StringUtils.isNotBlank(innerPrefix)) {
+                    field = field.replaceFirst(Pattern.quote(innerPrefix + "."), StringUtils.EMPTY);
+                    String[] tokens = field.split("\\.");
+                    if (tokens.length > 1) {
+                        String token = tokens[0];
+                        parentField = token.equals(field) ? innerPrefix : token;
+                    } else {
+                        parentField = clazz.getName();
+                    }
+                } else {
+                    parentField = clazz.getName();
                 }
-                if (field.startsWith(".")) {
-                    field = field.substring(1);
+                if (!collectionOfObjects.isEmpty()) {
+                    lastObject = collectionOfObjects.get(collectionOfObjects.size() - 1);
                 }
-
                 String value = matrix[i];
                 Object newObject = traverseObject(field, fieldType, object, value);
-                if (newObject != null && !newObject.equals(lastObject)) {
-                    fieldType = newObject.getClass();
-                    if (field.contains(".")) {
-                        String innerField = field.split("\\.")[0];
-                        innerPrefix = innerPrefix + "." + innerField;
+                if (newObject != null) {
+                    Object existentObject;
+                    String childField = newObject.getClass().equals(lastObject.getClass()) ? parentField : field.split("\\.")[0];
+                    existentObject = findById(newObject, lastObject, childField, idFields);
+                    if (existentObject != null) {
+                        newObject = existentObject;
                     }
-                    object = newObject;
+                    if (!newObject.equals(lastObject)) {
+                        fieldType = newObject.getClass();
+                        if (field.contains(".")) {
+                            String innerField = field.split("\\.")[0];
+                            innerPrefix = innerPrefix + "." + innerField;
+                        }
+                        object = newObject;
+                    }
+                }
+                if (!IterableUtils.contains(collectionOfObjects, lastObject)) {
+                    collectionOfObjects.add((T) lastObject);
                 }
             }
         } catch (Throwable t) {
             throw new InternalBraaSException(t);
         }
         return collectionOfObjects;
+    }
+
+    private static Object findById(Object newObject, Object lastObject, String field, Map<String, Collection<String>> idKeys) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+        if (newObject == null || lastObject == null) {
+            return null;
+        }
+        Collection<String> ids = idKeys.get(field);
+        Object lastObject_ = lastObject;
+        if (!newObject.getClass().equals(lastObject.getClass())) {
+            lastObject_ = PropertyUtils.getProperty(lastObject, field);
+        }
+        if (lastObject_.equals(newObject)) {
+            return newObject;
+        } else {
+            if (reflectionUtils.isCollectionImplementation(lastObject_.getClass())) {
+                Object[] orderedCollection = ((Collection) lastObject_).toArray(new Object[]{});
+                lastObject_ = orderedCollection[orderedCollection.length - 1];
+            }
+            for (String id : ids) {
+                Object newObjectValue = PropertyUtils.getProperty(newObject, id);
+                Object lastObjectValue = PropertyUtils.getProperty(lastObject_, id);
+                if (newObjectValue == null) {
+                    return lastObject_;
+                } else {
+                    if (newObjectValue.equals(lastObjectValue)) {
+                        return lastObject_;
+                    } else {
+                        return null;
+                    }
+                }
+            }
+            return lastObject_;
+        }
+    }
+
+    public <T> T merge(T local, T remote) throws IllegalAccessException, InstantiationException {
+        Class<?> clazz = local.getClass();
+        Object merged = clazz.newInstance();
+        for (Field field : clazz.getDeclaredFields()) {
+            field.setAccessible(true);
+            Object localValue = field.get(local);
+            Object remoteValue = field.get(remote);
+            if (localValue != null) {
+                switch (localValue.getClass().getSimpleName()) {
+                    case "Default":
+                    case "Detail":
+                        field.set(merged, this.merge(localValue, remoteValue));
+                        break;
+                    default:
+                        field.set(merged, (remoteValue != null) ? remoteValue : localValue);
+                }
+            }
+        }
+        return (T) merged;
     }
 
     private static Object traverseObject(String field, Class<?> parentType, Object parent, String value) throws InstantiationException, IllegalAccessException, InternalBraaSException {
