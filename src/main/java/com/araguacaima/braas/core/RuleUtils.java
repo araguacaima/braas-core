@@ -59,6 +59,13 @@ public class RuleUtils {
             String innerPrefix = prefix;
             Object lastObject = null;
             for (int i = 0; i < matrixSize; i++) {
+                if (object == null || ((i % objectSize) == 0)) {
+                    object = clazz.newInstance();
+                    lastObject = object;
+                    collectionOfObjects.add((T) object);
+                    innerPrefix = prefix;
+                    fieldType = clazz;
+                }
                 String field = fields[i % objectSize];
                 if (StringUtils.isNotBlank(prefix)) {
                     field = field.replaceFirst(Pattern.quote(innerPrefix), StringUtils.EMPTY);
@@ -67,12 +74,6 @@ public class RuleUtils {
                     field = field.substring(1);
                 }
 
-                if (object == null || ((i % objectSize) == 0)) {
-                    object = clazz.newInstance();
-                    lastObject = object;
-                    collectionOfObjects.add((T) object);
-                    innerPrefix = prefix;
-                }
                 String value = matrix[i];
                 Object newObject = traverseObject(field, fieldType, object, value);
                 if (newObject != null && !newObject.equals(lastObject)) {
