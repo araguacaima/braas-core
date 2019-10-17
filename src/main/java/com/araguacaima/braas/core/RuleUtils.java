@@ -63,39 +63,38 @@ public class RuleUtils {
             for (int i = 0; i < matrixSize; i++) {
                 if (object == null || ((i % objectSize) == 0)) {
                     object = clazz.newInstance();
-                    lastObject = object;
+                    if (!collectionOfObjects.isEmpty()) {
+                        lastObject = collectionOfObjects.get(collectionOfObjects.size() - 1);
+                    } else {
+                        lastObject = object;
+                    }
                     innerPrefix = prefix;
                     fieldType = clazz;
                 }
                 String field = fields[i % objectSize];
                 String parentField;
                 if (StringUtils.isNotBlank(innerPrefix)) {
-                    String fullField = field;
+                    String[] tokens = innerPrefix.split("\\.");
+                    parentField = tokens[tokens.length - 1];
                     field = field.replaceFirst(Pattern.quote(innerPrefix + "."), StringUtils.EMPTY);
-                    String[] tokens = field.split("\\.");
-                    if (tokens.length > 1) {
-                        String token = tokens[0];
+                    String[] tokens_ = field.split("\\.");
+                    if (tokens_.length > 1) {
+                        String token = tokens_[0];
                         parentField = token.equals(field) ? innerPrefix : token;
-                    } else {
-                        if (StringUtils.isNotBlank(innerPrefix)) {
-                            parentField = fullField.substring(0, (fullField.length() - field.length()) - 1);
-                        } else {
-                            parentField = clazz.getSimpleName();
-                        }
                     }
                 } else {
                     parentField = clazz.getName();
-                }
-                if (!collectionOfObjects.isEmpty()) {
-                    lastObject = collectionOfObjects.get(collectionOfObjects.size() - 1);
                 }
                 String value = matrix[i];
                 Object newObject = traverseObject(field, fieldType, object, value);
                 if (newObject != null) {
                     Object existentObject;
-                    existentObject = findById(newObject, lastObject, parentField, idFields);
+                    existentObject = findById(newObject, object, parentField, idFields);
                     if (existentObject != null) {
                         newObject = existentObject;
+                    } else {
+                        newObject = lastObject;
+                        object = newObject;
                     }
                     if (!newObject.equals(lastObject)) {
                         fieldType = newObject.getClass();
@@ -125,28 +124,27 @@ public class RuleUtils {
         if (!newObject.getClass().equals(lastObject.getClass())) {
             lastObject_ = PropertyUtils.getProperty(lastObject, field);
         }
-        if (lastObject_.equals(newObject)) {
-            return newObject;
-        } else {
-            if (reflectionUtils.isCollectionImplementation(lastObject_.getClass())) {
-                Object[] orderedCollection = ((Collection) lastObject_).toArray(new Object[]{});
-                lastObject_ = orderedCollection[orderedCollection.length - 1];
-            }
-            for (String id : ids) {
-                Object newObjectValue = PropertyUtils.getProperty(newObject, id);
-                Object lastObjectValue = PropertyUtils.getProperty(lastObject_, id);
-                if (newObjectValue == null) {
+        if (reflectionUtils.isCollectionImplementation(lastObject_.getClass())) {
+            Object[] orderedCollection = ((Collection) lastObject_).toArray(new Object[]{});
+            lastObject_ = orderedCollection[orderedCollection.length - 1];
+        }
+        for (String id : ids) {
+            Object newObjectValue = PropertyUtils.getProperty(newObject, id);
+            Object lastObjectValue = PropertyUtils.getProperty(lastObject_, id);
+            if (newObjectValue == null) {
+                if (lastObject_.equals(newObject)) {
+                    return null;
+                }
+                return lastObject_;
+            } else {
+                if (newObjectValue.equals(lastObjectValue)) {
                     return lastObject_;
                 } else {
-                    if (newObjectValue.equals(lastObjectValue)) {
-                        return lastObject_;
-                    } else {
-                        return null;
-                    }
+                    return null;
                 }
             }
-            return lastObject_;
         }
+        return lastObject_;
     }
 
     public <T> T merge(T local, T remote) throws IllegalAccessException, InstantiationException {
@@ -172,9 +170,10 @@ public class RuleUtils {
 
     private static Object traverseObject(String field, Class<?> parentType, Object parent, String value) throws InstantiationException, IllegalAccessException, InternalBraaSException {
         String token;
+        Field field_;
         if (field.contains(".")) {
             token = field.split("\\.")[0];
-            Field field_ = reflectionUtils.getField(parentType, token);
+            field_ = reflectionUtils.getField(parentType, token);
             field_.setAccessible(true);
             Class childType = field_.getType();
             if (reflectionUtils.isCollectionImplementation(childType)) {
@@ -183,12 +182,22 @@ public class RuleUtils {
                 Object innerObject = innerType.newInstance();
                 innerObject = traverseObject(remainingField, innerType, innerObject, value);
                 Object col = reflectionUtils.deepInitialization(childType);
-                ((Collection) col).add(innerObject);
+                if (innerObject != null) {
+                    ((Collection) col).add(innerObject);
+                }
                 field_.set(parent, col);
                 return innerObject;
             }
+        } else {
+            field_ = reflectionUtils.getField(parentType, field);
         }
-        return buildObject(field, parentType, parent, value, null);
+        if (value != null) {
+            Object defaultValue = getDefaultValue(field_.getType());
+            if (defaultValue != value) {
+                return buildObject(field, parentType, parent, value, null);
+            }
+        }
+        return parent;
     }
 
     public static Object buildObject(String field, Class<?> fieldType, Object parent, Object value, String prefix) throws InternalBraaSException {
@@ -324,6 +333,29 @@ public class RuleUtils {
         return innerObject;
     }
 
+    private static Object getDefaultValue(Class<?> targetType) {
+        if (targetType.isEnum()) {
+            return null;
+        } else if (String.class.isAssignableFrom(targetType)) {
+            return StringUtils.EMPTY;
+        } else if (Boolean.class.isAssignableFrom(targetType) || Boolean.TYPE.isAssignableFrom(targetType)) {
+            return false;
+        } else if (Character.class.isAssignableFrom(targetType) || Character.TYPE.isAssignableFrom(targetType)) {
+            return '\u0000';
+        } else if (Short.class.isAssignableFrom(targetType) || Short.TYPE.isAssignableFrom(targetType)) {
+            return 0;
+        } else if (Integer.class.isAssignableFrom(targetType) || Integer.TYPE.isAssignableFrom(targetType)) {
+            return 0;
+        } else if (Long.class.isAssignableFrom(targetType) || Long.TYPE.isAssignableFrom(targetType)) {
+            return 0L;
+        } else if (Float.class.isAssignableFrom(targetType) || Float.TYPE.isAssignableFrom(targetType)) {
+            return 0.0f;
+        } else if (Double.class.isAssignableFrom(targetType) || Double.TYPE.isAssignableFrom(targetType)) {
+            return 0.0d;
+        }
+        return null;
+    }
+
     private static Object fixValue(Class<?> targetType, String value) {
         if (targetType.isEnum()) {
             try {
@@ -342,7 +374,7 @@ public class RuleUtils {
                 log.debug("Unable to bind value of '" + value + "' as type '" + String.class.getName() + "'");
             }
         } else if (Boolean.class.isAssignableFrom(targetType) || Boolean.TYPE.isAssignableFrom(targetType)) {
-            String booleanValue = value.toString().toLowerCase();
+            String booleanValue = value.toLowerCase();
             try {
                 return Boolean.valueOf(booleanValue);
             } catch (Throwable t) {
@@ -350,49 +382,43 @@ public class RuleUtils {
                 return false;
             }
         } else if (Character.class.isAssignableFrom(targetType) || Character.TYPE.isAssignableFrom(targetType)) {
-            String characterValue = value.toString();
             try {
-                return characterValue.charAt(0);
+                return value.charAt(0);
             } catch (Throwable t) {
                 log.debug("Unable to bind value of '" + value + "' as type '" + Character.class.getName() + "'");
                 return '\u0000';
             }
         } else if (Short.class.isAssignableFrom(targetType) || Short.TYPE.isAssignableFrom(targetType)) {
-            String booleanValue = value.toString();
             try {
-                return Short.valueOf(booleanValue);
+                return Short.valueOf(value);
             } catch (Throwable t) {
                 log.debug("Unable to bind value of '" + value + "' as type '" + Short.class.getName() + "'");
                 return 0;
             }
         } else if (Integer.class.isAssignableFrom(targetType) || Integer.TYPE.isAssignableFrom(targetType)) {
-            String booleanValue = value.toString();
             try {
-                return Integer.valueOf(booleanValue);
+                return Integer.valueOf(value);
             } catch (Throwable t) {
                 log.debug("Unable to bind value of '" + value + "' as type '" + Integer.class.getName() + "'");
                 return 0;
             }
         } else if (Long.class.isAssignableFrom(targetType) || Long.TYPE.isAssignableFrom(targetType)) {
-            String booleanValue = value.toString();
             try {
-                return Long.valueOf(booleanValue);
+                return Long.valueOf(value);
             } catch (Throwable t) {
                 log.debug("Unable to bind value of '" + value + "' as type '" + Long.class.getName() + "'");
                 return 0L;
             }
         } else if (Float.class.isAssignableFrom(targetType) || Float.TYPE.isAssignableFrom(targetType)) {
-            String booleanValue = value.toString();
             try {
-                return Float.valueOf(booleanValue);
+                return Float.valueOf(value);
             } catch (Throwable t) {
                 log.debug("Unable to bind value of '" + value + "' as type '" + Float.class.getName() + "'");
                 return 0.0f;
             }
         } else if (Double.class.isAssignableFrom(targetType) || Double.TYPE.isAssignableFrom(targetType)) {
-            String booleanValue = value.toString();
             try {
-                return Double.valueOf(booleanValue);
+                return Double.valueOf(value);
             } catch (Throwable t) {
                 log.debug("Unable to bind value of '" + value + "' as type '" + Double.class.getName() + "'");
                 return 0.0d;

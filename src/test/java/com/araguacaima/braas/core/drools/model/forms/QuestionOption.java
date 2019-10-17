@@ -1,12 +1,21 @@
 package com.araguacaima.braas.core.drools.model.forms;
 
 public class QuestionOption {
+    private String id;
     private String title;
     private String description;
     private double weighing;
     private boolean isText;
     private boolean selected = false;
     private String questionId;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getTitle() {
         return title;
