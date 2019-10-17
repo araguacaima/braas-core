@@ -167,7 +167,7 @@ public class RuleUtils {
                     String fieldName = cell.toString();
                     cell = enumsUtils.getEnum(fieldType, fieldName);
                 } catch (Throwable t) {
-                    log.debug("Unable to bind value of '" + cell + "' as type '" + String.class.getName() + "' for field '" + field_.toString() + "'");
+                    log.trace("Unable to bind value of '" + cell + "' as type '" + String.class.getName() + "' for field '" + field_.toString() + "'");
                     cell = null;
                 }
             } else if (String.class.isAssignableFrom(fieldType)) {
@@ -177,7 +177,7 @@ public class RuleUtils {
                         cell = null;
                     }
                 } catch (Throwable t) {
-                    log.debug("Unable to bind value of '" + cell + "' as type '" + String.class.getName() + "' for field '" + field_.toString() + "'");
+                    log.trace("Unable to bind value of '" + cell + "' as type '" + String.class.getName() + "' for field '" + field_.toString() + "'");
                     cell = null;
                 }
             } else if (Boolean.class.isAssignableFrom(fieldType) || Boolean.TYPE.isAssignableFrom(fieldType)) {
@@ -185,7 +185,7 @@ public class RuleUtils {
                 try {
                     cell = Boolean.valueOf(booleanValue);
                 } catch (Throwable t) {
-                    log.debug("Unable to bind value of '" + cell + "' as type '" + Boolean.class.getName() + "' for field '" + field_.toString() + "'");
+                    log.trace("Unable to bind value of '" + cell + "' as type '" + Boolean.class.getName() + "' for field '" + field_.toString() + "'");
                     cell = false;
                 }
             } else if (Character.class.isAssignableFrom(fieldType) || Character.TYPE.isAssignableFrom(fieldType)) {
@@ -193,7 +193,7 @@ public class RuleUtils {
                 try {
                     cell = characterValue.charAt(0);
                 } catch (Throwable t) {
-                    log.debug("Unable to bind value of '" + cell + "' as type '" + Character.class.getName() + "' for field '" + field_.toString() + "'");
+                    log.trace("Unable to bind value of '" + cell + "' as type '" + Character.class.getName() + "' for field '" + field_.toString() + "'");
                     cell = '\u0000';
                 }
             } else if (Short.class.isAssignableFrom(fieldType) || Short.TYPE.isAssignableFrom(fieldType)) {
@@ -201,7 +201,7 @@ public class RuleUtils {
                 try {
                     cell = Short.valueOf(booleanValue);
                 } catch (Throwable t) {
-                    log.debug("Unable to bind value of '" + cell + "' as type '" + Short.class.getName() + "' for field '" + field_.toString() + "'");
+                    log.trace("Unable to bind value of '" + cell + "' as type '" + Short.class.getName() + "' for field '" + field_.toString() + "'");
                     cell = 0;
                 }
             } else if (Integer.class.isAssignableFrom(fieldType) || Integer.TYPE.isAssignableFrom(fieldType)) {
@@ -209,7 +209,7 @@ public class RuleUtils {
                 try {
                     cell = Integer.valueOf(booleanValue);
                 } catch (Throwable t) {
-                    log.debug("Unable to bind value of '" + cell + "' as type '" + Integer.class.getName() + "' for field '" + field_.toString() + "'");
+                    log.trace("Unable to bind value of '" + cell + "' as type '" + Integer.class.getName() + "' for field '" + field_.toString() + "'");
                     cell = 0;
                 }
             } else if (Long.class.isAssignableFrom(fieldType) || Long.TYPE.isAssignableFrom(fieldType)) {
@@ -217,7 +217,7 @@ public class RuleUtils {
                 try {
                     cell = Long.valueOf(booleanValue);
                 } catch (Throwable t) {
-                    log.debug("Unable to bind value of '" + cell + "' as type '" + Long.class.getName() + "' for field '" + field_.toString() + "'");
+                    log.trace("Unable to bind value of '" + cell + "' as type '" + Long.class.getName() + "' for field '" + field_.toString() + "'");
                     cell = 0L;
                 }
             } else if (Float.class.isAssignableFrom(fieldType) || Float.TYPE.isAssignableFrom(fieldType)) {
@@ -225,7 +225,7 @@ public class RuleUtils {
                 try {
                     cell = Float.valueOf(booleanValue);
                 } catch (Throwable t) {
-                    log.debug("Unable to bind value of '" + cell + "' as type '" + Float.class.getName() + "' for field '" + field_.toString() + "'");
+                    log.trace("Unable to bind value of '" + cell + "' as type '" + Float.class.getName() + "' for field '" + field_.toString() + "'");
                     cell = 0.0f;
                 }
             } else if (Double.class.isAssignableFrom(fieldType) || Double.TYPE.isAssignableFrom(fieldType)) {
@@ -233,7 +233,7 @@ public class RuleUtils {
                 try {
                     cell = Double.valueOf(booleanValue);
                 } catch (Throwable t) {
-                    log.debug("Unable to bind value of '" + cell + "' as type '" + Double.class.getName() + "' for field '" + field_.toString() + "'");
+                    log.trace("Unable to bind value of '" + cell + "' as type '" + Double.class.getName() + "' for field '" + field_.toString() + "'");
                     cell = 0.0d;
                 }
             }
