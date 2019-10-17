@@ -147,27 +147,6 @@ public class RuleUtils {
         return lastObject_;
     }
 
-    public <T> T merge(T local, T remote) throws IllegalAccessException, InstantiationException {
-        Class<?> clazz = local.getClass();
-        Object merged = clazz.newInstance();
-        for (Field field : clazz.getDeclaredFields()) {
-            field.setAccessible(true);
-            Object localValue = field.get(local);
-            Object remoteValue = field.get(remote);
-            if (localValue != null) {
-                switch (localValue.getClass().getSimpleName()) {
-                    case "Default":
-                    case "Detail":
-                        field.set(merged, this.merge(localValue, remoteValue));
-                        break;
-                    default:
-                        field.set(merged, (remoteValue != null) ? remoteValue : localValue);
-                }
-            }
-        }
-        return (T) merged;
-    }
-
     private static Object traverseObject(String field, Class<?> parentType, Object parent, String value) throws InstantiationException, IllegalAccessException, InternalBraaSException {
         String token;
         Field field_;
@@ -192,8 +171,10 @@ public class RuleUtils {
             field_ = reflectionUtils.getField(parentType, field);
         }
         if (value != null) {
-            Object defaultValue = getDefaultValue(field_.getType());
-            if (defaultValue != value) {
+            Class<?> type = field_.getType();
+            Object defaultValue = getDefaultValue(type);
+            Object value_ = fixValue(type, value);
+            if (value_ != null && !value_.equals(defaultValue)) {
                 return buildObject(field, parentType, parent, value, null);
             }
         }
