@@ -25,7 +25,7 @@
         <appender-ref ref="STDOUT"/>
     </logger>
 
-    <logger name="com.araguacaima.braas.core.RuleUtils" level="INFO" additivity="false">
+    <logger name="com.araguacaima.braas.core.SpreadsheetRuleUtils" level="INFO" additivity="false">
         <appender-ref ref="STDOUT"/>
     </logger>
 
