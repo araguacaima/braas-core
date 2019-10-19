@@ -368,10 +368,10 @@ public class SpreadsheetRuleUtils {
 
         LinkedList<T> collectionOfObjects = new LinkedList<T>();
         try {
-            int matrixSize = end == null ? matrix.length : end;
+            int i = start == null ? 0 : start;
+            int matrixSize = end == null ? matrix.length : end - i;
             String innerPrefix = prefix;
 
-            int i = start == null ? 0 : start;
             String field = fields[i % objectSize];
             if (StringUtils.isNotBlank(innerPrefix)) {
                 field = field.replaceFirst(Pattern.quote(innerPrefix + "."), StringUtils.EMPTY);
