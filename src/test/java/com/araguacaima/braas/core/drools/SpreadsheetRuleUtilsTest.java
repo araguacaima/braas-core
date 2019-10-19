@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.LinkedList;
 
 public class SpreadsheetRuleUtilsTest {
 
@@ -38,4 +39,12 @@ public class SpreadsheetRuleUtilsTest {
         String[] result = spreadsheetRuleUtils.buildMatrix();
         System.out.println(jsonUtils.toJSON(result));
     }
+
+    @Test
+    public void testGetIntervals() throws InternalBraaSException, IOException {
+        SpreadsheetRuleUtils spreadsheetRuleUtils = new SpreadsheetRuleUtils(matrixStr, fieldSeparator, headerSeparator);
+        LinkedList result = spreadsheetRuleUtils.getIntervals();
+        System.out.println(jsonUtils.toJSON(result));
+    }
+
 }

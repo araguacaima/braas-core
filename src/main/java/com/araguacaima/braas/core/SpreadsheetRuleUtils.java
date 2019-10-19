@@ -7,8 +7,6 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +28,6 @@ public class SpreadsheetRuleUtils {
     private final String[] matrix;
     private final String[] fields;
     private final int objectSize;
-    private LinkedHashMap<String, Pair<Integer, Integer>> subMatrixIndexes = new LinkedHashMap<>();
 
     public SpreadsheetRuleUtils(String matrixStr, String fieldSeparator, String headerSeparator) throws InternalBraaSException {
         this.matrixStr = matrixStr;
@@ -196,116 +193,8 @@ public class SpreadsheetRuleUtils {
         return stringArrayToBeans(prefix, clazz, null, null);
     }
 
-    @SuppressWarnings("SpellCheckingInspection")
-    public <T> Collection<T> stringArrayToBeans(String prefix, Class<?> clazz, Integer start, Integer end) throws InternalBraaSException {
-
-        LinkedList<T> collectionOfObjects = new LinkedList<T>();
-        try {
-            int matrixSize = end == null ? matrix.length : end;
-            String innerPrefix = prefix;
-
-            int i = start == null ? 0 : start;
-            String field = fields[i % objectSize];
-            if (StringUtils.isNotBlank(innerPrefix)) {
-                field = field.replaceFirst(Pattern.quote(innerPrefix + "."), StringUtils.EMPTY);
-            }
-            if (field.contains(".")) {
-                String innerField = field.split("\\.")[0];
-                innerPrefix = innerPrefix + "." + innerField;
-            }
-            int previousIndex = 0;
-            String previousValue = null;
-            for (int j = 0; j < matrixSize; j++) {
-                int index = i + (j * objectSize);
-                if (index >= matrixSize) {
-                    break;
-                }
-                String value = matrix[index];
-                String finalField = field;
-                Optional<T> obj = collectionOfObjects.stream().filter(element -> {
-                    Field field_ = reflectionUtils.getField(clazz, finalField);
-                    if (field_ != null) {
-                        field_.setAccessible(true);
-                        try {
-                            Object result = field_.get(element);
-                            if (result != null) {
-                                return result.equals(value);
-                            }
-                        } catch (IllegalAccessException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    return false;
-                }).findFirst();
-                Object obj_;
-                if (!obj.isPresent()) {
-                    previousIndex = index;
-                    obj_ = clazz.newInstance();
-                    PropertyUtils.setNestedProperty(obj_, field, value);
-                    collectionOfObjects.add((T) obj_);
-                    if (previousValue == null) {
-                        previousValue = value;
-                    }
-                    MutablePair<Integer, Integer> pair = (MutablePair<Integer, Integer>) subMatrixIndexes.get(previousValue);
-                    if (pair != null) {
-                        pair.setRight(pair.getRight() + objectSize - 1);
-                    }
-                    subMatrixIndexes.put(value, new MutablePair<>(index, index + objectSize));
-                } else {
-                    previousValue = value;
-                    MutablePair<Integer, Integer> pair = (MutablePair<Integer, Integer>) subMatrixIndexes.get(value);
-                    pair.setRight(index);
-                    //processRow(matrix, previousIndex, index, collectionOfObjects.getLast(), innerPrefix, fields);
-                }
-            }
-            MutablePair<Integer, Integer> pair = (MutablePair<Integer, Integer>) subMatrixIndexes.get(previousValue);
-            if (pair != null) {
-                pair.setRight(pair.getRight() + objectSize - 1);
-            }
-        } catch (Throwable t) {
-            throw new InternalBraaSException(t);
-        }
-        return collectionOfObjects;
-    }
-
-    private void processRow(String[] matrix, int first, int last, Object obj, String prefix, String[] fields) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException, InternalBraaSException, InstantiationException {
-        first++;
-        for (int j = first; j < last; j++) {
-            String value = matrix[j];
-            String field = fields[j];
-            String originalField = field;
-            String remainingField;
-            if (StringUtils.isNotBlank(prefix)) {
-                field = field.replaceFirst(Pattern.quote(prefix + "."), StringUtils.EMPTY);
-            }
-            if (field.contains(".")) {
-                String field_ = field.split("\\.")[0];
-                remainingField = field.substring(field_.length() + 1);
-                field = field_;
-            } else {
-                remainingField = field;
-            }
-            Class<?> fieldType = obj.getClass();
-            Field field_ = reflectionUtils.getField(fieldType, field);
-            if (field_ != null) {
-                field_.setAccessible(true);
-                Class clazz = field_.getType();
-                if (reflectionUtils.isCollectionImplementation(clazz)) {
-                    Object innerObj = field_.get(obj);
-                    if (innerObj == null) {
-                        innerObj = reflectionUtils.deepInitialization(clazz);
-                    }
-                    Class innerClass = reflectionUtils.extractGenerics(field_);
-                    String newPrefix = originalField.substring(0, originalField.length() - (remainingField.length() + 1));
-                    ((Collection) innerObj).addAll(stringArrayToBeans(newPrefix, innerClass, j, null));
-                } else {
-                    traverseObject(remainingField, fieldType, obj, value, null);
-                }
-            }
-        }
-    }
-
-    public static Object buildObject(String field, Class<?> fieldType, Object parent, Object value, String prefix) throws InternalBraaSException {
+    public static Object buildObject(String field, Class<?> fieldType, Object parent, Object value, String prefix) throws
+            InternalBraaSException {
         Field field_;
         Object innerObject = null;
         if (StringUtils.isNotBlank(prefix) && field.startsWith(prefix)) {
@@ -352,7 +241,8 @@ public class SpreadsheetRuleUtils {
         }
     }
 
-    private static Object buildObject(Class<?> fieldType, Object value, Field field_, Object innerObject) throws IllegalAccessException, InstantiationException {
+    private static Object buildObject(Class<?> fieldType, Object value, Field field_, Object innerObject) throws
+            IllegalAccessException, InstantiationException {
         if (field_ != null) {
             Object cell = value;
             if (fieldType.isEnum()) {
@@ -439,7 +329,149 @@ public class SpreadsheetRuleUtils {
     }
 
     @SuppressWarnings("SpellCheckingInspection")
-    public <T> Collection<T> stringArrayToBean2(String str, String prefix, Class<T> clazz, Map<String, Collection<String>> idFields) throws InternalBraaSException {
+    public LinkedList<Interval> getIntervals() throws InternalBraaSException {
+        return getIntervals(null, null);
+    }
+
+    @SuppressWarnings("SpellCheckingInspection")
+    public LinkedList<Interval> getIntervals(Integer start, Integer end) throws InternalBraaSException {
+        LinkedList<Interval> subMatrixIndexes = new LinkedList<>();
+        try {
+            int matrixSize = end == null ? matrix.length : end;
+            int i = start == null ? 0 : start;
+            for (int j = 0; j < matrixSize; j++) {
+                int index = i + (j * objectSize);
+                if (index >= matrixSize) {
+                    break;
+                }
+                String value = matrix[index];
+                Optional<Interval> optionalInterval = subMatrixIndexes.stream().filter(element -> element.key.equals(value)).findFirst();
+                if (!optionalInterval.isPresent()) {
+                    subMatrixIndexes.add(new Interval(value, index, index + objectSize));
+                } else {
+                    Interval interval = optionalInterval.get();
+                    if (interval.key.equals(value)) {
+                        interval.end = index + objectSize - 1;
+                    } else {
+                        interval.end = index;
+                    }
+                }
+            }
+        } catch (Throwable t) {
+            throw new InternalBraaSException(t);
+        }
+        return subMatrixIndexes;
+    }
+
+    @SuppressWarnings("SpellCheckingInspection")
+    public <T> Collection<T> stringArrayToBeans(String prefix, Class<?> clazz, Integer start, Integer end) throws InternalBraaSException {
+
+        LinkedList<T> collectionOfObjects = new LinkedList<T>();
+        try {
+            int matrixSize = end == null ? matrix.length : end;
+            String innerPrefix = prefix;
+
+            int i = start == null ? 0 : start;
+            String field = fields[i % objectSize];
+            if (StringUtils.isNotBlank(innerPrefix)) {
+                field = field.replaceFirst(Pattern.quote(innerPrefix + "."), StringUtils.EMPTY);
+            }
+            if (field.contains(".")) {
+                String innerField = field.split("\\.")[0];
+                innerPrefix = innerPrefix + "." + innerField;
+            }
+            int previousIndex = 0;
+            String previousValue = null;
+            for (int j = 0; j < matrixSize; j++) {
+                int index = i + (j * objectSize);
+                if (index >= matrixSize) {
+                    break;
+                }
+                String value = matrix[index];
+                String finalField = field;
+                Optional<T> obj = collectionOfObjects.stream().filter(element -> {
+                    Field field_ = reflectionUtils.getField(clazz, finalField);
+                    if (field_ != null) {
+                        field_.setAccessible(true);
+                        try {
+                            Object result = field_.get(element);
+                            if (result != null) {
+                                return result.equals(value);
+                            }
+                        } catch (IllegalAccessException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    return false;
+                }).findFirst();
+                Object obj_;
+                if (!obj.isPresent()) {
+                    previousIndex = index;
+                    obj_ = clazz.newInstance();
+                    PropertyUtils.setNestedProperty(obj_, field, value);
+                    collectionOfObjects.add((T) obj_);
+                    if (previousValue == null) {
+                        previousValue = value;
+                    }
+                } else {
+                    previousValue = value;
+                    processRow(matrix, previousIndex, index, collectionOfObjects.getLast(), innerPrefix, fields);
+                }
+            }
+        } catch (Throwable t) {
+            throw new InternalBraaSException(t);
+        }
+        return collectionOfObjects;
+    }
+
+    private void processRow(String[] matrix, int first, int last, Object obj, String prefix, String[] fields) throws
+            IllegalAccessException, NoSuchMethodException, InvocationTargetException, InternalBraaSException, InstantiationException {
+        first++;
+        for (int j = first; j < last; j++) {
+            String value = matrix[j];
+            String field = fields[j];
+            String originalField = field;
+            String remainingField;
+            if (StringUtils.isNotBlank(prefix)) {
+                field = field.replaceFirst(Pattern.quote(prefix + "."), StringUtils.EMPTY);
+            }
+            if (field.contains(".")) {
+                String field_ = field.split("\\.")[0];
+                remainingField = field.substring(field_.length() + 1);
+                field = field_;
+            } else {
+                remainingField = field;
+            }
+            Class<?> fieldType = obj.getClass();
+            Field field_ = reflectionUtils.getField(fieldType, field);
+            if (field_ != null) {
+                field_.setAccessible(true);
+                Class clazz = field_.getType();
+                if (reflectionUtils.isCollectionImplementation(clazz)) {
+                    Object innerObj = field_.get(obj);
+                    if (innerObj == null) {
+                        innerObj = reflectionUtils.deepInitialization(clazz);
+                    }
+                    Class innerClass = reflectionUtils.extractGenerics(field_);
+                    String newPrefix = originalField.substring(0, originalField.length() - (remainingField.length() + 1));
+                    LinkedList<Interval> intervals = getIntervals(j, null);
+                    Collection innerObj1 = (Collection) innerObj;
+                    for (Interval interval : intervals) {
+                        if (interval.key.equals(value)) {
+                            innerObj1.addAll(stringArrayToBeans(newPrefix, innerClass, interval.start, interval.end));
+                        }
+                    }
+                } else {
+                    traverseObject(remainingField, fieldType, obj, value, null);
+                }
+            }
+        }
+    }
+
+    @SuppressWarnings("SpellCheckingInspection")
+    public <
+            T> Collection<T> stringArrayToBean2(String str, String prefix, Class<T> clazz, Map<String, Collection<String>> idFields) throws
+            InternalBraaSException {
 
         LinkedList<T> collectionOfObjects = new LinkedList<T>();
         try {
@@ -590,4 +622,15 @@ public class SpreadsheetRuleUtils {
         return null;
     }
 
+    class Interval {
+        String key;
+        int start = 0;
+        int end = 0;
+
+        public Interval(String key, int start, int end) {
+            this.key = key;
+            this.start = start;
+            this.end = end;
+        }
+    }
 }
