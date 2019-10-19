@@ -30,7 +30,7 @@ public class SpreadsheetRuleUtils {
     private final String[] matrix;
     private final String[] fields;
     private final int objectSize;
-    private HashMap<String, Pair<Integer, Integer>> subMatrixIndexes = new HashMap<>();
+    private LinkedHashMap<String, Pair<Integer, Integer>> subMatrixIndexes = new LinkedHashMap<>();
 
     public SpreadsheetRuleUtils(String matrixStr, String fieldSeparator, String headerSeparator) throws InternalBraaSException {
         this.matrixStr = matrixStr;
@@ -257,6 +257,10 @@ public class SpreadsheetRuleUtils {
                     pair.setRight(index);
                     //processRow(matrix, previousIndex, index, collectionOfObjects.getLast(), innerPrefix, fields);
                 }
+            }
+            MutablePair<Integer, Integer> pair = (MutablePair<Integer, Integer>) subMatrixIndexes.get(previousValue);
+            if (pair != null) {
+                pair.setRight(pair.getRight() + objectSize - 1);
             }
         } catch (Throwable t) {
             throw new InternalBraaSException(t);
