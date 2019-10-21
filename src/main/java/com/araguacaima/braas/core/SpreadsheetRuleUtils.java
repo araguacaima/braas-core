@@ -376,46 +376,51 @@ public class SpreadsheetRuleUtils {
             if (StringUtils.isNotBlank(innerPrefix)) {
                 field = field.replaceFirst(Pattern.quote(innerPrefix + "."), StringUtils.EMPTY);
             }
+            LinkedList<Interval> intervals = null;
             if (field.contains(".")) {
                 String innerField = field.split("\\.")[0];
                 innerPrefix = innerPrefix + "." + innerField;
+            } else {
+                intervals = getIntervals(i, matrixSize);
             }
-            int previousIndex = 0;
-            String previousValue = null;
-            for (int j = 0; j < matrixSize; j++) {
-                int index = i + (j * objectSize);
-                if (index >= matrixSize) {
-                    break;
-                }
-                String value = matrix[index];
-                String finalField = field;
-                Optional<T> obj = collectionOfObjects.stream().filter(element -> {
-                    Field field_ = reflectionUtils.getField(clazz, finalField);
-                    if (field_ != null) {
-                        field_.setAccessible(true);
-                        try {
-                            Object result = field_.get(element);
-                            if (result != null) {
-                                return result.equals(value);
+            if (CollectionUtils.isNotEmpty(intervals)) {
+                int previousIndex = 0;
+                String previousValue = null;
+                for (int j = 0; j < matrixSize; j++) {
+                    int index = i + (j * objectSize);
+                    if (index >= matrixSize) {
+                        break;
+                    }
+                    String value = matrix[index];
+                    String finalField = field;
+                    Optional<T> obj = collectionOfObjects.stream().filter(element -> {
+                        Field field_ = reflectionUtils.getField(clazz, finalField);
+                        if (field_ != null) {
+                            field_.setAccessible(true);
+                            try {
+                                Object result = field_.get(element);
+                                if (result != null) {
+                                    return result.equals(value);
+                                }
+                            } catch (IllegalAccessException e) {
+                                e.printStackTrace();
                             }
-                        } catch (IllegalAccessException e) {
-                            e.printStackTrace();
                         }
-                    }
-                    return false;
-                }).findFirst();
-                Object obj_;
-                if (!obj.isPresent()) {
-                    previousIndex = index;
-                    obj_ = clazz.newInstance();
-                    PropertyUtils.setNestedProperty(obj_, field, value);
-                    collectionOfObjects.add((T) obj_);
-                    if (previousValue == null) {
+                        return false;
+                    }).findFirst();
+                    Object obj_;
+                    if (!obj.isPresent()) {
+                        previousIndex = index;
+                        obj_ = clazz.newInstance();
+                        PropertyUtils.setNestedProperty(obj_, field, value);
+                        collectionOfObjects.add((T) obj_);
+                        if (previousValue == null) {
+                            previousValue = value;
+                        }
+                    } else {
                         previousValue = value;
+                        processRow(matrix, previousIndex, index, collectionOfObjects.getLast(), innerPrefix, fields);
                     }
-                } else {
-                    previousValue = value;
-                    processRow(matrix, previousIndex, index, collectionOfObjects.getLast(), innerPrefix, fields);
                 }
             }
         } catch (Throwable t) {
@@ -622,15 +627,27 @@ public class SpreadsheetRuleUtils {
         return null;
     }
 
-    class Interval {
-        String key;
-        int start = 0;
-        int end = 0;
+    public class Interval {
+        private String key;
+        private int start = 0;
+        private int end = 0;
 
         public Interval(String key, int start, int end) {
             this.key = key;
             this.start = start;
             this.end = end;
+        }
+
+        public String getKey() {
+            return key;
+        }
+
+        public int getStart() {
+            return start;
+        }
+
+        public int getEnd() {
+            return end;
         }
     }
 }

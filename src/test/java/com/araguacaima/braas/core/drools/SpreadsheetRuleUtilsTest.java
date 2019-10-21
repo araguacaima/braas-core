@@ -43,7 +43,7 @@ public class SpreadsheetRuleUtilsTest {
     @Test
     public void testGetIntervals() throws InternalBraaSException, IOException {
         SpreadsheetRuleUtils spreadsheetRuleUtils = new SpreadsheetRuleUtils(matrixStr, fieldSeparator, headerSeparator);
-        LinkedList result = spreadsheetRuleUtils.getIntervals();
+        LinkedList<SpreadsheetRuleUtils.Interval> result = spreadsheetRuleUtils.getIntervals();
         System.out.println(jsonUtils.toJSON(result));
     }
 
