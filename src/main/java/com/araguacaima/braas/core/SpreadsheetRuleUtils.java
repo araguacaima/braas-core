@@ -5,7 +5,6 @@ import com.araguacaima.braas.core.exception.InternalBraaSException;
 import com.araguacaima.commons.utils.EnumsUtils;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -345,15 +344,17 @@ public class SpreadsheetRuleUtils {
                     break;
                 }
                 String value = matrix[index];
-                Optional<Interval> optionalInterval = subMatrixIndexes.stream().filter(element -> element.key.equals(value)).findFirst();
-                if (!optionalInterval.isPresent()) {
-                    subMatrixIndexes.add(new Interval(value, index, index + objectSize));
-                } else {
-                    Interval interval = optionalInterval.get();
-                    if (interval.key.equals(value)) {
-                        interval.end = index + objectSize - 1;
+                if (StringUtils.isNotBlank(value)) {
+                    Optional<Interval> optionalInterval = subMatrixIndexes.stream().filter(element -> element.key.equals(value)).findFirst();
+                    if (!optionalInterval.isPresent()) {
+                        subMatrixIndexes.add(new Interval(value, index, index + objectSize));
                     } else {
-                        interval.end = index;
+                        Interval interval = optionalInterval.get();
+                        if (interval.key.equals(value)) {
+                            interval.end = index + objectSize - 1;
+                        } else {
+                            interval.end = index;
+                        }
                     }
                 }
             }
@@ -386,8 +387,11 @@ public class SpreadsheetRuleUtils {
             if (CollectionUtils.isNotEmpty(intervals)) {
                 int previousIndex = 0;
                 String previousValue = null;
+                Interval interval = null;
+                LinkedList<Interval> innerIntervals = null;
                 for (int j = 0; j < matrixSize; j++) {
                     int index = i + (j * objectSize);
+                    boolean endOfInterval = interval != null && index > interval.end;
                     if (index >= matrixSize) {
                         break;
                     }
@@ -413,13 +417,17 @@ public class SpreadsheetRuleUtils {
                         previousIndex = index;
                         obj_ = clazz.newInstance();
                         PropertyUtils.setNestedProperty(obj_, field, value);
+                        Optional<Interval> intervalOpt = intervals.stream().filter(interval_ -> interval_.getKey().equals(value)).findFirst();
+                        if (intervalOpt.isPresent()) {
+                            interval = intervalOpt.get();
+                        }
                         collectionOfObjects.add((T) obj_);
                         if (previousValue == null) {
                             previousValue = value;
                         }
                     } else {
                         previousValue = value;
-                        processRow(matrix, previousIndex, index, collectionOfObjects.getLast(), innerPrefix, fields);
+                        innerIntervals = processRow(matrix, previousIndex, index, collectionOfObjects.getLast(), innerPrefix, fields, interval, innerIntervals);
                     }
                 }
             }
@@ -429,12 +437,12 @@ public class SpreadsheetRuleUtils {
         return collectionOfObjects;
     }
 
-    private void processRow(String[] matrix, int first, int last, Object obj, String prefix, String[] fields) throws
+    private LinkedList<Interval> processRow(String[] matrix, int first, int last, Object obj, String prefix, String[] fields, Interval parentInterval, LinkedList<Interval> innerIntervals) throws
             IllegalAccessException, NoSuchMethodException, InvocationTargetException, InternalBraaSException, InstantiationException {
         first++;
         for (int j = first; j < last; j++) {
             String value = matrix[j];
-            String field = fields[j];
+            String field = fields[j % objectSize];
             String originalField = field;
             String remainingField;
             if (StringUtils.isNotBlank(prefix)) {
@@ -453,29 +461,37 @@ public class SpreadsheetRuleUtils {
                 field_.setAccessible(true);
                 Class clazz = field_.getType();
                 if (reflectionUtils.isCollectionImplementation(clazz)) {
+                    if (innerIntervals == null) {
+                        innerIntervals = getIntervals(j, parentInterval.end);
+                    }
                     Object innerObj = field_.get(obj);
                     if (innerObj == null) {
                         innerObj = reflectionUtils.deepInitialization(clazz);
                     }
                     Class innerClass = reflectionUtils.extractGenerics(field_);
                     String newPrefix = originalField.substring(0, originalField.length() - (remainingField.length() + 1));
-                    LinkedList<Interval> intervals = getIntervals(j, null);
                     Collection innerObj1 = (Collection) innerObj;
-                    for (Interval interval : intervals) {
-                        if (interval.key.equals(value)) {
-                            innerObj1.addAll(stringArrayToBeans(newPrefix, innerClass, interval.start, interval.end));
+                    int k = 0;
+                    for (Interval innerInterval : innerIntervals) {
+                        if (innerInterval.key.equals(value)) {
+                            int start = parentInterval.start + k;
+                            Collection<Object> c = stringArrayToBeans(newPrefix, innerClass, start, innerInterval.end);
+                            k = k + objectSize;
+                            innerObj1.addAll(c);
                         }
                     }
+                    return innerIntervals;
                 } else {
                     traverseObject(remainingField, fieldType, obj, value, null);
                 }
             }
         }
+        return null;
     }
 
+/*
     @SuppressWarnings("SpellCheckingInspection")
-    public <
-            T> Collection<T> stringArrayToBean2(String str, String prefix, Class<T> clazz, Map<String, Collection<String>> idFields) throws
+    public <T> Collection<T> stringArrayToBean2(String str, String prefix, Class<T> clazz, Map<String, Collection<String>> idFields) throws
             InternalBraaSException {
 
         LinkedList<T> collectionOfObjects = new LinkedList<T>();
@@ -555,6 +571,7 @@ public class SpreadsheetRuleUtils {
         }
         return collectionOfObjects;
     }
+*/
 
     private static Object fixValue(Class<?> targetType, String value) {
         if (targetType.isEnum()) {
