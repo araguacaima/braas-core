@@ -474,8 +474,8 @@ public class SpreadsheetRuleUtils {
                     int k = 0;
                     for (Interval innerInterval : innerIntervals) {
                         if (innerInterval.key.equals(value)) {
-                            int start = parentInterval.start + k;
-                            Collection<Object> c = stringArrayToBeans(newPrefix, innerClass, start, innerInterval.end);
+                            int start = parentInterval.start + j;
+                            Collection<Object> c = stringArrayToBeans(newPrefix, innerClass, start, parentInterval.end);
                             k = k + objectSize;
                             innerObj1.addAll(c);
                         }
