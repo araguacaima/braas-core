@@ -347,11 +347,11 @@ public class SpreadsheetRuleUtils {
                 if (StringUtils.isNotBlank(value)) {
                     Optional<Interval> optionalInterval = subMatrixIndexes.stream().filter(element -> element.key.equals(value)).findFirst();
                     if (!optionalInterval.isPresent()) {
-                        subMatrixIndexes.add(new Interval(value, index, index + objectSize));
+                        subMatrixIndexes.add(new Interval(value, index, index + objectSize - i));
                     } else {
                         Interval interval = optionalInterval.get();
                         if (interval.key.equals(value)) {
-                            interval.end = index + objectSize - 1;
+                            interval.end = index + (objectSize - i) - 1;
                         } else {
                             interval.end = index;
                         }
@@ -391,7 +391,6 @@ public class SpreadsheetRuleUtils {
                 LinkedList<Interval> innerIntervals = null;
                 for (int j = 0; j < matrixSize; j++) {
                     int index = i + (j * objectSize);
-                    boolean endOfInterval = interval != null && index > interval.end;
                     if (index >= matrixSize) {
                         break;
                     }
@@ -476,8 +475,8 @@ public class SpreadsheetRuleUtils {
                         if (innerInterval.key.equals(value)) {
                             int start = parentInterval.start + j;
                             Collection<Object> c = stringArrayToBeans(newPrefix, innerClass, start, parentInterval.end);
-                            k = k + objectSize;
                             innerObj1.addAll(c);
+                            break;
                         }
                     }
                     return innerIntervals;

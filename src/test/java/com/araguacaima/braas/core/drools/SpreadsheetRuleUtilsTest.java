@@ -47,4 +47,10 @@ public class SpreadsheetRuleUtilsTest {
         System.out.println(jsonUtils.toJSON(result));
     }
 
+    @Test
+    public void testGetIntervals2() throws InternalBraaSException, IOException {
+        SpreadsheetRuleUtils spreadsheetRuleUtils = new SpreadsheetRuleUtils(matrixStr, fieldSeparator, headerSeparator);
+        LinkedList<SpreadsheetRuleUtils.Interval> result = spreadsheetRuleUtils.getIntervals(5, 344);
+        System.out.println(jsonUtils.toJSON(result));
+    }
 }
