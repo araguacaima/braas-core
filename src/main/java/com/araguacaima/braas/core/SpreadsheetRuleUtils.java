@@ -57,7 +57,6 @@ public class SpreadsheetRuleUtils {
         }
         for (String id : ids) {
             Object newObjectValue = PropertyUtils.getProperty(newObject, id);
-            Object lastObjectValue = PropertyUtils.getProperty(lastObject_, id);
             if (newObjectValue == null) {
                 if (lastObject_.equals(newObject)) {
                     return null;
@@ -481,9 +480,6 @@ public class SpreadsheetRuleUtils {
                 field_.setAccessible(true);
                 Class clazz = field_.getType();
                 if (reflectionUtils.isCollectionImplementation(clazz)) {
-                    /*if (innerIntervals == null) {
-                        innerIntervals = getIntervals(j, parentInterval.end);
-                    }*/
                     Object innerObj = field_.get(obj);
                     if (innerObj == null) {
                         innerObj = reflectionUtils.deepInitialization(clazz);
@@ -498,15 +494,6 @@ public class SpreadsheetRuleUtils {
                     }
                     Collection<Object> c = stringArrayToBeans(newPrefix, innerClass, start, end);
                     innerObj1.addAll(c);
-                    /*int k = 0;
-                    for (Interval innerInterval : innerIntervals) {
-                        if (innerInterval.key.equals(value)) {
-                            int start = parentInterval.start + j;
-                            Collection<Object> c = stringArrayToBeans(newPrefix, innerClass, start, parentInterval.end);
-                            innerObj1.addAll(c);
-                            break;
-                        }
-                    }*/
                     return innerIntervals;
                 } else {
                     traverseObject(remainingField, fieldType, obj, value, null);
@@ -515,90 +502,6 @@ public class SpreadsheetRuleUtils {
         }
         return null;
     }
-
-/*
-    @SuppressWarnings("SpellCheckingInspection")
-    public <T> Collection<T> stringArrayToBean2(String str, String prefix, Class<T> clazz, Map<String, Collection<String>> idFields) throws
-            InternalBraaSException {
-
-        LinkedList<T> collectionOfObjects = new LinkedList<T>();
-        try {
-            String[] strSplitted = str.split(Pattern.quote(headerSeparator));
-
-            if (strSplitted.length != 2) {
-                throw new BraaSParserException("It's not possible to parse incoming entry");
-            }
-
-            String headerStr = strSplitted[0];
-            String objectsStr = strSplitted[1];
-
-            if (objectsStr.startsWith(fieldSeparator)) {
-                objectsStr = objectsStr.replaceFirst(Pattern.quote(fieldSeparator), StringUtils.EMPTY);
-            }
-
-            String[] fields = headerStr.split(Pattern.quote(fieldSeparator));
-            int objectSize = fields.length;
-            String[] matrix = objectsStr.split(Pattern.quote(fieldSeparator));
-            int matrixSize = matrix.length;
-            Object object = null;
-            Class<?> fieldType = clazz;
-            String innerPrefix = prefix;
-            Object lastObject = null;
-            for (int i = 0; i < matrixSize; i++) {
-                if (object == null || ((i % objectSize) == 0)) {
-                    object = clazz.newInstance();
-                    if (!collectionOfObjects.isEmpty()) {
-                        lastObject = collectionOfObjects.get(collectionOfObjects.size() - 1);
-                    } else {
-                        lastObject = object;
-                    }
-                    innerPrefix = prefix;
-                    fieldType = clazz;
-                }
-                String field = fields[i % objectSize];
-                String parentField;
-                if (StringUtils.isNotBlank(innerPrefix)) {
-                    String[] tokens = innerPrefix.split("\\.");
-                    parentField = tokens[tokens.length - 1];
-                    field = field.replaceFirst(Pattern.quote(innerPrefix + "."), StringUtils.EMPTY);
-                    String[] tokens_ = field.split("\\.");
-                    if (tokens_.length > 1) {
-                        String token = tokens_[0];
-                        parentField = token.equals(field) ? innerPrefix : token;
-                    }
-                } else {
-                    parentField = clazz.getName();
-                }
-                String value = matrix[i];
-                Object newObject = traverseObject(field, fieldType, object, value, idFields);
-                if (newObject != null) {
-                    Object existentObject;
-                    existentObject = findById(newObject, object, parentField, idFields);
-                    if (existentObject != null) {
-                        newObject = existentObject;
-                    } else {
-                        newObject = lastObject;
-                        object = newObject;
-                    }
-                    if (!newObject.equals(lastObject)) {
-                        fieldType = newObject.getClass();
-                        if (field.contains(".")) {
-                            String innerField = field.split("\\.")[0];
-                            innerPrefix = innerPrefix + "." + innerField;
-                        }
-                        object = newObject;
-                    }
-                }
-                if (!IterableUtils.contains(collectionOfObjects, lastObject)) {
-                    collectionOfObjects.add((T) lastObject);
-                }
-            }
-        } catch (Throwable t) {
-            throw new InternalBraaSException(t);
-        }
-        return collectionOfObjects;
-    }
-*/
 
     private static Object fixValue(Class<?> targetType, String value) {
         if (targetType.isEnum()) {
@@ -671,7 +574,7 @@ public class SpreadsheetRuleUtils {
         return null;
     }
 
-    public class Interval {
+    public static class Interval {
         private String key;
         private int start = 0;
         private int end = 0;
