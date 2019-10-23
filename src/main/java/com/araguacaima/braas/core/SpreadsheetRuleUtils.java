@@ -401,24 +401,19 @@ public class SpreadsheetRuleUtils {
         LinkedList<T> collectionOfObjects = new LinkedList<T>();
         try {
             int i = start == null ? 0 : start;
-            int matrixSize = end == null ? matrix.length : end - i;
+            int matrixSize = end == null ? matrix.length : end;
             String innerPrefix = prefix;
 
             String field = fields[i % objectSize];
             if (StringUtils.isNotBlank(innerPrefix)) {
                 field = field.replaceFirst(Pattern.quote(innerPrefix + "."), StringUtils.EMPTY);
             }
-            //LinkedList<Interval> intervals = null;
             if (field.contains(".")) {
                 String innerField = field.split("\\.")[0];
                 innerPrefix = innerPrefix + "." + innerField;
-            } else {
-                //intervals = getIntervals(i, matrixSize);
             }
-            //if (CollectionUtils.isNotEmpty(intervals)) {
             int previousIndex = 0;
             String previousValue = null;
-            Interval interval = null;
             LinkedList<Interval> innerIntervals = null;
             for (int j = 0; j < matrixSize; j++) {
                 int index = i + (j * objectSize);
@@ -447,10 +442,6 @@ public class SpreadsheetRuleUtils {
                     previousIndex = index;
                     obj_ = clazz.newInstance();
                     PropertyUtils.setNestedProperty(obj_, field, value);
-                        /*Optional<Interval> intervalOpt = intervals.stream().filter(interval_ -> interval_.getKey().equals(value)).findFirst();
-                        if (intervalOpt.isPresent()) {
-                            interval = intervalOpt.get();
-                        }*/
                     collectionOfObjects.add((T) obj_);
                     if (previousValue == null) {
                         previousValue = value;
@@ -460,7 +451,6 @@ public class SpreadsheetRuleUtils {
                     innerIntervals = processRow(matrix, previousIndex, index, collectionOfObjects.getLast(), innerPrefix, fields, new Interval(value, i, matrixSize), innerIntervals);
                 }
             }
-            //}
         } catch (Throwable t) {
             throw new InternalBraaSException(t);
         }
@@ -502,10 +492,11 @@ public class SpreadsheetRuleUtils {
                     String newPrefix = originalField.substring(0, originalField.length() - (remainingField.length() + 1));
                     Collection innerObj1 = (Collection) innerObj;
                     int start = parentInterval.start + j;
+                    int end = parentInterval.end;
                     if (start >= objectSize) {
                         start = j;
                     }
-                    Collection<Object> c = stringArrayToBeans(newPrefix, innerClass, start, parentInterval.end);
+                    Collection<Object> c = stringArrayToBeans(newPrefix, innerClass, start, end);
                     innerObj1.addAll(c);
                     /*int k = 0;
                     for (Interval innerInterval : innerIntervals) {
