@@ -355,6 +355,11 @@ public class SpreadsheetRuleUtils {
         } catch (Throwable t) {
             throw new InternalBraaSException(t);
         }
+        subMatrixIndexes.forEach(element -> {
+            if (element.end % objectSize == 0) {
+                element.end = element.end - 1;
+            }
+        });
         return subMatrixIndexes;
     }
 
@@ -386,6 +391,14 @@ public class SpreadsheetRuleUtils {
             LinkedList<Interval> intervals = getIntervals(i, matrixSize);
             for (Interval interval : intervals) {
                 Collection<T> result = stringArrayToBeans_(innerPrefix, clazz, interval.start, interval.end);
+                String finalInnerPrefix = innerPrefix;
+                result.forEach(element -> {
+                    try {
+                        processRow(matrix, interval.start, interval.end + 1, element, finalInnerPrefix, fields, new Interval(null, i, matrixSize), null);
+                    } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException | InternalBraaSException | InstantiationException e) {
+                        e.printStackTrace();
+                    }
+                });
                 collectionOfObjects.addAll(result);
             }
         } catch (Throwable t) {
@@ -448,6 +461,7 @@ public class SpreadsheetRuleUtils {
                 } else {
                     previousValue = value;
                     innerIntervals = processRow(matrix, previousIndex, index, collectionOfObjects.getLast(), innerPrefix, fields, new Interval(value, i, matrixSize), innerIntervals);
+                    j = matrixSize;
                 }
             }
         } catch (Throwable t) {
