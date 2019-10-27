@@ -173,7 +173,8 @@ public class DroolsUtils {
                 kieSessionImpl.setGlobal(entry.getKey(), entry.getValue());
             }
         }
-        return kieSessionImpl.execute(asset, expandLists);
+        Collection<Object> execute = kieSessionImpl.execute(asset, expandLists);
+        return execute;
     }
 
     public Map<String, Object> getGlobals() {
