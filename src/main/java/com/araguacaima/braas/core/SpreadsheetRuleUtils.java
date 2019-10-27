@@ -5,6 +5,8 @@ import com.araguacaima.braas.core.exception.InternalBraaSException;
 import com.araguacaima.commons.utils.EnumsUtils;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.IterableUtils;
+import org.apache.commons.collections4.Predicate;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -340,12 +342,13 @@ public class SpreadsheetRuleUtils {
                 String value = matrix[index];
                 if (StringUtils.isNotBlank(value)) {
                     Optional<Interval> optionalInterval = subMatrixIndexes.stream().filter(element -> element.key.equals(value)).findFirst();
+                    int end1 = (i / objectSize) * objectSize + index + (objectSize - i);
                     if (!optionalInterval.isPresent()) {
-                        subMatrixIndexes.add(new Interval(value, index, index + objectSize - i));
+                        subMatrixIndexes.add(new Interval(value, index, end1));
                     } else {
                         Interval interval = optionalInterval.get();
                         if (interval.key.equals(value)) {
-                            interval.end = index + (objectSize - i) - 1;
+                            interval.end = end1 - 1;
                         } else {
                             interval.end = index;
                         }
@@ -379,8 +382,8 @@ public class SpreadsheetRuleUtils {
 
 
     @SuppressWarnings("SpellCheckingInspection")
-    private <T> Collection<T> stringArrayToBeans(String prefix, Class<?> clazz, Integer start, Integer end) throws InternalBraaSException {
-        LinkedList<T> collectionOfObjects = new LinkedList<T>();
+    private Collection stringArrayToBeans(String prefix, Class<?> clazz, Integer start, Integer end) throws InternalBraaSException {
+        LinkedList<Object> collectionOfObjects = new LinkedList<>();
         try {
             int i = start == null ? 0 : start;
             int matrixSize = end == null ? matrix.length : end;
@@ -389,17 +392,41 @@ public class SpreadsheetRuleUtils {
                 innerPrefix = clazz.getSimpleName();
             }
             LinkedList<Interval> intervals = getIntervals(i, matrixSize);
-            for (Interval interval : intervals) {
-                Collection<T> result = stringArrayToBeans_(innerPrefix, clazz, interval.start, interval.end);
-                String finalInnerPrefix = innerPrefix;
-                result.forEach(element -> {
-                    try {
-                        processRow(matrix, interval.start, interval.end + 1, element, finalInnerPrefix, fields, new Interval(null, i, matrixSize), null);
-                    } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException | InternalBraaSException | InstantiationException e) {
-                        e.printStackTrace();
+            if (intervals.size() > 1) {
+                for (Interval interval : intervals) {
+                    Collection<?> result = stringArrayToBeans_(innerPrefix, clazz, interval.start, interval.end);
+                    Interval innerInterval = interval;
+                    if (CollectionUtils.isNotEmpty(result)) {
+                        innerInterval = (Interval) IterableUtils.find(result, (Predicate<Object>) element -> Interval.class.isAssignableFrom(element.getClass()));
+                        if (innerInterval != null) {
+                            result.remove(innerInterval);
+                        } else {
+                            innerInterval = interval;
+                        }
                     }
-                });
-                collectionOfObjects.addAll(result);
+                    if (innerInterval.equals(interval) || innerInterval.end < interval.start) {
+                        String finalInnerPrefix = innerPrefix;
+                        result.forEach(element -> {
+                            try {
+                                processRow(matrix, interval.start, interval.end + 1, element, finalInnerPrefix, fields, new Interval(null, i, matrixSize), null);
+                            } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException | InternalBraaSException | InstantiationException e) {
+                                e.printStackTrace();
+                            }
+                        });
+                    }
+                    collectionOfObjects.addAll(result);
+                }
+            } else {
+                try {
+                    Interval interval = intervals.getFirst();
+                    Collection<?> result = stringArrayToBeans_(innerPrefix, clazz, interval.start, interval.end);
+                    Object element = result.iterator().next();
+                    processRow(matrix, interval.start, interval.end + 1, element, innerPrefix, fields, interval, null);
+                    collectionOfObjects.add(element);
+                } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException | InternalBraaSException | InstantiationException e) {
+                    e.printStackTrace();
+                }
+
             }
         } catch (Throwable t) {
             throw new InternalBraaSException(t);
@@ -409,8 +436,8 @@ public class SpreadsheetRuleUtils {
 
 
     @SuppressWarnings("SpellCheckingInspection")
-    private <T> Collection<T> stringArrayToBeans_(String prefix, Class<?> clazz, Integer start, Integer end) throws InternalBraaSException {
-        LinkedList<T> collectionOfObjects = new LinkedList<T>();
+    private Collection<?> stringArrayToBeans_(String prefix, Class<?> clazz, Integer start, Integer end) throws InternalBraaSException {
+        LinkedList<Object> collectionOfObjects = new LinkedList<>();
         try {
             int i = start == null ? 0 : start;
             int matrixSize = end == null ? matrix.length : end;
@@ -434,7 +461,7 @@ public class SpreadsheetRuleUtils {
                 }
                 String value = matrix[index];
                 String finalField = field;
-                Optional<T> obj = collectionOfObjects.stream().filter(element -> {
+                Optional<?> obj = collectionOfObjects.stream().filter(element -> {
                     Field field_ = reflectionUtils.getField(clazz, finalField);
                     if (field_ != null) {
                         field_.setAccessible(true);
@@ -454,14 +481,16 @@ public class SpreadsheetRuleUtils {
                     previousIndex = index;
                     obj_ = clazz.newInstance();
                     PropertyUtils.setNestedProperty(obj_, field, value);
-                    collectionOfObjects.add((T) obj_);
+                    collectionOfObjects.add(obj_);
                     if (previousValue == null) {
                         previousValue = value;
                     }
                 } else {
                     previousValue = value;
-                    innerIntervals = processRow(matrix, previousIndex, index, collectionOfObjects.getLast(), innerPrefix, fields, new Interval(value, i, matrixSize), innerIntervals);
+                    Interval parentInterval = new Interval(value, i, matrixSize);
+                    innerIntervals = processRow(matrix, previousIndex, index, collectionOfObjects.getLast(), innerPrefix, fields, parentInterval, innerIntervals);
                     j = matrixSize;
+                    collectionOfObjects.add(parentInterval);
                 }
             }
         } catch (Throwable t) {
@@ -508,6 +537,11 @@ public class SpreadsheetRuleUtils {
                     }
                     Collection<Object> c = stringArrayToBeans(newPrefix, innerClass, start, end);
                     innerObj1.addAll(c);
+                    if (innerIntervals == null) {
+                        innerIntervals = new LinkedList<>();
+                    }
+                    Interval interval = new Interval(null, start, end);
+                    innerIntervals.add(interval);
                     return innerIntervals;
                 } else {
                     traverseObject(remainingField, fieldType, obj, value, null);
