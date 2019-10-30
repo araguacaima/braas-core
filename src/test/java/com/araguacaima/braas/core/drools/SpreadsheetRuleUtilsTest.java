@@ -2,8 +2,6 @@ package com.araguacaima.braas.core.drools;
 
 import com.araguacaima.braas.core.SpreadsheetRuleUtils;
 import com.araguacaima.braas.core.drools.model.forms.Form;
-import com.araguacaima.braas.core.drools.model.forms.Question;
-import com.araguacaima.braas.core.drools.model.forms.QuestionOption;
 import com.araguacaima.braas.core.exception.InternalBraaSException;
 import com.araguacaima.commons.utils.JsonUtils;
 import org.junit.Test;
@@ -54,33 +52,5 @@ public class SpreadsheetRuleUtilsTest {
         SpreadsheetRuleUtils spreadsheetRuleUtils = new SpreadsheetRuleUtils(matrixStr, fieldSeparator, headerSeparator);
         LinkedList<SpreadsheetRuleUtils.Interval> result = spreadsheetRuleUtils.getIntervals(5, 344);
         System.out.println(jsonUtils.toJSON(result));
-    }
-
-    @Test
-    public void testFindOption() throws InternalBraaSException {
-        SpreadsheetRuleUtils spreadsheetRuleUtils = new SpreadsheetRuleUtils(matrixStr, fieldSeparator, headerSeparator);
-        Collection<Form> result = spreadsheetRuleUtils.stringArrayToBeans(prefix, Form.class);
-        //QuestionOption option = $1;
-        String optionId = "25892bc8-cd1c-4cfd-8201-eb2fbd5da379";
-        QuestionOption optionFound = null;
-        double accumulatedWeighting = 0;
-        for (Form form : result) {
-            Collection<Question> questions = form.getQuestions();
-            for (Question question : questions) {
-                Collection<QuestionOption> options = question.getOptions();
-                for (QuestionOption option_ : options) {
-                    if (option_.getId().equals(optionId)) {
-                        optionFound = option_;
-                        break;
-                    }
-                }
-            }
-        }
-
-        if (optionFound != null) {
-            accumulatedWeighting = accumulatedWeighting + optionFound.getWeighing();
-        }
-
-
     }
 }

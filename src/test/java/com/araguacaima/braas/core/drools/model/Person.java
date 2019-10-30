@@ -4,6 +4,8 @@ import io.codearte.jfairy.producer.company.Company;
 import io.codearte.jfairy.producer.person.Address;
 import org.joda.time.DateTime;
 
+import java.lang.reflect.Field;
+
 import static com.araguacaima.braas.core.Commons.reflectionUtils;
 
 public class Person extends io.codearte.jfairy.producer.person.Person {
@@ -17,8 +19,10 @@ public class Person extends io.codearte.jfairy.producer.person.Person {
         reflectionUtils.invokeSimpleSetter(this, "address", address);
     }
 
-    public void setFirstName(String firstName) {
-        reflectionUtils.invokeSimpleSetter(this, "firstName", firstName);
+    public void setFirstName(String firstName) throws IllegalAccessException {
+        Field field = reflectionUtils.getFieldByFieldName(this, "firstName");
+        field.setAccessible(true);
+        field.set(this, firstName);
     }
 
     public void setMiddleName(String middleName) {

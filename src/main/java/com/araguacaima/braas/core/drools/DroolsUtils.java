@@ -1,5 +1,6 @@
 package com.araguacaima.braas.core.drools;
 
+import com.araguacaima.braas.core.Constants;
 import com.araguacaima.braas.core.drools.factory.KieSessionImpl;
 import com.araguacaima.braas.core.drools.factory.ResourceStrategyFactory;
 import com.araguacaima.braas.core.drools.strategy.ResourceStrategy;
@@ -18,6 +19,7 @@ import org.kie.api.KieServices;
 import org.kie.api.builder.KieModule;
 import org.kie.api.builder.KieRepository;
 import org.kie.api.builder.KieScanner;
+import org.kie.api.builder.ReleaseId;
 import org.kie.api.io.KieResources;
 import org.kie.api.io.Resource;
 import org.kie.api.runtime.KieContainer;
@@ -128,31 +130,39 @@ public class DroolsUtils {
 
     @SuppressWarnings("ConstantConditions")
     public void validate(final List<DataListener> listeners) throws IllegalAccessException {
-        String rulesTabName = droolsConfig.getRulesTabName();
-        if (StringUtils.isBlank(rulesTabName)) {
-            droolsConfig.setRulesTabName(DroolsConfig.DEFAULT_RULESHEET_NAME);
-        }
-        final ExcelParser parser = new ExcelParser(listeners);
+        if (Constants.URL_RESOURCE_STRATEGIES.ABSOLUTE_DECISION_TABLE_PATH.name().equals(droolsConfig.getRulesRepositoryStrategy())) {
+            String rulesTabName = droolsConfig.getRulesTabName();
+            if (StringUtils.isBlank(rulesTabName)) {
+                droolsConfig.setRulesTabName(DroolsConfig.DEFAULT_RULESHEET_NAME);
+            }
+            final ExcelParser parser = new ExcelParser(listeners);
 
-        Field _useFirstSheet = reflectionUtils.getField(ExcelParser.class, "_useFirstSheet");
-        _useFirstSheet.setAccessible(true);
-        _useFirstSheet.set(parser, false);
-        try {
+            Field _useFirstSheet = reflectionUtils.getField(ExcelParser.class, "_useFirstSheet");
+            _useFirstSheet.setAccessible(true);
+            _useFirstSheet.set(parser, false);
+            try {
+                ResourceStrategy urlResourceStrategy = ResourceStrategyFactory.getUrlResourceStrategy(droolsConfig);
+                String url = urlResourceStrategy.buildUrl();
+                if (url != null) {
+                    ByteArrayOutputStream o = new ByteArrayOutputStream();
+                    droolsConfig.setUrl(url);
+                    IOUtils.copy(FileUtils.openInputStream(new File(droolsConfig.getUrl())), o);
+                    droolsConfig.setSpreadsheetStream(o);
+                } else {
+                    ByteArrayOutputStream stream = urlResourceStrategy.getStream();
+                    droolsConfig.setSpreadsheetStream(stream);
+                }
+            } catch (Throwable t) {
+                t.printStackTrace();
+            }
+            parser.parseFile(new ByteArrayInputStream(droolsConfig.getSpreadsheetStream().toByteArray()));
+        } else {
             ResourceStrategy urlResourceStrategy = ResourceStrategyFactory.getUrlResourceStrategy(droolsConfig);
             String url = urlResourceStrategy.buildUrl();
             if (url != null) {
-                ByteArrayOutputStream o = new ByteArrayOutputStream();
                 droolsConfig.setUrl(url);
-                IOUtils.copy(FileUtils.openInputStream(new File(droolsConfig.getUrl())), o);
-                droolsConfig.setSpreadsheetStream(o);
-            } else {
-                ByteArrayOutputStream stream = urlResourceStrategy.getStream();
-                droolsConfig.setSpreadsheetStream(stream);
             }
-        } catch (Throwable t) {
-            t.printStackTrace();
         }
-        parser.parseFile(new ByteArrayInputStream(droolsConfig.getSpreadsheetStream().toByteArray()));
     }
 
     public Collection<Object> executeRules(Object assets)
@@ -173,8 +183,8 @@ public class DroolsUtils {
                 kieSessionImpl.setGlobal(entry.getKey(), entry.getValue());
             }
         }
-        Collection<Object> execute = kieSessionImpl.execute(asset, expandLists);
-        return execute;
+        Collection<Object> result = kieSessionImpl.execute(asset, expandLists);
+        return result;
     }
 
     public Map<String, Object> getGlobals() {
@@ -204,11 +214,16 @@ public class DroolsUtils {
             is = new ByteArrayInputStream(droolsConfig.getSpreadsheetStream().toByteArray());
         }
         final Resource resource = resources.newInputStreamResource(is);
-        KieModule kModule = kr.addKieModule(resource);
-
         KieContainer kContainer;
         if (droolsConfig.getClassLoader() == null) {
-            kContainer = ks.newKieContainer(kModule.getReleaseId());
+            if (Constants.URL_RESOURCE_STRATEGIES.ABSOLUTE_DRL_FILE_OR_DIRECTORY.name().equals(droolsConfig.getRulesRepositoryStrategy())) {
+                Class<? extends DroolsUtils> aClass = this.getClass();
+                ReleaseId releaseId = ks.newReleaseId(aClass.getPackage().getName(), droolsConfig.getArtifactName().replaceAll("\\.", "-"), UUID.randomUUID().toString());
+                kContainer = ks.newKieContainer(releaseId);
+            } else {
+                KieModule kModule = kr.addKieModule(resource);
+                kContainer = ks.newKieContainer(kModule.getReleaseId());
+            }
         } else {
             kContainer = ks.getKieClasspathContainer(droolsConfig.getClassLoader());
         }

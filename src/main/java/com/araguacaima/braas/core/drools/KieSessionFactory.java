@@ -4,10 +4,12 @@ import com.araguacaima.braas.core.Commons;
 import com.araguacaima.braas.core.Constants;
 import com.araguacaima.braas.core.drools.factory.*;
 import org.apache.commons.lang.StringUtils;
+import org.drools.core.builder.conf.impl.ResourceConfigurationImpl;
 import org.drools.core.impl.InternalKnowledgeBase;
 import org.drools.core.impl.KnowledgeBaseFactory;
 import org.kie.api.KieBaseConfiguration;
 import org.kie.api.io.Resource;
+import org.kie.api.io.ResourceConfiguration;
 import org.kie.api.io.ResourceType;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
@@ -22,6 +24,8 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Map;
 
@@ -65,10 +69,18 @@ public class KieSessionFactory {
             }
         } else if (Constants.RULES_SESSION_TYPE.STATELESS.name().equalsIgnoreCase(kieSessionType)) {
             if (Constants.RULES_REPOSITORY_STRATEGIES.DRL.name().equalsIgnoreCase(rulesRepositoryStrategy)) {
-                KieContainer kieContainer = droolsUtils.getKieContainer();
-                return new KieStatelessDrlSessionImpl(kieContainer.newStatelessKieSession(kieSession),
-                        verbose,
-                        globals);
+                if (Constants.URL_RESOURCE_STRATEGIES.ABSOLUTE_DRL_FILE_OR_DIRECTORY.name().equalsIgnoreCase(droolsConfig.getUrlResourceStrategy())) {
+                    InternalKnowledgeBase knowledgeBase;
+                    knowledgeBase = createKnowledgeBaseFromFileOrDirectory(droolsConfig.getUrl(), classLoader);
+                    log.info("knowledge base created!");
+                    statelessSession = knowledgeBase.newStatelessKieSession();
+                    return new KieStatelessDecisionTableSessionImpl(statelessSession, verbose, globals);
+                } else {
+                    KieContainer kieContainer = droolsUtils.getKieContainer();
+                    return new KieStatelessDrlSessionImpl(kieContainer.newStatelessKieSession(kieSession),
+                            verbose,
+                            globals);
+                }
             } else if (Constants.RULES_REPOSITORY_STRATEGIES.DECISION_TABLE.name().equalsIgnoreCase(
                     rulesRepositoryStrategy)) {
                 try {
@@ -94,6 +106,20 @@ public class KieSessionFactory {
         } else {
             throw new IllegalArgumentException("Kie Session's can be only of types STATEFUL and STATELESS");
         }
+    }
+
+    private static InternalKnowledgeBase getInternalKnowledgeBaseFromFileOrDirectory(ResourceConfiguration dtconf, KnowledgeBuilder knowledgeBuilder, Resource resource, URLClassLoader classLoader) {
+        KieBaseConfiguration conf = KnowledgeBaseFactory.newKnowledgeBaseConfiguration(null, classLoader);
+        InternalKnowledgeBase knowledgeBase = KnowledgeBaseFactory.newKnowledgeBase(conf);
+        knowledgeBuilder.add(resource, ResourceType.DRL, dtconf);
+        log.info("Resource added to knowledge builder");
+        if (knowledgeBuilder.hasErrors()) {
+            log.info("Knowledge builder detected some error in rules definition");
+            throw new RuntimeException(knowledgeBuilder.getErrors().toString());
+        }
+        log.info("Knowledge builder does not detect any error in rules definition");
+        knowledgeBase.addPackages(knowledgeBuilder.getKnowledgePackages());
+        return knowledgeBase;
     }
 
     private static InternalKnowledgeBase getInternalKnowledgeBase(DecisionTableConfiguration dtconf, KnowledgeBuilder knowledgeBuilder, Resource resource, URLClassLoader classLoader) throws IllegalAccessException, NoSuchFieldException, ClassNotFoundException {
@@ -158,5 +184,20 @@ public class KieSessionFactory {
             resource = ResourceFactory.newClassPathResource(path);
         }
         return getInternalKnowledgeBase(dtconf, knowledgeBuilder, resource, classLoader);
+    }
+
+    public static InternalKnowledgeBase createKnowledgeBaseFromFileOrDirectory(String path, URLClassLoader classLoader) throws MalformedURLException {
+        ResourceConfigurationImpl dtconf = new ResourceConfigurationImpl();
+        dtconf.setResourceType(ResourceType.DRL);
+        KnowledgeBuilderConfiguration configuration = KnowledgeBuilderFactory.newKnowledgeBuilderConfiguration();
+        KnowledgeBuilder knowledgeBuilder = KnowledgeBuilderFactory.newKnowledgeBuilder(configuration);
+        Resource resource;
+        File file = new File(new URL(path).getFile());
+        if (file.exists()) {
+            resource = ResourceFactory.newFileResource(file);
+        } else {
+            resource = ResourceFactory.newClassPathResource(path);
+        }
+        return getInternalKnowledgeBaseFromFileOrDirectory(dtconf, knowledgeBuilder, resource, classLoader);
     }
 }

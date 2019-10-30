@@ -56,10 +56,14 @@ public class ResourceStrategyFactory {
                         groupid,
                         artifactid,
                         version);
-            case ABSOLUTE_DRL_PATH:
+            case ABSOLUTE_DRL_JAR_PATH:
                 rulesPath = droolsConfig.getRulesPath();
                 artifactName = droolsConfig.getArtifactName();
                 return new AbsolutePathDrlResourceStrategy(rulesPath, artifactName);
+            case ABSOLUTE_DRL_FILE_OR_DIRECTORY:
+                rulesPath = droolsConfig.getRulesPath();
+                artifactName = droolsConfig.getArtifactName();
+                return new AbsoluteFileOrDirectoryDrlResourceStrategy(rulesPath, artifactName);
             case ABSOLUTE_DECISION_TABLE_PATH:
                 decisionTablePath = droolsConfig.getDecisionTablePath();
                 String file1;
