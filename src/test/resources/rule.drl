@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.Collection
 import org.kie.api.runtime.KieRuntime;
 
-global java.util.Map _result;
 global java.lang.Double accumulatedWeighting;
 global java.util.List forms;
 
@@ -70,8 +69,6 @@ rule "Initialize variable forms"
         RuleLogging.debug("Variable forms initialized with an collection of forms from the spreadsheet");
         kcontext.getKieRuntime().setGlobal("accumulatedWeighting", 0.0D);
         RuleLogging.debug("Variable accumulatedWeighting initialized with 0.0D");
-        kcontext.getKieRuntime().setGlobal("_result",new HashMap());
-        RuleLogging.debug("Variable _result initialized with an empty map");
 end
 
 rule "Process form"
@@ -120,8 +117,8 @@ rule "Process accumulatedWeighting"
                     Form form = (Form) element;
                     RuleLogging.debug("Processing form with id " + form.getId());
                     if (form.getId().equals(formId)) {
-                        _result.put("nextForm", form);
-                        RuleLogging.debug("Adding form to result Map");
+                        insert(form);
+                        RuleLogging.debug("Adding form to output");
                         break;
                     }
                 }

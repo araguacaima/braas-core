@@ -178,11 +178,11 @@ public class DroolsUtils {
     private void fixGlobals(String identifier, String className) {
         try {
             Class<?> clazz = droolsConfig.getClassLoader().loadClass(className);
-            if (reflectionUtils.getFullyQualifiedJavaTypeOrNull(clazz) != null) {
-                if (reflectionUtils.isCollectionImplementation(clazz) || reflectionUtils.isMapImplementation(clazz)) {
-                    Object instance = reflectionUtils.deepInitialization(clazz);
-                    addGlobal(identifier, instance);
-                } else {
+            if (reflectionUtils.isCollectionImplementation(clazz) || reflectionUtils.isMapImplementation(clazz)) {
+                Object instance = reflectionUtils.deepInitialization(clazz);
+                addGlobal(identifier, instance);
+            } else {
+                if (reflectionUtils.getFullyQualifiedJavaTypeOrNull(clazz) != null) {
                     addGlobal(identifier, clazz.newInstance());
                 }
             }
