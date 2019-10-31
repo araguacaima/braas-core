@@ -32,6 +32,8 @@ import java.net.URISyntaxException;
 import java.util.*;
 
 import static com.araguacaima.braas.core.Commons.reflectionUtils;
+import static com.araguacaima.braas.core.Constants.RULES_REPOSITORY_STRATEGIES.DECISION_TABLE;
+import static com.araguacaima.braas.core.Constants.RULES_REPOSITORY_STRATEGIES.DRL;
 
 /**
  * Clase utilitaria para manipular repositorio DRL de Jboss Drools <p>
@@ -130,7 +132,8 @@ public class DroolsUtils {
 
     @SuppressWarnings("ConstantConditions")
     public void validate(final List<DataListener> listeners) throws IllegalAccessException {
-        if (Constants.URL_RESOURCE_STRATEGIES.ABSOLUTE_DECISION_TABLE_PATH.name().equals(droolsConfig.getRulesRepositoryStrategy())) {
+        String rulesRepositoryStrategy = droolsConfig.getRulesRepositoryStrategy();
+        if (DECISION_TABLE.name().equals(rulesRepositoryStrategy)) {
             String rulesTabName = droolsConfig.getRulesTabName();
             if (StringUtils.isBlank(rulesTabName)) {
                 droolsConfig.setRulesTabName(DroolsConfig.DEFAULT_RULESHEET_NAME);
@@ -156,7 +159,7 @@ public class DroolsUtils {
                 t.printStackTrace();
             }
             parser.parseFile(new ByteArrayInputStream(droolsConfig.getSpreadsheetStream().toByteArray()));
-        } else {
+        } else if (DRL.name().equals(rulesRepositoryStrategy)) {
             ResourceStrategy urlResourceStrategy = ResourceStrategyFactory.getUrlResourceStrategy(droolsConfig);
             String url = urlResourceStrategy.buildUrl();
             if (url != null) {
