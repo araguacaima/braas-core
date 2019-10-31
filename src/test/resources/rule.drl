@@ -107,12 +107,11 @@ end
 rule "Process accumulatedWeighting"
 	salience 1
 	no-loop true
-	auto-focus false
 	enabled true
-	agenda-group "form-selection"
 	when
 	then
-		double accum = accumulatedWeighting;
+	    KieRuntime kieRuntime = kcontext.getKieRuntime();
+		double accum = (Double) kieRuntime.getGlobal("accumulatedWeighting");
         RuleLogging.log("DEBUG", "accum : " + accum);
         if (accum > 0) {
             if(accum >= 4) {

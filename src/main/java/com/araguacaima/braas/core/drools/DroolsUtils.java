@@ -8,6 +8,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.drools.compiler.compiler.DRLFactory;
+import org.drools.compiler.lang.DRLParser;
+import org.drools.compiler.lang.descr.GlobalDescr;
 import org.drools.core.io.impl.UrlResource;
 import org.drools.decisiontable.parser.DefaultRuleSheetListener;
 import org.drools.decisiontable.parser.RuleSheetParserUtil;
@@ -23,12 +26,14 @@ import org.kie.api.builder.ReleaseId;
 import org.kie.api.io.KieResources;
 import org.kie.api.io.Resource;
 import org.kie.api.runtime.KieContainer;
+import org.kie.internal.builder.conf.LanguageLevelOption;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.lang.reflect.Field;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.*;
 
 import static com.araguacaima.braas.core.Commons.reflectionUtils;
@@ -52,7 +57,7 @@ public class DroolsUtils {
     private static final Logger log = LoggerFactory.getLogger(DroolsUtils.class);
     private DroolsConfig droolsConfig;
     private Map<String, Object> globals = new HashMap<>();
-    private Collection<String> globalsDefinedInSheets = new ArrayList<>();
+    private Collection<String> globalsFromRules = new ArrayList<>();
 
     public DroolsUtils(DroolsConfig droolsConfig) throws IllegalAccessException {
         this(droolsConfig, true);
@@ -63,10 +68,7 @@ public class DroolsUtils {
         if (initialize) {
             init();
         } else {
-            final List<DataListener> listeners = new ArrayList<>();
-            final DefaultRuleSheetListener listener = new DefaultRuleSheetListener();
-            listeners.add(listener);
-            validate(listeners);
+            validate();
         }
     }
 
@@ -96,44 +98,22 @@ public class DroolsUtils {
 
     @SuppressWarnings("ConstantConditions")
     private void init() {
-        final List<DataListener> listeners = new ArrayList<>();
-        final DefaultRuleSheetListener listener = new DefaultRuleSheetListener();
-        listeners.add(listener);
         try {
-            validate(listeners);
-            PropertiesSheetListener.CaseInsensitiveMap properties = listener.getProperties();
-            final List<Global> variableList = RuleSheetParserUtil.getVariableList(properties.getProperty(DefaultRuleSheetListener.VARIABLES_TAG));
-            if (CollectionUtils.isNotEmpty(variableList)) {
-                variableList.forEach(variable -> {
-                    String identifier = variable.getIdentifier();
-                    String className = variable.getClassName();
-                    try {
-                        Class<?> clazz = droolsConfig.getClassLoader().loadClass(className);
-                        if (reflectionUtils.getFullyQualifiedJavaTypeOrNull(clazz) != null) {
-                            if (reflectionUtils.isCollectionImplementation(clazz) || reflectionUtils.isMapImplementation(clazz)) {
-                                Object instance = reflectionUtils.deepInitialization(clazz);
-                                addGlobal(identifier, instance);
-                            } else {
-                                addGlobal(identifier, clazz.newInstance());
-                            }
-                        }
-                    } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
-                        String message = "It's not possible to initialize global variable '" + identifier + "' due there is no Class named '" + className + "' or it has no an accesible constructor able to create a new object";
-                        log.error(message);
-                        throw new RuntimeException(message);
-                    }
-                    this.globalsDefinedInSheets.add(identifier);
-                });
-            }
+            validate();
         } catch (Throwable t) {
             t.printStackTrace();
         }
     }
 
     @SuppressWarnings("ConstantConditions")
-    public void validate(final List<DataListener> listeners) throws IllegalAccessException {
+    public void validate() throws IllegalAccessException {
         String rulesRepositoryStrategy = droolsConfig.getRulesRepositoryStrategy();
         if (DECISION_TABLE.name().equals(rulesRepositoryStrategy)) {
+            List<DataListener> listeners = new ArrayList<>();
+            final DefaultRuleSheetListener listener = new DefaultRuleSheetListener();
+            listeners.add(listener);
+            PropertiesSheetListener.CaseInsensitiveMap properties = listener.getProperties();
+
             String rulesTabName = droolsConfig.getRulesTabName();
             if (StringUtils.isBlank(rulesTabName)) {
                 droolsConfig.setRulesTabName(DroolsConfig.DEFAULT_RULESHEET_NAME);
@@ -159,13 +139,59 @@ public class DroolsUtils {
                 t.printStackTrace();
             }
             parser.parseFile(new ByteArrayInputStream(droolsConfig.getSpreadsheetStream().toByteArray()));
+
+            final List<Global> globalVariablesList = RuleSheetParserUtil.getVariableList(properties.getProperty(DefaultRuleSheetListener.VARIABLES_TAG));
+            if (CollectionUtils.isNotEmpty(globalVariablesList)) {
+                globalVariablesList.forEach(variable -> {
+                    String identifier = variable.getIdentifier();
+                    String className = variable.getClassName();
+                    fixGlobals(identifier, className);
+                });
+            }
         } else if (DRL.name().equals(rulesRepositoryStrategy)) {
             ResourceStrategy urlResourceStrategy = ResourceStrategyFactory.getUrlResourceStrategy(droolsConfig);
             String url = urlResourceStrategy.buildUrl();
             if (url != null) {
                 droolsConfig.setUrl(url);
             }
+            try {
+                URL url1 = new URL(droolsConfig.getUrl());
+                String file = url1.getFile();
+                InputStream is = FileUtils.openInputStream(new File(file));
+                String encoding = "UTF-8";
+                LanguageLevelOption languageLevel = LanguageLevelOption.DRL6;
+                DRLParser parser = DRLFactory.buildParser(is, encoding, languageLevel);
+                List<GlobalDescr> variableList = parser.compilationUnit().getGlobals();
+                if (CollectionUtils.isNotEmpty(variableList)) {
+                    variableList.forEach(variable -> {
+                        String identifier = variable.getIdentifier();
+                        String className = variable.getType();
+                        fixGlobals(identifier, className);
+                    });
+                }
+            } catch (Throwable t) {
+                t.printStackTrace();
+            }
         }
+    }
+
+    private void fixGlobals(String identifier, String className) {
+        try {
+            Class<?> clazz = droolsConfig.getClassLoader().loadClass(className);
+            if (reflectionUtils.getFullyQualifiedJavaTypeOrNull(clazz) != null) {
+                if (reflectionUtils.isCollectionImplementation(clazz) || reflectionUtils.isMapImplementation(clazz)) {
+                    Object instance = reflectionUtils.deepInitialization(clazz);
+                    addGlobal(identifier, instance);
+                } else {
+                    addGlobal(identifier, clazz.newInstance());
+                }
+            }
+        } catch (IllegalAccessException | InstantiationException | ClassNotFoundException e) {
+            String message = "It's not possible to initialize global variable '" + identifier + "' due there is no Class named '" + className + "' or it has no an accesible constructor able to create a new object";
+            log.error(message);
+            throw new RuntimeException(message);
+        }
+        this.globalsFromRules.add(identifier);
     }
 
     public Collection<Object> executeRules(Object assets)
@@ -198,8 +224,8 @@ public class DroolsUtils {
         this.globals = globals;
     }
 
-    public Collection<String> getGlobalsDefinedInSheets() {
-        return globalsDefinedInSheets;
+    public Collection<String> getGlobalsFromRules() {
+        return globalsFromRules;
     }
 
     KieContainer getKieContainer()
