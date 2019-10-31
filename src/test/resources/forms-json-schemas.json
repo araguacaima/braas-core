@@ -46,7 +46,7 @@
             "title": {
               "type": "string"
             },
-            "weighing": {
+            "weighting": {
               "type": "number"
             }
           },
@@ -105,7 +105,7 @@
       "title": {
         "type": "string"
       },
-      "weighing": {
+      "weighting": {
         "type": "number"
       }
     },
@@ -186,7 +186,7 @@
                   "title": {
                     "type": "string"
                   },
-                  "weighing": {
+                  "weighting": {
                     "type": "number"
                   }
                 },

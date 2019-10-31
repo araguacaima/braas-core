@@ -4,7 +4,7 @@ public class QuestionOption {
     private String id;
     private String title;
     private String description;
-    private double weighing;
+    private double weighting;
     private boolean isText;
     private boolean selected = false;
     private String questionId;
@@ -33,12 +33,12 @@ public class QuestionOption {
         this.description = description;
     }
 
-    public double getWeighing() {
-        return weighing;
+    public double getWeighting() {
+        return weighting;
     }
 
-    public void setWeighing(double weighing) {
-        this.weighing = weighing;
+    public void setWeighting(double weighting) {
+        this.weighting = weighting;
     }
 
     public boolean isSelected() {
