@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Vector;
 
 public class Commons {
@@ -82,5 +83,25 @@ public class Commons {
             }
         }
         return classes;
+    }
+
+    public static String encodeFileToBase64(String fileName) throws IOException {
+        return encodeFileToBase64(new File(fileName));
+    }
+
+    public static String encodeFileToBase64(File file) throws IOException {
+        byte[] result = FileUtils.readFileToByteArray(file);
+        return encodeFileToBase64(result);
+    }
+
+    public static String encodeFileToBase64(byte[] result) {
+        return Base64.getEncoder().encodeToString(result);
+    }
+
+    public static String getFileExtension(File file) {
+        String fileName = file.getName();
+        if (fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0)
+            return fileName.substring(fileName.lastIndexOf(".") + 1);
+        else return "";
     }
 }

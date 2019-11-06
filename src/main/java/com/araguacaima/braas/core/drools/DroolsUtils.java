@@ -132,13 +132,18 @@ public class DroolsUtils {
                     IOUtils.copy(FileUtils.openInputStream(new File(droolsConfig.getUrl())), o);
                     droolsConfig.setSpreadsheetStream(o);
                 } else {
-                    ByteArrayOutputStream stream = urlResourceStrategy.getStream();
-                    droolsConfig.setSpreadsheetStream(stream);
+                    if (droolsConfig.getSpreadsheetStream() == null) {
+                        ByteArrayOutputStream incomingStream = urlResourceStrategy.getStream();
+                        if (incomingStream == null) {
+                            droolsConfig.setSpreadsheetStream(incomingStream);
+                        }
+                    }
                 }
             } catch (Throwable t) {
                 t.printStackTrace();
             }
-            parser.parseFile(new ByteArrayInputStream(droolsConfig.getSpreadsheetStream().toByteArray()));
+            ByteArrayInputStream inStream = new ByteArrayInputStream(droolsConfig.getSpreadsheetStream().toByteArray());
+            parser.parseFile(inStream);
 
             final List<Global> globalVariablesList = RuleSheetParserUtil.getVariableList(properties.getProperty(DefaultRuleSheetListener.VARIABLES_TAG));
             if (CollectionUtils.isNotEmpty(globalVariablesList)) {

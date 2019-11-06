@@ -103,6 +103,14 @@ public class ResourceStrategyFactory {
                     t.printStackTrace();
                     return null;
                 }
+            case BINARY_BASE_64_DECISION_TABLE:
+                try {
+                    ByteArrayOutputStream spreadsheetStream = droolsConfig.getSpreadsheetStream();
+                    return new BinaryBase64DecisionTableResourceStrategy(spreadsheetStream);
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                    return null;
+                }
             default:
                 throw new IllegalArgumentException();
         }
