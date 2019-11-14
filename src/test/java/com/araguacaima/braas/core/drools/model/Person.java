@@ -20,7 +20,7 @@ public class Person extends io.codearte.jfairy.producer.person.Person {
     }
 
     public void setFirstName(String firstName) throws IllegalAccessException {
-        Field field = reflectionUtils.getFieldByFieldName(this, "firstName");
+        Field field = reflectionUtils.getField(this, "firstName");
         field.setAccessible(true);
         field.set(this, firstName);
     }
