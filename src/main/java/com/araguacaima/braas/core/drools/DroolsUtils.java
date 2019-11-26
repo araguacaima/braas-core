@@ -14,6 +14,8 @@ import org.drools.compiler.lang.descr.GlobalDescr;
 import org.drools.core.io.impl.UrlResource;
 import org.drools.decisiontable.parser.DefaultRuleSheetListener;
 import org.drools.decisiontable.parser.RuleSheetParserUtil;
+import org.drools.decisiontable.parser.csv.CsvLineParser;
+import org.drools.decisiontable.parser.csv.CsvParser;
 import org.drools.decisiontable.parser.xls.ExcelParser;
 import org.drools.decisiontable.parser.xls.PropertiesSheetListener;
 import org.drools.template.model.Global;
@@ -37,8 +39,7 @@ import java.net.URL;
 import java.util.*;
 
 import static com.araguacaima.braas.core.Commons.reflectionUtils;
-import static com.araguacaima.braas.core.Constants.RULES_REPOSITORY_STRATEGIES.DECISION_TABLE;
-import static com.araguacaima.braas.core.Constants.RULES_REPOSITORY_STRATEGIES.DRL;
+import static com.araguacaima.braas.core.Constants.RULES_REPOSITORY_STRATEGIES.*;
 
 /**
  * Clase utilitaria para manipular repositorio DRL de Jboss Drools <p>
@@ -108,7 +109,7 @@ public class DroolsUtils {
     @SuppressWarnings("ConstantConditions")
     public void validate() throws IllegalAccessException {
         String rulesRepositoryStrategy = droolsConfig.getRulesRepositoryStrategy();
-        if (DECISION_TABLE.name().equals(rulesRepositoryStrategy)) {
+        if (DECISION_TABLE_SPREADSHEET.name().equals(rulesRepositoryStrategy)) {
             List<DataListener> listeners = new ArrayList<>();
             final DefaultRuleSheetListener listener = new DefaultRuleSheetListener();
             listeners.add(listener);
@@ -143,6 +144,29 @@ public class DroolsUtils {
                 t.printStackTrace();
             }
             ByteArrayInputStream inStream = new ByteArrayInputStream(droolsConfig.getSpreadsheetStream().toByteArray());
+            parser.parseFile(inStream);
+
+            final List<Global> globalVariablesList = RuleSheetParserUtil.getVariableList(properties.getProperty(DefaultRuleSheetListener.VARIABLES_TAG));
+            if (CollectionUtils.isNotEmpty(globalVariablesList)) {
+                globalVariablesList.forEach(variable -> {
+                    String identifier = variable.getIdentifier();
+                    String className = variable.getClassName();
+                    fixGlobals(identifier, className);
+                });
+            }
+        } else if (DECISION_TABLE_CSV.name().equals(rulesRepositoryStrategy)) {
+            List<DataListener> listeners = new ArrayList<>();
+            final DefaultRuleSheetListener listener = new DefaultRuleSheetListener();
+            listeners.add(listener);
+            PropertiesSheetListener.CaseInsensitiveMap properties = listener.getProperties();
+
+            String rulesTabName = droolsConfig.getRulesTabName();
+            if (StringUtils.isBlank(rulesTabName)) {
+                droolsConfig.setRulesTabName(DroolsConfig.DEFAULT_RULESHEET_NAME);
+            }
+            CsvLineParser csvLineParser = new CsvLineParser();
+            final CsvParser parser = new CsvParser(listener, csvLineParser);
+            ByteArrayInputStream inStream = new ByteArrayInputStream(droolsConfig.getSpreadsheetCsv().getBytes());
             parser.parseFile(inStream);
 
             final List<Global> globalVariablesList = RuleSheetParserUtil.getVariableList(properties.getProperty(DefaultRuleSheetListener.VARIABLES_TAG));

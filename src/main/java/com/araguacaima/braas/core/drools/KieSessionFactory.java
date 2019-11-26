@@ -54,7 +54,7 @@ public class KieSessionFactory {
                 KieContainer kieContainer = droolsUtils.getKieContainer();
                 session = kieContainer.newKieSession(kieSession);
                 return new KieStatefulDrlSessionImpl(session, verbose, globals);
-            } else if (Constants.RULES_REPOSITORY_STRATEGIES.DECISION_TABLE.name().equalsIgnoreCase(
+            } else if (Constants.RULES_REPOSITORY_STRATEGIES.DECISION_TABLE_SPREADSHEET.name().equalsIgnoreCase(
                     rulesRepositoryStrategy)) {
                 try {
                     InternalKnowledgeBase knowledgeBase = createKnowledgeBaseFromSpreadsheet(url, classLoader, rulesTabName);
@@ -63,9 +63,18 @@ public class KieSessionFactory {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
+            } else if (Constants.RULES_REPOSITORY_STRATEGIES.DECISION_TABLE_CSV.name().equalsIgnoreCase(
+                    rulesRepositoryStrategy)) {
+                try {
+                    InternalKnowledgeBase knowledgeBase = createKnowledgeBaseFromCsv(url, classLoader, rulesTabName);
+                    session = knowledgeBase.newKieSession();
+                    return new KieStatefulDecisionTableSessionImpl(session, verbose, globals);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             } else {
                 throw new IllegalArgumentException(
-                        "Rules Repository Strategy can be only of types DRL and DECISION_TABLE");
+                        "Rules Repository Strategy can be only of types DRL, DECISION_TABLE_SPREADSHEET and DECISION_TABLE_CSV");
             }
         } else if (Constants.RULES_SESSION_TYPE.STATELESS.name().equalsIgnoreCase(kieSessionType)) {
             if (Constants.RULES_REPOSITORY_STRATEGIES.DRL.name().equalsIgnoreCase(rulesRepositoryStrategy)) {
@@ -81,7 +90,7 @@ public class KieSessionFactory {
                             verbose,
                             globals);
                 }
-            } else if (Constants.RULES_REPOSITORY_STRATEGIES.DECISION_TABLE.name().equalsIgnoreCase(
+            } else if (Constants.RULES_REPOSITORY_STRATEGIES.DECISION_TABLE_SPREADSHEET.name().equalsIgnoreCase(
                     rulesRepositoryStrategy)) {
                 try {
                     InternalKnowledgeBase knowledgeBase;
@@ -99,9 +108,24 @@ public class KieSessionFactory {
                     e.printStackTrace();
                     throw new RuntimeException(e);
                 }
+            } else if (Constants.RULES_REPOSITORY_STRATEGIES.DECISION_TABLE_CSV.name().equalsIgnoreCase(
+                    rulesRepositoryStrategy)) {
+                try {
+                    InternalKnowledgeBase knowledgeBase = null;
+                    if (url != null) {
+                        log.info("Using url: " + url);
+                        knowledgeBase = createKnowledgeBaseFromCsv(url, classLoader, rulesTabName);
+                    }
+                    log.info("knowledge base created!");
+                    statelessSession = knowledgeBase.newStatelessKieSession();
+                    return new KieStatelessDecisionTableSessionImpl(statelessSession, verbose, globals);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new RuntimeException(e);
+                }
             } else {
                 throw new IllegalArgumentException(
-                        "Rules Repository Strategy can be only of types DRL and DECISION_TABLE");
+                        "Rules Repository Strategy can be only of types DRL, DECISION_TABLE_SPREADSHEET and DECISION_TABLE_CSV");
             }
         } else {
             throw new IllegalArgumentException("Kie Session's can be only of types STATEFUL and STATELESS");
@@ -165,6 +189,26 @@ public class KieSessionFactory {
 
     public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(String path) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
         return createKnowledgeBaseFromSpreadsheet(path, null, null);
+    }
+
+
+    public static InternalKnowledgeBase createKnowledgeBaseFromCsv(String path, URLClassLoader classLoader, String rulesTabName) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+        DecisionTableConfiguration dtconf = KnowledgeBuilderFactory.newDecisionTableConfiguration();
+        dtconf.setInputType(DecisionTableInputType.XLS);
+        dtconf.setTrimCell(false);
+        dtconf.setWorksheetName(StringUtils.isNotBlank(rulesTabName) ? rulesTabName : DroolsConfig.DEFAULT_RULESHEET_NAME);
+        KnowledgeBuilderConfiguration configuration = KnowledgeBuilderFactory.newKnowledgeBuilderConfiguration(null, classLoader);
+        configuration.setOption(TrimCellsInDTableOption.DISABLED);
+        configuration.setProperty(DefaultPackageNameOption.PROPERTY_NAME, Commons.DEFAULT_PACKAGE_NAME);
+        KnowledgeBuilder knowledgeBuilder = KnowledgeBuilderFactory.newKnowledgeBuilder(configuration);
+        Resource resource;
+        File file = new File(path);
+        if (file.exists()) {
+            resource = ResourceFactory.newFileResource(file);
+        } else {
+            resource = ResourceFactory.newClassPathResource(path);
+        }
+        return getInternalKnowledgeBase(dtconf, knowledgeBuilder, resource, classLoader);
     }
 
     public static InternalKnowledgeBase createKnowledgeBaseFromSpreadsheet(String path, URLClassLoader classLoader, String rulesTabName) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {

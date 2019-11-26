@@ -31,7 +31,8 @@ public class Constants {
 
     public enum RULES_REPOSITORY_STRATEGIES {
         DRL,
-        DECISION_TABLE
+        DECISION_TABLE_SPREADSHEET,
+        DECISION_TABLE_CSV
     }
 
     public enum CREDENTIALS_ORIGIN_STRATEGIES {
