@@ -25,4 +25,9 @@ public class AbsolutePathDecisionTableResourceStrategy implements ResourceStrate
     public ByteArrayOutputStream getStream() {
         return null;
     }
+
+    @Override
+    public String getContent() {
+        return null;
+    }
 }

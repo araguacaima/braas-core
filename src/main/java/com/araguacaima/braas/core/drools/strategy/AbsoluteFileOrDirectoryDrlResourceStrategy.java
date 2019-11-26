@@ -26,4 +26,9 @@ public class AbsoluteFileOrDirectoryDrlResourceStrategy implements ResourceStrat
     public ByteArrayOutputStream getStream() {
         return null;
     }
+
+    @Override
+    public String getContent() {
+        return null;
+    }
 }

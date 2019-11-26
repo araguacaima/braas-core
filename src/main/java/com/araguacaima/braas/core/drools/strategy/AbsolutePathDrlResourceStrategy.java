@@ -27,4 +27,9 @@ public class AbsolutePathDrlResourceStrategy implements ResourceStrategy {
     public ByteArrayOutputStream getStream() {
         return null;
     }
+
+    @Override
+    public String getContent() {
+        return null;
+    }
 }

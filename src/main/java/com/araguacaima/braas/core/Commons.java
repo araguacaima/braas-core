@@ -91,11 +91,15 @@ public class Commons {
 
     public static String encodeFileToBase64(File file) throws IOException {
         byte[] result = FileUtils.readFileToByteArray(file);
-        return encodeFileToBase64(result);
+        return encodeToBase64(result);
     }
 
-    public static String encodeFileToBase64(byte[] result) {
+    public static String encodeToBase64(byte[] result) {
         return Base64.getEncoder().encodeToString(result);
+    }
+
+    public static byte[] decodeFromBase64(String result) {
+        return Base64.getDecoder().decode(result);
     }
 
     public static String getFileExtension(File file) {

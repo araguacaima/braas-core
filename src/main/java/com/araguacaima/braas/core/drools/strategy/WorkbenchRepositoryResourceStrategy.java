@@ -41,4 +41,9 @@ public class WorkbenchRepositoryResourceStrategy implements ResourceStrategy {
     public ByteArrayOutputStream getStream() {
         return null;
     }
+
+    @Override
+    public String getContent() {
+        return null;
+    }
 }

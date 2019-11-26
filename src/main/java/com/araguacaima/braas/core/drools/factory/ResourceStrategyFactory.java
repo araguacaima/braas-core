@@ -111,6 +111,14 @@ public class ResourceStrategyFactory {
                     t.printStackTrace();
                     return null;
                 }
+            case CSV_DECISION_TABLE:
+                try {
+                    String csv = droolsConfig.getSpreadsheetCsv();
+                    return new CsvDecisionTableResourceStrategy(csv);
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                    return null;
+                }
             default:
                 throw new IllegalArgumentException();
         }

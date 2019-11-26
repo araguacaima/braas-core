@@ -10,4 +10,6 @@ public interface ResourceStrategy {
     String buildUrl();
 
     ByteArrayOutputStream getStream();
+
+    String getContent();
 }

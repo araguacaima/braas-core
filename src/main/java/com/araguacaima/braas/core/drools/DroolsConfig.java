@@ -54,6 +54,7 @@ public class DroolsConfig {
     @JsonIgnore
     private URLClassLoader classLoader;
     private Locale locale;
+    private String csv;
 
     public DroolsConfig(Properties bundle) throws FileNotFoundException, URISyntaxException, MalformedURLException {
         this.build("rulesPath", bundle.getProperty("rulesPath"))
@@ -359,4 +360,11 @@ public class DroolsConfig {
         this.classLoader = classLoader;
     }
 
+    public String getSpreadsheetCsv() {
+        return csv;
+    }
+
+    public void setSpreadsheetCsv(String csv) {
+        this.csv = csv;
+    }
 }

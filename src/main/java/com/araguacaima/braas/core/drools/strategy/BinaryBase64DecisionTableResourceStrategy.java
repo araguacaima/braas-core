@@ -22,4 +22,9 @@ public class BinaryBase64DecisionTableResourceStrategy implements ResourceStrate
     public ByteArrayOutputStream getStream() {
         return this.spreadsheetStream;
     }
+
+    @Override
+    public String getContent() {
+        return null;
+    }
 }
