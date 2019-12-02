@@ -45,31 +45,31 @@ public class GoogleDriveUtils {
     /**
      * @param fileId                        Identifier of the file to retrieve
      * @param credentials                   Stream that contains a json object with user credentials info
-     * @param googleDriveCredentialStrategy
+     * @param credentialStrategy  The credential strategy
      * @return A stream with the requested file
      * @throws GeneralSecurityException If there is any security issue trying tio use the provided credentials
      * @throws IOException              If the credentials stream is invalid.
      */
-    public static ByteArrayOutputStream getSpreadsheet(String fileId, InputStream credentials, String googleDriveCredentialStrategy) throws Exception {
-        return getFile(fileId, GoogleDocumentsMime.Types.SPREADSHEET.value(), credentials, googleDriveCredentialStrategy);
+    public static ByteArrayOutputStream getSpreadsheet(String fileId, InputStream credentials, String credentialStrategy) throws Exception {
+        return getFile(fileId, GoogleDocumentsMime.Types.SPREADSHEET.value(), credentials, credentialStrategy);
     }
 
     /**
      * @param fileId                        Identifier of the file to retrieve
      * @param mime                          The mime type for a Google Document, when it's not binary
      * @param credentials                   Stream that contains a json object with user credentials info
-     * @param googleDriveCredentialStrategy
+     * @param credentialStrategy The credential strategy
      * @return A stream with the requested file
      * @throws GeneralSecurityException If there is any security issue trying tio use the provided credentials
      * @throws IOException              If the credentials stream is invalid.
      */
-    public static ByteArrayOutputStream getFile(String fileId, String mime, InputStream credentials, String googleDriveCredentialStrategy) throws Exception {
+    public static ByteArrayOutputStream getFile(String fileId, String mime, InputStream credentials, String credentialStrategy) throws Exception {
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         Credential credential;
         Constants.CREDENTIALS_ORIGIN_STRATEGIES credentialsStrategy = null;
         try {
-            credentialsStrategy = Constants.CREDENTIALS_ORIGIN_STRATEGIES.valueOf(googleDriveCredentialStrategy);
+            credentialsStrategy = Constants.CREDENTIALS_ORIGIN_STRATEGIES.valueOf(credentialStrategy);
         } catch (Throwable ignored) {
         }
         if (Constants.CREDENTIALS_ORIGIN_STRATEGIES.SERVER.equals(credentialsStrategy)) {

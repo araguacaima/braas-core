@@ -24,6 +24,7 @@ public class GetCredentialsException extends Exception {
     }
 
     /**
+     * @param authorizationUrl The url that grants authorization
      * Set the authorization URL.
      */
     public void setAuthorizationUrl(String authorizationUrl) {
