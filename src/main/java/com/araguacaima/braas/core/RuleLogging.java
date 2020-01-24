@@ -19,6 +19,8 @@ public class RuleLogging {
 
     /**
      * Log a trace message from a rule
+     * @param message The message to be logged
+     * @param parameters Optional parameters for message formatting
      */
     public static void trace(final String message, final Object... parameters) {
         String message1 = message;
@@ -31,7 +33,9 @@ public class RuleLogging {
     }
 
     /**
-     * Log a info message from a rule
+     * Log an info message from a rule
+     * @param message The message to be logged
+     * @param parameters Optional parameters for message formatting
      */
     public static void info(final String message, final Object... parameters) {
         String message1 = message;
@@ -45,6 +49,8 @@ public class RuleLogging {
 
     /**
      * Log a debug message from a rule
+     * @param message The message to be logged
+     * @param parameters Optional parameters for message formatting
      */
     public static void debug(final String message, final Object... parameters) {
         String message1 = message;
@@ -57,7 +63,9 @@ public class RuleLogging {
     }
 
     /**
-     * Log a error message from a rule
+     * Log an error message from a rule
+     * @param message The message to be logged
+     * @param parameters Optional parameters for message formatting
      */
     public static void error(final String message, final Object... parameters) {
         String message1 = message;
@@ -71,6 +79,8 @@ public class RuleLogging {
 
     /**
      * Log a warn message from a rule
+     * @param message The message to be logged
+     * @param parameters Optional parameters for message formatting
      */
     public static void warn(final String message, final Object... parameters) {
         String message1 = message;
@@ -84,6 +94,9 @@ public class RuleLogging {
 
     /**
      * Log a message from a rule
+     * @param type_ Type of logging
+     * @param message The message to be logged
+     * @param parameters Optional parameters for message formatting
      */
     public static void log(String type_, final String message, final Object... parameters) {
         String message1 = message;
@@ -101,6 +114,9 @@ public class RuleLogging {
 
     /**
      * Log a message from a rule
+     * @param type Type of logging
+     * @param message The message to be logged
+     * @param parameters Optional parameters for message formatting
      */
     public static void log(MessageType type, final String message, final Object... parameters) {
 

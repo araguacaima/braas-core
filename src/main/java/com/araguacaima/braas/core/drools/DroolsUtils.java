@@ -135,7 +135,7 @@ public class DroolsUtils {
                 } else {
                     if (droolsConfig.getSpreadsheetStream() == null) {
                         ByteArrayOutputStream incomingStream = urlResourceStrategy.getStream();
-                        if (incomingStream == null) {
+                        if (incomingStream != null) {
                             droolsConfig.setSpreadsheetStream(incomingStream);
                         }
                     }
